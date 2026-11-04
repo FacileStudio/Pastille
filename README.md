@@ -117,33 +117,49 @@ The output files land in `dist/fab/`, `dist/cad/`, `dist/docs/`, and `bodies/`. 
 
 ## Firmware guide
 
-Pastille firmware runs bare-metal on the ESP32-S3 using Rust (`embassy-executor`, `esp-hal`, and `esp-wifi`) with pin bindings generated directly by Fusible (`apps/firmware/src/pins.rs`).
+Pastille firmware runs bare-metal on the ESP32-S3 in Rust, on `esp-hal` 1.2 with the `esp-rtos` Embassy executor. Fusible generates the pin bindings in `apps/firmware/src/pins.rs`, and the device code takes every GPIO from there.
+
+### What runs on the device in v0.4.0
+
+- USB CDC transport on the USB Serial/JTAG port, with `u16be` stream framing. The Bulle app relays it to the gateway.
+- Reverse MCP over `0x02`: `tools/list`, `charm.display_avatar`, `charm.haptic_pulse`, `charm.get_telemetry`. Every request gets a result or a JSON-RPC error.
+- The avatar on the GC9A01 round LCD (`mipidsi`, 10 frames per second).
+- Haptic pulses on the DRV2605L in open-loop real-time playback.
+- Battery and charger sampling every 10 s, published to `charm.get_telemetry` and as `charm.low_battery` alerts.
+
+Not in v0.4.0: Wi-Fi WSS, the BLE GATT server and BLE provisioning, NVS storage, tap events, and microphone and speaker audio. The provisioning state machine is in the code and host-tested, but no BLE stack drives it yet. The implementation status in [BOHS-01-WIRE.md](docs/spec/BOHS-01-WIRE.md) has the full list. The display, haptic and battery drivers compile but have not run on a board yet.
 
 ### Host unit tests
 
-Run the host test suite covering the BOHS-01 wire protocol, BLE provisioning, Reverse MCP tool validation, I2S DMA audio VAD pipeline, power state machine, and integer trigonometric avatar renderer:
+The host tests cover the wire protocol, stream framing, JSON-RPC error handling, Reverse MCP tools, BLE provisioning, the network routing, battery alerts, the power state machine and the avatar renderer:
 
 ```bash
-cd apps/firmware
-cargo test
+mise run check-firmware
 ```
 
-### Flashing onto ESP32-S3
+### Building and flashing
 
-Install the ESP32 Rust toolchain and flashing utility:
+Install the ESP32 Rust toolchain and the flasher once:
 
 ```bash
-cargo install espup
+cargo install espup --locked
 espup install
-cargo install cargo-espflash
+cargo install espflash --locked
 ```
 
-Connect Pastille to your computer with a USB-C cable, hold `SW_BOOT`, and flash:
+`espup` writes `~/export-esp.sh`. The firmware tasks source it and select the `esp` toolchain:
 
 ```bash
-cd apps/firmware
-cargo espflash flash --release --monitor
+mise run build-firmware
 ```
+
+Connect Pastille with a USB-C cable, hold `SW_BOOT`, and flash. The task opens the serial monitor afterwards:
+
+```bash
+mise run flash
+```
+
+Without mise, run `source ~/export-esp.sh` and then `cargo +esp build --release --target xtensa-esp32s3-none-elf` from `apps/firmware`.
 
 ## Landing page (`apps/web`)
 
