@@ -1,5 +1,6 @@
 use crate::ble::{BleProvisioner, ProvisionConfig, TransportKind, DEVICE_TOKEN_LEN, DEVICE_TOKEN_PREFIX};
 use crate::protocol::{write_framed_json, ProtocolError, OPCODE_PROVISION};
+use crate::rpc::{parse_request, write_error, Incoming};
 use core::fmt::Write;
 use heapless::String;
 use serde_json::Value;
@@ -9,27 +10,28 @@ const TRANSPORT_NAMES: [&str; 3] = ["ble", "wifi", "usb"];
 const GATEWAY_SCHEME: &str = "wss://";
 
 impl BleProvisioner {
-    /// Handles a `0x03` JSON-RPC request (`prov.identify`, `prov.status`, `prov.configure`) that arrived
-    /// over `link` and writes the `0x03` response frame. Requests from any link but BLE get `-32001`.
-    pub fn dispatch_provision_rpc(
-        &mut self,
-        json_str: &str,
-        link: TransportKind,
-        out: &mut [u8],
-    ) -> Result<usize, ProtocolError> {
-        let value: Value = serde_json::from_str(json_str).map_err(|_| ProtocolError::JsonParseError)?;
-        let id = value.get("id").cloned().unwrap_or(Value::Null);
-        let result = match link {
-            TransportKind::BleRelay => self.run_method(&value),
-            _ => Err(ProtocolError::Unauthorized),
+    /// Handles a `0x03` JSON-RPC message (`prov.identify`, `prov.status`, `prov.configure`) that
+    /// arrived over `link` and writes the `0x03` response frame. Every request gets `-32001` unless
+    /// it came from a connected BLE central over an encrypted link. Notifications get no answer.
+    pub fn dispatch_provision_rpc(&mut self, json_str: &str, link: TransportKind, out: &mut [u8]) -> Option<usize> {
+        let allowed = link == TransportKind::BleRelay && self.link_encrypted && self.conn.is_some();
+        let (id, result) = match parse_request(json_str) {
+            Incoming::Notification => return None,
+            Incoming::Invalid(err) => (Value::Null, Err(err)),
+            Incoming::Call { id, .. } if !allowed => (id, Err(ProtocolError::Unauthorized)),
+            Incoming::Call { value, id } => {
+                let result = self.run_method(&value);
+                (id, result)
+            }
         };
         let mut body: String<256> = String::new();
         match result {
-            Ok(false) => write_status(self, &id, &mut body)?,
-            Ok(true) => write_configured(&id, &mut body)?,
-            Err(err) => write_error(&id, err, &mut body)?,
+            Ok(false) => write_status(self, &id, &mut body),
+            Ok(true) => write_configured(&id, &mut body),
+            Err(err) => write_error(&id, err, &mut body),
         }
-        write_framed_json(OPCODE_PROVISION, body.as_bytes(), out)
+        .ok()?;
+        write_framed_json(OPCODE_PROVISION, body.as_bytes(), out).ok()
     }
 
     fn run_method(&mut self, value: &Value) -> Result<bool, ProtocolError> {
@@ -58,14 +60,21 @@ fn parse_config(params: &Value) -> Result<ProvisionConfig, ProtocolError> {
         prefer_ble: params.get("prefer_ble").and_then(Value::as_bool).ok_or(ProtocolError::InvalidArguments)?,
     };
     let wifi_missing = !cfg.prefer_ble && cfg.wifi_ssid.is_empty();
-    if !cfg.gateway_url.starts_with(GATEWAY_SCHEME) || !valid_token(&cfg.device_token) || wifi_missing {
+    let has_host = cfg.gateway_url.strip_prefix(GATEWAY_SCHEME).is_some_and(|rest| {
+        rest.split(['/', '?', '#']).next().is_some_and(|host| !host.is_empty())
+    });
+    if !has_host || !valid_token(&cfg.device_token) || wifi_missing {
         return Err(ProtocolError::InvalidArguments);
     }
     Ok(cfg)
 }
 
+/// Copies a string field; a present field that is not a string is rejected, not treated as empty.
 fn copy_field<const N: usize>(params: &Value, key: &str, required: bool) -> Result<String<N>, ProtocolError> {
-    let raw = params.get(key).and_then(Value::as_str).unwrap_or("");
+    let raw = match params.get(key) {
+        None => "",
+        Some(v) => v.as_str().ok_or(ProtocolError::InvalidArguments)?,
+    };
     if required && raw.is_empty() {
         return Err(ProtocolError::InvalidArguments);
     }
@@ -100,19 +109,4 @@ fn write_status(prov: &BleProvisioner, id: &Value, out: &mut String<256>) -> Res
 fn write_configured(id: &Value, out: &mut String<256>) -> Result<(), ProtocolError> {
     write!(out, r#"{{"jsonrpc":"2.0","id":{},"result":{{"status":"provisioned"}}}}"#, id)
         .map_err(|_| ProtocolError::BufferTooSmall)
-}
-
-fn write_error(id: &Value, err: ProtocolError, out: &mut String<256>) -> Result<(), ProtocolError> {
-    let (code, message) = match err {
-        ProtocolError::Unauthorized => (-32001, "unauthorized"),
-        ProtocolError::InvalidArguments => (-32602, "invalid params"),
-        ProtocolError::UnknownMethod => (-32601, "method not found"),
-        _ => (-32603, "internal error"),
-    };
-    write!(
-        out,
-        r#"{{"jsonrpc":"2.0","id":{},"error":{{"code":{},"message":"{}"}}}}"#,
-        id, code, message
-    )
-    .map_err(|_| ProtocolError::BufferTooSmall)
 }

@@ -46,8 +46,8 @@ pub enum ProvisionState {
     Provisioned = 3,
 }
 
-/// Settings written by `prov.configure`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// Settings written by `prov.configure`. Its `Debug` output redacts the token and the PSK.
+#[derive(Clone, PartialEq, Eq)]
 pub struct ProvisionConfig {
     pub gateway_url: String<96>,
     pub device_token: String<48>,
@@ -65,6 +65,10 @@ pub struct BleProvisioner {
     pub link_encrypted: bool,
     pub config: Option<ProvisionConfig>,
     pub hardware_id: [u8; 4],
+    /// Handle of the connected BLE central, if any.
+    pub conn: Option<u16>,
+    /// Connection that opened the current tap window; only it may send `prov.configure`.
+    pub auth_conn: Option<u16>,
 }
 
 impl BleProvisioner {
@@ -77,6 +81,8 @@ impl BleProvisioner {
             link_encrypted: false,
             config: None,
             hardware_id,
+            conn: None,
+            auth_conn: None,
         }
     }
 
@@ -87,24 +93,21 @@ impl BleProvisioner {
         [self.state as u8, caps, a, b, c, d]
     }
 
-    /// Opens the physical-tap authorization window.
+    /// Opens the physical-tap window for the current connection. A window that is already open
+    /// stays as it is, so a repeated `prov.identify` can neither extend nor reset it.
     pub fn on_identify_request(&mut self) {
+        if matches!(self.state, ProvisionState::AwaitingTap | ProvisionState::Authorized) {
+            return;
+        }
         self.state = ProvisionState::AwaitingTap;
         self.auth_timer_ms = AUTH_WINDOW_MS;
+        self.auth_conn = self.conn;
     }
 
     /// Authorizes the pending pairing when the user taps the pad inside the window.
     pub fn on_physical_tap(&mut self) {
         if self.state == ProvisionState::AwaitingTap {
             self.state = ProvisionState::Authorized;
-        }
-    }
-
-    /// Records the BLE link encryption status; losing it cancels any pending authorization.
-    pub fn on_link_encrypted(&mut self, encrypted: bool) {
-        self.link_encrypted = encrypted;
-        if !encrypted {
-            self.expire_auth();
         }
     }
 
@@ -119,9 +122,10 @@ impl BleProvisioner {
         }
     }
 
-    /// Stores a configuration; only an authorized pairing over an encrypted link may do so.
+    /// Stores a configuration; only the authorized connection, over an encrypted link, may do so.
     pub fn apply_config(&mut self, cfg: ProvisionConfig) -> Result<(), ProtocolError> {
-        if self.state != ProvisionState::Authorized || !self.link_encrypted {
+        let same_conn = self.conn.is_some() && self.auth_conn == self.conn;
+        if self.state != ProvisionState::Authorized || !self.link_encrypted || !same_conn {
             return Err(ProtocolError::Unauthorized);
         }
         self.transport = if cfg.prefer_ble {
@@ -132,14 +136,17 @@ impl BleProvisioner {
         self.config = Some(cfg);
         self.state = ProvisionState::Provisioned;
         self.auth_timer_ms = 0;
+        self.auth_conn = None;
         Ok(())
     }
 
-    fn expire_auth(&mut self) {
+    /// Closes the tap window and returns to the state held before `prov.identify`.
+    pub(crate) fn expire_auth(&mut self) {
         if !matches!(self.state, ProvisionState::AwaitingTap | ProvisionState::Authorized) {
             return;
         }
         self.auth_timer_ms = 0;
+        self.auth_conn = None;
         self.state = if self.config.is_some() {
             ProvisionState::Provisioned
         } else {

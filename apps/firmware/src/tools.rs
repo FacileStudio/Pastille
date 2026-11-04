@@ -1,6 +1,7 @@
 use crate::avatar::{AvatarEmotion, AvatarRenderer, AvatarState};
-use crate::protocol::{ProtocolDispatcher, ProtocolError};
-use core::fmt::Write;
+use crate::haptic::{HapticPattern, HapticPulse};
+use crate::protocol::{Body, ProtocolDispatcher, ProtocolError};
+use core::fmt::{Display, Write};
 use heapless::String;
 
 const TOOLS_SCHEMA: &str = concat!(
@@ -47,7 +48,7 @@ fn parse_avatar_args(
 
 pub fn write_tools_list(
     id: &serde_json::Value,
-    out: &mut String<2048>,
+    out: &mut Body,
 ) -> Result<(), ProtocolError> {
     write!(
         out,
@@ -62,7 +63,7 @@ pub fn execute_tool(
     params: &serde_json::Value,
     id: &serde_json::Value,
     avatar: &mut AvatarRenderer,
-    out: &mut String<2048>,
+    out: &mut Body,
 ) -> Result<(), ProtocolError> {
     let tool_name = params
         .get("name")
@@ -83,7 +84,7 @@ fn exec_display_avatar(
     args: &serde_json::Value,
     id: &serde_json::Value,
     avatar: &mut AvatarRenderer,
-    out: &mut String<2048>,
+    out: &mut Body,
 ) -> Result<(), ProtocolError> {
     let state_str = args
         .get("state")
@@ -113,26 +114,19 @@ fn exec_haptic_pulse(
     dispatcher: &mut ProtocolDispatcher,
     args: &serde_json::Value,
     id: &serde_json::Value,
-    out: &mut String<2048>,
+    out: &mut Body,
 ) -> Result<(), ProtocolError> {
     let pattern = args
         .get("pattern")
         .and_then(|v| v.as_str())
-        .ok_or(ProtocolError::InvalidArguments)?;
-    if !matches!(pattern, "tap" | "double_tap" | "alert" | "error") {
-        return Err(ProtocolError::InvalidArguments);
-    }
-
-    let duration_ms = args.get("duration_ms").and_then(|v| v.as_u64()).unwrap_or(50);
-    let intensity = args.get("intensity").and_then(|v| v.as_u64()).unwrap_or(80);
+        .ok_or(ProtocolError::InvalidArguments)
+        .and_then(HapticPattern::parse)?;
+    let duration_ms = args.get("duration_ms").map_or(Some(50), |v| v.as_u64()).unwrap_or(0);
+    let intensity = args.get("intensity").map_or(Some(80), |v| v.as_u64()).unwrap_or(0);
     if !(10..=500).contains(&duration_ms) || !(1..=100).contains(&intensity) {
         return Err(ProtocolError::InvalidArguments);
     }
-
-    dispatcher.last_haptic_pattern.clear();
-    let _ = dispatcher.last_haptic_pattern.push_str(pattern);
-    dispatcher.last_haptic_duration = duration_ms as u32;
-    dispatcher.last_haptic_intensity = intensity as u8;
+    dispatcher.haptic = Some(HapticPulse { pattern, duration_ms: duration_ms as u16, intensity: intensity as u8 });
 
     write!(
         out,
@@ -148,25 +142,38 @@ fn exec_haptic_pulse(
 fn exec_get_telemetry(
     dispatcher: &ProtocolDispatcher,
     id: &serde_json::Value,
-    out: &mut String<2048>,
+    out: &mut Body,
 ) -> Result<(), ProtocolError> {
     let telem = dispatcher.telemetry;
-    let chg = if telem.is_charging { "true" } else { "false" };
     write!(
         out,
         concat!(
             r#"{{"jsonrpc":"2.0","id":{},"result":{{"content":[{{"type":"text","#,
             r#""text":"{{\"battery_pct\":{},\"is_charging\":{},"#,
-            r#"\"rssi_dbm\":{},\"temp_c\":{:.1}}}"}}],"isError":false}}}}"#
+            r#"\"rssi_dbm\":{},\"temp_c\":{}}}"}}],"isError":false}}}}"#
         ),
-        id, telem.battery_pct, chg, telem.rssi_dbm, telem.temp_c
+        id,
+        telem.battery_pct,
+        telem.is_charging,
+        json_or_null(telem.rssi_dbm),
+        json_or_null(telem.temp_c)
     )
     .map_err(|_| ProtocolError::BufferTooSmall)
 }
 
+/// Formats a reading with one decimal for floats, or `null` when the device has no source for it.
+fn json_or_null<T: Display>(value: Option<T>) -> String<16> {
+    let mut text = String::new();
+    let _ = match value {
+        Some(v) => write!(text, "{:.1}", v),
+        None => text.push_str("null").map_err(|_| core::fmt::Error),
+    };
+    text
+}
+
 fn write_capability_error(
     id: &serde_json::Value,
-    out: &mut String<2048>,
+    out: &mut Body,
 ) -> Result<(), ProtocolError> {
     write!(
         out,

@@ -89,8 +89,4 @@ impl PowerManager {
         }
         self.state
     }
-
-    pub const fn is_amp_active(&self) -> bool {
-        matches!(self.state, PowerState::StreamFullDuplex)
-    }
 }

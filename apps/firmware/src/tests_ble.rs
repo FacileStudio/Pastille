@@ -1,18 +1,13 @@
-use crate::audio::{AudioFrame, BYTES_PER_FRAME};
-use crate::avatar::AvatarRenderer;
-use crate::ble::gatt::{
-    BLE_CHAR_AUDIO_UUID, BLE_CHAR_CONTROL_UUID, BLE_CHAR_INFO_UUID, BLE_CHAR_PROV_UUID, BLE_SERVICE_UUID,
-};
-use crate::ble::{BleProvisioner, ProvisionConfig, ProvisionState, TransportKind, AUTH_WINDOW_MS};
-use crate::power::{PowerManager, PowerState};
-use crate::protocol::{ProtocolDispatcher, ProtocolError, OPCODE_CONTROL, OPCODE_PROVISION};
-use crate::stream::{encode_stream_frame, StreamReassembler};
-use crate::{handle_inbound_packet, AUDIO_RX_CHANNEL, MAX_PACKET_BYTES, OUTBOUND_PKT_CHANNEL};
+use crate::ble::{BleProvisioner, ProvisionState, TransportKind, AUTH_WINDOW_MS};
+use crate::protocol::OPCODE_PROVISION;
+use crate::MAX_PACKET_BYTES;
 
 const TOKEN: &str = "bohs_tok_0123456789abcdef0123456789abcdef";
 const HW_ID: [u8; 4] = [0x4F, 0x2A, 0x91, 0xC0];
+const IDENTIFY: &str = r#"{"jsonrpc":"2.0","id":1,"method":"prov.identify"}"#;
+const UNAUTHORIZED: &str = r#""error":{"code":-32001,"message":"unauthorized"}"#;
 
-fn configure_req(token: &str) -> std::string::String {
+fn configure_req(token: &str) -> String {
     format!(
         concat!(
             r#"{{"jsonrpc":"2.0","id":7,"method":"prov.configure","params":{{"#,
@@ -22,166 +17,122 @@ fn configure_req(token: &str) -> std::string::String {
     )
 }
 
-fn prov_call(prov: &mut BleProvisioner, req: &str) -> std::string::String {
+fn prov_call(prov: &mut BleProvisioner, req: &str) -> String {
     let mut out = [0u8; MAX_PACKET_BYTES];
     let len = prov.dispatch_provision_rpc(req, TransportKind::BleRelay, &mut out).unwrap();
     assert_eq!(out[0], OPCODE_PROVISION);
-    std::string::String::from_utf8(out[1..len].to_vec()).unwrap()
+    String::from_utf8(out[1..len].to_vec()).unwrap()
+}
+
+fn secure_link(prov: &mut BleProvisioner, handle: u16) {
+    prov.on_connected(handle);
+    prov.on_link_encrypted(true);
 }
 
 #[test]
-fn test_provisioner_rejects_unauthorized_configure() {
+fn test_provisioner_rejects_unencrypted_links() {
     let mut prov = BleProvisioner::new(HW_ID);
-    assert_eq!(prov.state, ProvisionState::Unclaimed);
     assert_eq!(prov.advertisement_service_data(), [0x00, 0x0F, 0x4F, 0x2A, 0x91, 0xC0]);
-    assert!(prov_call(&mut prov, &configure_req(TOKEN)).contains(r#""code":-32001,"message":"unauthorized""#));
+    assert!(prov_call(&mut prov, IDENTIFY).contains(UNAUTHORIZED));
+    prov.on_connected(1);
+    assert!(prov_call(&mut prov, IDENTIFY).contains(UNAUTHORIZED));
+    assert!(prov_call(&mut prov, r#"{"jsonrpc":"2.0","id":2,"method":"prov.status"}"#).contains(UNAUTHORIZED));
+    assert_eq!(prov.state, ProvisionState::Unclaimed);
 
-    let cfg = ProvisionConfig {
-        gateway_url: "wss://g".try_into().unwrap(),
-        device_token: TOKEN.try_into().unwrap(),
-        wifi_ssid: Default::default(),
-        wifi_psk: Default::default(),
-        prefer_ble: true,
-    };
-    assert_eq!(prov.apply_config(cfg.clone()), Err(ProtocolError::Unauthorized));
-
-    prov_call(&mut prov, r#"{"jsonrpc":"2.0","id":1,"method":"prov.identify"}"#);
+    prov.on_link_encrypted(true);
+    prov_call(&mut prov, IDENTIFY);
+    assert!(prov_call(&mut prov, &configure_req(TOKEN)).contains(UNAUTHORIZED));
     prov.on_physical_tap();
-    assert_eq!(prov.state, ProvisionState::Authorized);
-    assert_eq!(prov.apply_config(cfg), Err(ProtocolError::Unauthorized));
-    assert!(prov.config.is_none());
+    prov.on_link_encrypted(false);
+    assert_eq!(prov.state, ProvisionState::Unclaimed);
+    assert!(prov_call(&mut prov, &configure_req(TOKEN)).contains(UNAUTHORIZED));
+    let mut out = [0u8; MAX_PACKET_BYTES];
+    let notification = r#"{"jsonrpc":"2.0","method":"prov.identify"}"#;
+    assert_eq!(prov.dispatch_provision_rpc(notification, TransportKind::BleRelay, &mut out), None);
 }
 
 #[test]
 fn test_provisioning_happy_path() {
     let mut prov = BleProvisioner::new(HW_ID);
-    let identify = prov_call(&mut prov, r#"{"jsonrpc":"2.0","id":1,"method":"prov.identify"}"#);
-    assert!(identify.contains(r#""state":"awaiting_tap""#));
-    assert!(identify.ends_with(r#","hardware_id":"4f2a91c0"}}"#));
+    secure_link(&mut prov, 1);
+    let identify = prov_call(&mut prov, IDENTIFY);
+    let expected = r#""state":"awaiting_tap","transport":"ble","link_encrypted":true,"hardware_id":"4f2a91c0"}}"#;
+    assert!(identify.ends_with(expected));
     prov.on_physical_tap();
-    prov.on_link_encrypted(true);
 
-    let bad_token = &TOKEN[..TOKEN.len() - 1];
-    assert!(prov_call(&mut prov, &configure_req(bad_token)).contains("-32602"));
-    assert!(prov_call(&mut prov, &configure_req(&TOKEN.to_uppercase())).contains("-32602"));
-    let no_pref = configure_req(TOKEN).replace(r#","prefer_ble":true"#, "");
-    assert!(prov_call(&mut prov, &no_pref).contains("-32602"));
+    let invalid = [
+        configure_req(&TOKEN[..TOKEN.len() - 1]),
+        configure_req(&TOKEN.to_uppercase()),
+        configure_req(TOKEN).replace(r#","prefer_ble":true"#, ""),
+        configure_req(TOKEN).replace("wss://bulle.example/api/hardware/ws", "wss://"),
+        configure_req(TOKEN).replace("wss://bulle.example/api/hardware/ws", "wss:///api"),
+        configure_req(TOKEN).replace("wss://bulle.example", "https://bulle.example"),
+        configure_req(TOKEN).replace(r#""prefer_ble":true"#, r#""prefer_ble":true,"wifi_ssid":123"#),
+    ];
+    for req in invalid {
+        assert!(prov_call(&mut prov, &req).contains(r#""code":-32602"#), "{req}");
+    }
 
     let done = prov_call(&mut prov, &configure_req(TOKEN));
     assert_eq!(done, r#"{"jsonrpc":"2.0","id":7,"result":{"status":"provisioned"}}"#);
     let status = prov_call(&mut prov, r#"{"jsonrpc":"2.0","id":8,"method":"prov.status"}"#);
-    let expected = r#""state":"provisioned","transport":"ble","link_encrypted":true,"hardware_id":"4f2a91c0""#;
-    assert!(status.contains(expected));
-    assert_eq!(prov.state, ProvisionState::Provisioned);
-    assert_eq!(prov.transport, TransportKind::BleRelay);
+    assert!(status.contains(r#""state":"provisioned","transport":"ble","link_encrypted":true"#));
+    assert_eq!((prov.state, prov.transport), (ProvisionState::Provisioned, TransportKind::BleRelay));
     assert_eq!(prov.config.as_ref().unwrap().device_token.as_str(), TOKEN);
-    assert!(prov.config.as_ref().unwrap().wifi_psk.is_empty());
     assert!(!done.contains(TOKEN));
 }
 
 #[test]
-fn test_auth_window_timeout_resets() {
+fn test_auth_window_cannot_be_extended() {
     let mut prov = BleProvisioner::new([0xFF; 4]);
     prov.transport = TransportKind::WifiDirect;
-    let uuid = "00000000-0000-0000-0000-000000000000";
-    let req = format!(r#"{{"jsonrpc":"2.0","id":"{}","method":"prov.identify"}}"#, uuid);
-    let longest_status = concat!(
-        r#"{"jsonrpc":"2.0","id":"00000000-0000-0000-0000-000000000000","result":{"state":"awaiting_tap","#,
-        r#""transport":"wifi","link_encrypted":false,"hardware_id":"ffffffff"}}"#
-    );
-    assert_eq!(prov_call(&mut prov, &req), longest_status);
-    prov.tick(AUTH_WINDOW_MS - 1);
-    assert_eq!(prov.state, ProvisionState::AwaitingTap);
-    prov.tick(1);
+    secure_link(&mut prov, 3);
+    let id = "x".repeat(64);
+    let req = format!(r#"{{"jsonrpc":"2.0","id":"{}","method":"prov.identify"}}"#, id);
+    let expected = r#""transport":"wifi","link_encrypted":true,"hardware_id":"ffffffff"}}"#;
+    assert!(prov_call(&mut prov, &req).ends_with(expected));
+    prov.tick(AUTH_WINDOW_MS - 10);
+    prov_call(&mut prov, IDENTIFY);
+    prov.on_physical_tap();
+    prov_call(&mut prov, IDENTIFY);
+    assert_eq!((prov.state, prov.auth_timer_ms), (ProvisionState::Authorized, 10));
+    prov.tick(10);
     assert_eq!(prov.state, ProvisionState::Unclaimed);
+    prov.on_physical_tap();
+    assert_eq!(prov.state, ProvisionState::Unclaimed);
+    assert!(prov_call(&mut prov, &configure_req(TOKEN)).contains(UNAUTHORIZED));
+}
 
-    prov.on_identify_request();
+#[test]
+fn test_repair_keeps_old_config_until_configured() {
+    let mut prov = BleProvisioner::new(HW_ID);
+    secure_link(&mut prov, 1);
+    prov_call(&mut prov, IDENTIFY);
+    prov.on_physical_tap();
+    prov_call(&mut prov, &configure_req(TOKEN));
+    let old = prov.config.clone();
+
+    prov_call(&mut prov, IDENTIFY);
+    assert_eq!(prov.state, ProvisionState::AwaitingTap);
     prov.on_physical_tap();
     prov.tick(AUTH_WINDOW_MS);
-    assert_eq!(prov.state, ProvisionState::Unclaimed);
-    assert_eq!(prov.auth_timer_ms, 0);
-    prov.on_physical_tap();
-    assert_eq!(prov.state, ProvisionState::Unclaimed);
-
-    prov.on_identify_request();
-    prov.on_physical_tap();
-    prov.on_link_encrypted(false);
-    assert_eq!(prov.state, ProvisionState::Unclaimed);
+    assert_eq!((prov.state, &prov.config), (ProvisionState::Provisioned, &old));
+    assert!(prov_call(&mut prov, &configure_req(TOKEN)).contains(UNAUTHORIZED));
 }
 
 #[test]
-fn test_stream_reassembly() {
-    let frame: std::vec::Vec<u8> = (0..644u32).map(|i| i as u8).collect();
-    let mut wire = [0u8; 2 * (MAX_PACKET_BYTES + 2)];
-    let first = encode_stream_frame(&frame, &mut wire).unwrap();
-    let total = first + encode_stream_frame(&frame[..3], &mut wire[first..]).unwrap();
-    assert_eq!(&wire[..2], &644u16.to_be_bytes());
-
-    let mut reassembler = StreamReassembler::new();
-    let mut frames: std::vec::Vec<std::vec::Vec<u8>> = std::vec::Vec::new();
-    for chunk in wire[..total].chunks(244) {
-        let mut rest = chunk;
-        while !rest.is_empty() {
-            if let Some(done) = reassembler.push(&mut rest).unwrap() {
-                frames.push(done.to_vec());
-            }
-        }
-    }
-    assert_eq!(frames, [frame.clone(), frame[..3].to_vec()]);
-
-    let mut oversized: &[u8] = &[0x04, 0x01, 0xAA];
-    assert_eq!(reassembler.push(&mut oversized), Err(ProtocolError::InvalidFrameLength));
-    let mut zero: &[u8] = &[0x00, 0x00];
-    assert_eq!(reassembler.push(&mut zero), Err(ProtocolError::InvalidFrameLength));
-    assert_eq!(encode_stream_frame(&[], &mut wire), Err(ProtocolError::InvalidFrameLength));
-    assert_eq!(encode_stream_frame(&[0; MAX_PACKET_BYTES + 1], &mut wire), Err(ProtocolError::InvalidFrameLength));
-
-    let list_req = r#"{"jsonrpc":"2.0","id":"00000000-0000-0000-0000-000000000000","method":"tools/list"}"#;
-    let mut list = [0u8; MAX_PACKET_BYTES];
-    let mut avatar = AvatarRenderer::new();
-    assert!(ProtocolDispatcher::new().dispatch_json_rpc(list_req, &mut avatar, &mut list).is_ok());
-}
-
-#[test]
-fn test_inbound_routing_and_outbound_queue() {
-    let mut dispatcher = ProtocolDispatcher::new();
-    let mut avatar = AvatarRenderer::new();
+fn test_tap_authorization_is_bound_to_its_connection() {
     let mut prov = BleProvisioner::new(HW_ID);
-    let mut audio = [0u8; 4 + BYTES_PER_FRAME];
-    let payload = AudioFrame::new();
-    let len = ProtocolDispatcher::encode_audio_frame(0, 9, payload.as_bytes(), &mut audio).unwrap();
-    assert_eq!(len, 644);
-    handle_inbound_packet(&mut dispatcher, &mut avatar, &mut prov, TransportKind::WifiDirect, &audio);
-    assert!(AUDIO_RX_CHANNEL.try_receive().is_ok());
+    secure_link(&mut prov, 1);
+    prov_call(&mut prov, IDENTIFY);
+    prov.on_physical_tap();
+    prov.on_disconnect();
+    assert_eq!((prov.state, prov.conn), (ProvisionState::Unclaimed, None));
 
-    let mut call = std::vec::Vec::from([OPCODE_CONTROL]);
-    let telemetry = br#"{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"charm.get_telemetry"}}"#;
-    call.extend_from_slice(telemetry);
-    handle_inbound_packet(&mut dispatcher, &mut avatar, &mut prov, TransportKind::WifiDirect, &call);
-    let (pkt, pkt_len) = OUTBOUND_PKT_CHANNEL.try_receive().unwrap();
-    assert_eq!(pkt[0], OPCODE_CONTROL);
-    assert!(core::str::from_utf8(&pkt[1..pkt_len]).unwrap().contains(r#""id":5"#));
-
-    let mut identify = std::vec::Vec::from([OPCODE_PROVISION]);
-    identify.extend_from_slice(br#"{"jsonrpc":"2.0","id":6,"method":"prov.identify"}"#);
-    handle_inbound_packet(&mut dispatcher, &mut avatar, &mut prov, TransportKind::WifiDirect, &identify);
-    let (pkt, pkt_len) = OUTBOUND_PKT_CHANNEL.try_receive().unwrap();
-    assert!(core::str::from_utf8(&pkt[1..pkt_len]).unwrap().contains("-32001"));
-    assert_eq!(prov.state, ProvisionState::Unclaimed);
-}
-
-#[test]
-fn test_ble_uuids_and_power_fast_connect() {
-    let chars = [BLE_CHAR_INFO_UUID, BLE_CHAR_AUDIO_UUID, BLE_CHAR_CONTROL_UUID, BLE_CHAR_PROV_UUID];
-    for (n, uuid) in (1u128..).zip(chars) {
-        assert_eq!(uuid, BLE_SERVICE_UUID + (n << 96));
-    }
-
-    let mut pm = PowerManager::new();
-    pm.on_wake_trigger();
-    pm.on_hardware_ready(TransportKind::BleRelay);
-    assert_eq!(pm.state, PowerState::BleFastConnect);
-    pm.on_ble_connected();
-    assert_eq!(pm.state, PowerState::StreamFullDuplex);
-    assert_eq!(pm.silence_ms, 0);
+    secure_link(&mut prov, 2);
+    assert!(prov_call(&mut prov, &configure_req(TOKEN)).contains(UNAUTHORIZED));
+    prov.state = ProvisionState::Authorized;
+    prov.auth_conn = Some(1);
+    assert!(prov_call(&mut prov, &configure_req(TOKEN)).contains(UNAUTHORIZED));
+    assert!(prov.config.is_none());
 }

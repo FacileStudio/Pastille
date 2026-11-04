@@ -32,7 +32,9 @@ impl StreamReassembler {
     }
 
     /// Consumes bytes from the front of `input` and returns a frame once one is complete.
-    /// Call it again while `input` is not empty. A zero or oversized length resets the stream.
+    /// Call it again while `input` is not empty. A zero or oversized length means the stream is
+    /// broken: the buffer and the rest of `input` are discarded, and the caller drops the BLE link
+    /// or, on USB, resumes with the next chunk the host writes after reopening the port.
     pub fn push(&mut self, input: &mut &[u8]) -> Result<Option<&[u8]>, ProtocolError> {
         let take = self.missing().min(input.len());
         self.buf[self.filled..self.filled + take].copy_from_slice(&input[..take]);
@@ -41,6 +43,7 @@ impl StreamReassembler {
         let header_done = self.filled >= LENGTH_PREFIX_BYTES;
         if header_done && !(1..=MAX_PACKET_BYTES).contains(&self.frame_len()) {
             self.filled = 0;
+            *input = &[];
             return Err(ProtocolError::InvalidFrameLength);
         }
         if !header_done || self.filled < LENGTH_PREFIX_BYTES + self.frame_len() {
