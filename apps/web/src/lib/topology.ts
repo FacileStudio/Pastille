@@ -68,6 +68,8 @@ export const TOPOLOGY_DEVICES: TopologyNode[] = [
   { id: "headset", label: "Headset", icon: "solar:headphones-round-sound-bold-duotone" },
 ];
 
+export const EXAMPLE_NOTE = "The speaker and headset are examples of other BOHS-01 devices, not Pastille products.";
+
 export const TOPOLOGY_HUB = { label: "Bulle app", icon: "solar:monitor-smartphone-bold-duotone" };
 
 export const TOPOLOGY_SERVER = { label: "Your server", icon: "solar:server-square-bold-duotone" };
@@ -77,7 +79,7 @@ export const TOPOLOGY_MODES: TopologyMode[] = [
     id: "ble",
     button: "Bluetooth",
     icon: "solar:bluetooth-wave-bold-duotone",
-    summary: "Every device talks to the Bulle app, which relays to your server.",
+    summary: "Pastille and any other BOHS-01 device talk to the Bulle app, which relays to your server.",
     devices: ["pastille", "speaker", "headset"],
     direct: false,
     pills: [
@@ -90,7 +92,7 @@ export const TOPOLOGY_MODES: TopologyMode[] = [
     id: "wifi",
     button: "Wi-Fi",
     icon: "solar:wi-fi-router-bold-duotone",
-    summary: "At home, every device connects straight to your server.",
+    summary: "At home, Pastille and any other BOHS-01 device connect straight to your server.",
     devices: ["pastille", "speaker", "headset"],
     direct: true,
     pills: [

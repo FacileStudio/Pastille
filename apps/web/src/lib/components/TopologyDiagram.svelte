@@ -5,11 +5,12 @@
     TOPOLOGY_DEVICES,
     TOPOLOGY_HUB,
     TOPOLOGY_SERVER,
+    EXAMPLE_NOTE,
     type TopologyMode,
     type TopologyNode,
   } from "$lib/topology";
 
-  let { mode, vertical = false }: { mode: TopologyMode; vertical?: boolean } = $props();
+  let { mode, id, vertical = false }: { mode: TopologyMode; id: string; vertical?: boolean } = $props();
 
   const L = $derived(vertical ? LAYOUTS.vertical : LAYOUTS.horizontal);
   const isActive = (node: TopologyNode) => mode.devices.includes(node.id);
@@ -22,11 +23,11 @@
 <svg
   viewBox={L.viewBox}
   role="img"
-  aria-labelledby="topology-title"
+  aria-labelledby={id}
   class="topology mx-auto h-auto w-full"
   class:max-w-sm={vertical}
 >
-  <title id="topology-title">{mode.button}: {mode.summary}</title>
+  <title {id}>{mode.button}: {mode.summary} {EXAMPLE_NOTE}</title>
 
   {#each TOPOLOGY_DEVICES as node, i (node.id)}
     <path
@@ -40,7 +41,7 @@
       d="M{L.devices[i].x} {L.devices[i].y} Q{L.direct.x} {L.direct.y} {L.server.x} {L.server.y}"
       class="link"
       class:flow={directOn(node)}
-      class:hidden={!directOn(node)}
+      class:off={!directOn(node)}
     />
   {/each}
   <path
@@ -108,7 +109,8 @@
     opacity: 0.3;
   }
 
-  .hidden {
+  .off {
+    stroke: var(--color-fc-accent);
     opacity: 0;
   }
 
