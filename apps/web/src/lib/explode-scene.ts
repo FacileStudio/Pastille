@@ -149,7 +149,7 @@ class ExplodeScene {
  */
 export async function mountExplodeScene(
   host: HTMLElement,
-  onFrame: (frame: ScreenFrame) => void,
+  onFrame: (frame: ScreenFrame) => void = () => {},
 ): Promise<ExplodeControl> {
   const [T, { GLTFLoader }] = await Promise.all([
     import("three"),

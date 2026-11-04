@@ -2,10 +2,9 @@
   import { onMount } from "svelte";
   import { gsap } from "gsap";
   import { Card, Icon, Spinner, prefersReducedMotion } from "@facile/muse";
-  import ScreenBlob from "$lib/components/ScreenBlob.svelte";
   import { STEPS } from "$lib/explode";
   import { whenNear, watchSteps } from "$lib/explode-motion";
-  import { OVERLAY_PX, mountExplodeScene, type ExplodeControl, type ScreenFrame } from "$lib/explode-scene";
+  import { mountExplodeScene, type ExplodeControl } from "$lib/explode-scene";
 
   const LAST = STEPS.length - 1;
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -17,7 +16,6 @@
   let status = $state<"idle" | "loading" | "ready" | "error">("idle");
   let active = $state(0);
   let reduced = $state(false);
-  let frame = $state<ScreenFrame>({ transform: "", opacity: 0 });
   let viewer: ExplodeControl | null = null;
   let progress = 0;
   const label = $derived(`Pastille disassembly, step ${active + 1} of ${STEPS.length}: ${STEPS[active].title}`);
@@ -62,7 +60,7 @@
   async function boot(isDisposed: () => boolean) {
     status = "loading";
     try {
-      const ctrl = await mountExplodeScene(host, (next) => (frame = next));
+      const ctrl = await mountExplodeScene(host);
       if (isDisposed()) {
         ctrl.dispose();
         return;
@@ -105,19 +103,6 @@
     <div bind:this={stage} class="relative size-full overflow-hidden rounded-fc-lg bg-fc-component">
       <div bind:this={host} role="img" aria-label={label} class="absolute inset-0"></div>
 
-      {#if status === "ready"}
-        <div
-          class="pointer-events-none absolute left-0 top-0 origin-top-left"
-          style:width="{OVERLAY_PX}px"
-          style:height="{OVERLAY_PX}px"
-          style:transform={frame.transform}
-          style:opacity={frame.opacity}
-          style:visibility={frame.opacity > 0 ? "visible" : "hidden"}
-        >
-          <ScreenBlob still={reduced} />
-        </div>
-      {/if}
-
       {#if status === "idle" || status === "loading"}
         <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none">
           <Spinner />
@@ -156,9 +141,9 @@
         style:margin-bottom={i === LAST ? "0" : "36vh"}
       >
         <Card
-          class="flex w-full flex-col gap-3 p-6 !bg-fc-component border transition-all duration-300 {current
-            ? 'border-fc-accent shadow-fc-lg scale-[1.01]'
-            : 'border-fc-line shadow-fc-sm'}"
+          class="flex w-full flex-col gap-3 p-6 !bg-fc-component transition-all duration-300 {current
+            ? 'shadow-fc-lg scale-[1.01]'
+            : 'shadow-fc-sm'}"
         >
           <div class="flex items-center gap-3">
             <span

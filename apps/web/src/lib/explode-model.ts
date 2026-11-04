@@ -3,7 +3,7 @@ import type { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { PARTS, type ModelSource, type PartName } from "$lib/explode";
 import { partOffset } from "$lib/explode-math";
 import { disposeObject } from "$lib/pcb-scene";
-import { enrichBoard, styleAssemblyParts } from "$lib/pcb-components";
+import { attachLcdFace, enrichBoard, styleAssemblyParts } from "$lib/pcb-components";
 
 type Three = typeof import("three");
 
@@ -72,6 +72,7 @@ function buildModel(T: Three, objects: THREE.Object3D[]): ExplodeModel {
   }
   enrichBoard(T, root);
   styleAssemblyParts(T, root);
+  attachLcdFace(T, root);
   root.updateMatrixWorld(true);
   const parts = new Map<PartName, PartNode>();
   for (const name of PARTS) {

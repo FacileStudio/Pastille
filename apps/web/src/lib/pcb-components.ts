@@ -1,4 +1,5 @@
 import type * as THREE from "three";
+import { blobUri } from "@facile/blob";
 
 type Three = typeof import("three");
 
@@ -73,4 +74,38 @@ export function styleAssemblyParts(T: Three, root: THREE.Object3D) {
       }
     });
   }
+}
+
+export function attachLcdFace(T: Three, root: THREE.Object3D) {
+  if (typeof document === "undefined") return;
+  const lcd = root.getObjectByName("lcd");
+  if (!lcd || lcd.getObjectByName("lcd_face")) return;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.fillStyle = "#050505";
+  ctx.fillRect(0, 0, 512, 512);
+
+  const texture = new T.CanvasTexture(canvas);
+  texture.colorSpace = T.SRGBColorSpace;
+
+  const img = new Image();
+  img.onload = () => {
+    ctx.fillStyle = "#050505";
+    ctx.fillRect(0, 0, 512, 512);
+    ctx.drawImage(img, 48, 48, 416, 416);
+    texture.needsUpdate = true;
+  };
+  img.src = blobUri("Bulle");
+
+  const geom = new T.CircleGeometry(16.0, 64);
+  const mat = new T.MeshBasicMaterial({ map: texture, toneMapped: false });
+  const face = new T.Mesh(geom, mat);
+  face.name = "lcd_face";
+  face.position.set(0, 0, 5.71);
+  lcd.add(face);
 }
