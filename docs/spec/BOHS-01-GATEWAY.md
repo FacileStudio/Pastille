@@ -36,6 +36,8 @@ flowchart LR
 1. **Direct Wi-Fi.** The device opens WSS to `/api/hardware/ws` and authenticates with `Authorization: Bearer bohs_tok_...`.
 2. **App relay.** The device talks to the Bulle app over BLE GATT or USB CDC. The app opens WSS to `/api/hardware/ws?device_id=hw_...` with the user's authenticated session and forwards frames in both directions.
 
+Pastille v0.4.0 firmware runs only the USB CDC side of the app relay path. It has no Wi-Fi WSS client and no BLE stack, so it cannot open a direct session, advertise, or run the claim flow below. See the implementation status in [BOHS-01-WIRE.md](BOHS-01-WIRE.md).
+
 ## Device claim
 
 The Bulle app claims a device after the user authorizes pairing with a physical tap. See the `0x03` provisioning frames in [BOHS-01-WIRE.md](BOHS-01-WIRE.md).
@@ -182,4 +184,5 @@ Physical tool execution must not block conversational flow:
 
 - Maximum RPC round-trip timeout: 350 ms.
 - If the peripheral fails to acknowledge a tool execution within 350 ms, the gateway aborts the call and continues the dialogue.
+- The device answers every request with a result or a JSON-RPC error, so a timeout means the link is slow or gone, not that the call was rejected.
 - If the session closes, direct or relayed, the gateway immediately removes peripheral tools from the active model session. Future alerts fall back to desktop and mobile push channels.

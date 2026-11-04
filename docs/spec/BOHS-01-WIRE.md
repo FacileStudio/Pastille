@@ -2,6 +2,23 @@
 
 The BOHS-01 wire protocol `bohs.v1` multiplexes real-time audio, Reverse MCP control messages, and BLE provisioning messages. The same frames run over three transports: Wi-Fi WSS, BLE 5.0 GATT, and USB-C CDC.
 
+## Pastille v0.4.0 implementation status
+
+The Pastille v0.4.0 firmware implements part of this specification. The rest is defined here for the gateway, the apps, and later firmware.
+
+| Feature | Pastille v0.4.0 |
+| :--- | :--- |
+| Transport C, USB CDC (stream framing, `0x01`, `0x02`, `0x03` rejected with `-32001`) | Runs on the device |
+| Reverse MCP: `tools/list`, `charm.display_avatar`, `charm.haptic_pulse`, `charm.get_telemetry` | Runs on the device |
+| `charm.low_battery` notification | Runs on the device |
+| Transport A, Wi-Fi WSS | Not implemented |
+| Transport B, BLE GATT: advertising, `B001` to `B004`, link security | Not implemented |
+| `0x03` provisioning on BLE, `prov.state`, NVS storage of the config | Not implemented. The provisioning state machine exists and is host-tested, but no BLE stack drives it. |
+| `charm.tap_event` notification | Not implemented. esp-hal has no touch driver for the ESP32-S3. |
+| Microphone capture and speaker playback | Not implemented. The device validates inbound `0x01` frames and discards them, and sends none. |
+
+On the device, `charm.get_telemetry` reports `rssi_dbm` and `temp_c` as `null`: v0.4.0 has no radio link and esp-hal has no ESP32-S3 temperature sensor driver.
+
 ## Frames
 
 A `bohs.v1` frame is a byte sequence that starts with a one-byte opcode. The opcode identifies the payload type.
@@ -38,7 +55,7 @@ BLE characteristics and USB CDC are byte streams. A frame on these transports ha
 ```
 
 - The sender writes the frame length `N` as an unsigned 16-bit big-endian integer, then the `N` frame bytes.
-- `N` is between 1 and 1024. A receiver that reads `N = 0` or `N > 1024` treats the stream as broken. On BLE, it disconnects. On USB CDC, it discards its buffer and waits for the host to reopen the port.
+- `N` is between 1 and 1024. A receiver that reads `N = 0` or `N > 1024` treats the stream as broken. On BLE, it disconnects. On USB CDC, it discards its buffer and the rest of the bytes it has read, then parses the next bytes as a new length prefix. The host resynchronizes by reopening the port.
 - On BLE, the sender splits the prefixed bytes into chunks of at most ATT_MTU - 3 bytes. Each chunk goes in one notification, indication, or write.
 - The receiver appends each chunk to a buffer and extracts every complete frame from it. A chunk may end in the middle of a frame or hold the end of one frame and the start of the next. The receiver must not assume chunks align with frames.
 - Each BLE characteristic is its own stream in each direction. The receiver keeps one reassembly buffer per characteristic per direction.
@@ -88,7 +105,7 @@ The device advertises the service UUID with 6 bytes of service data:
 | :--- | :--- | :--- |
 | 0 | `state` | Provisioning state code (see below) |
 | 1 | `caps` | Capability bitfield (see below) |
-| 2-5 | `hw_id` | First 4 bytes of the hardware ID (eFuse MAC) |
+| 2-5 | `hw_id` | Hardware ID: the last 4 bytes of the eFuse base MAC. The first 3 bytes are the vendor OUI and repeat across devices. |
 
 Pastille advertises `[0x00, 0x0F, hw_id[0], hw_id[1], hw_id[2], hw_id[3]]` when unclaimed.
 
@@ -151,6 +168,8 @@ An audio frame is 644 bytes: a 4-byte header and a 640-byte payload. On BLE it s
 - `Sequence Number` (2 bytes): Monotonically increasing unsigned 16-bit integer in big-endian byte order (`0x0000` to `0xFFFF`). Wraps around to zero on overflow. Enables jitter buffer packet reordering and packet loss detection. Each direction keeps its own counter.
 - `Payload` (640 bytes): 320 signed 16-bit PCM samples, little-endian.
 
+A receiver discards an audio frame that is not exactly 644 bytes or that has a reserved flag bit set.
+
 ### Audio codec profile (v1)
 
 - Encoding: raw PCM, signed 16-bit, little-endian.
@@ -177,6 +196,25 @@ Control frames transport UTF-8 encoded JSON-RPC 2.0 messages.
 ```
 
 The payload follows the JSON-RPC 2.0 specification without modification. Each frame holds one complete JSON-RPC message. A message must fit in 1023 bytes, so the device keeps its tool list and tool results under that limit.
+
+### Request handling
+
+These rules apply to `0x02` and `0x03` messages alike.
+
+- The device answers every request that has an `id` with a result or an error object. It never lets a request time out silently.
+- A message without an `id` is a notification. The device ignores it: it neither runs it nor answers it.
+- The `id` must be a string of at most 64 bytes, a number, or `null`. Any other `id` gets error `-32600` with `"id":null`.
+- A payload that is not valid JSON gets error `-32700` with `"id":null`. A JSON value that is not an object, such as a batch array, gets `-32600`.
+
+| Code | Message | Meaning |
+| :--- | :--- | :--- |
+| `-32700` | `parse error` | The payload is not valid JSON |
+| `-32600` | `invalid request` | Not an object, or the `id` has a forbidden type or length |
+| `-32601` | `method not found` | Unknown method, or `charm.snapshot` on a device without a camera |
+| `-32602` | `unknown tool` | `tools/call` names a tool the device does not have |
+| `-32602` | `invalid params` | Missing or out-of-range arguments, such as `intensity` 500 |
+| `-32603` | `internal error` | The response did not fit in a frame |
+| `-32001` | `unauthorized` | `0x03` only: see the provisioning error codes |
 
 ## Reverse MCP specification
 
@@ -320,6 +358,8 @@ Request:
 }
 ```
 
+`pattern` sets the number of pulses: 1 for `tap`, 2 for `double_tap`, 3 for `alert`, 4 for `error`. Each pulse lasts `duration_ms` (default 50) at `intensity` percent (default 80), with 60 ms between pulses. The device answers once the pulse is queued for the motor, not when it ends.
+
 Response:
 
 ```json
@@ -369,6 +409,8 @@ Response:
   }
 }
 ```
+
+`rssi_dbm` and `temp_c` are `null` when the device has no source for them.
 
 #### Snapshot tool (future camera support)
 
@@ -443,9 +485,11 @@ Triggered when the user taps or holds the capacitive front surface.
 
 Supported `type` values: `single_tap`, `double_tap`, `long_press`.
 
+Pastille v0.4.0 does not send this notification.
+
 ### Low battery alert notification
 
-Triggered when battery charge drops below 15 percent or 5 percent thresholds.
+Triggered when battery charge drops below 15 percent or 5 percent thresholds. Each threshold alerts once, and alerts again only after the charge has climbed 3 points above it. A device that boots below a threshold alerts once for the lowest threshold it is under.
 
 ```json
 {
@@ -489,6 +533,9 @@ stateDiagram-v2
 - The 60 second window opens when the device accepts `prov.identify`. The tap and `prov.configure` must both happen before it ends.
 - If the window ends or the encrypted link drops before `prov.configure` succeeds, the device returns to the state it held before `prov.identify`. A new device returns to `unclaimed`. A device being re-paired returns to `provisioned` and keeps its old config.
 - A provisioned device accepts `prov.identify` to re-pair. The new config replaces the old one only after a tap and a successful `prov.configure`.
+- A `prov.identify` while the window is open returns the status and changes nothing. It neither restarts nor extends the window.
+- The window belongs to the BLE connection that sent `prov.identify`. A disconnect closes it, and `prov.configure` from any other connection gets `-32001`.
+- The device answers every `0x03` request with `-32001` unless it arrived from a connected central over an encrypted link. This includes `prov.identify` and `prov.status`.
 
 ### Error codes
 
@@ -516,7 +563,7 @@ Response, a status result:
 
 ### prov.status
 
-Returns the provisioning state and the active transport. Valid in every state.
+Returns the provisioning state and the configured transport. Valid in every state.
 
 Request:
 
@@ -533,7 +580,7 @@ Response:
 A status result has four fields:
 
 - `state`: one of `unclaimed`, `awaiting_tap`, `authorized`, `provisioned`.
-- `transport`: one of `ble`, `wifi`, `usb`.
+- `transport`: the transport the device uses to reach the gateway once provisioned, set by `prefer_ble`: one of `ble`, `wifi`, `usb`.
 - `link_encrypted`: `true` when the BLE link is encrypted.
 - `hardware_id`: 8 lowercase hex characters. They encode the same 4 bytes as `hw_id` in the advertising service data, in the same order. The value is fixed per device, so the app can use it to recognize a charm across browsers and reinstalls.
 
@@ -556,10 +603,12 @@ Otherwise the device answers with error `-32001` `unauthorized` and stores nothi
 
 | Field | Type | Required | Rule |
 | :--- | :--- | :--- | :--- |
-| `gateway_url` | string | Yes | `wss://` URL, at most 96 characters |
+| `gateway_url` | string | Yes | `wss://` URL with a non-empty host, at most 96 characters |
 | `device_token` | string | Yes | `bohs_tok_` followed by 32 lowercase hex characters |
 | `wifi_ssid` | string | No | At most 32 characters. Required when `prefer_ble` is `false`. |
 | `wifi_psk` | string | No | At most 64 characters. Omit for an open network. |
+
+A present optional field with a type other than string gets `-32602`.
 | `prefer_ble` | boolean | Yes | `true` selects BLE relay first, `false` selects Wi-Fi direct first |
 
 Request:
