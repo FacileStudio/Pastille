@@ -133,9 +133,15 @@ export async function mountPcbScene(
   } | null = null;
 
   const loader = new GLTFLoader();
+  let loadSeq = 0;
 
   async function loadUrl(url: string) {
+    const seq = ++loadSeq;
     const gltf = await loader.loadAsync(url);
+    if (seq !== loadSeq) {
+      disposeObject(gltf.scene);
+      return;
+    }
     if (currentModel) {
       scene.remove(currentModel);
       disposeObject(currentModel);

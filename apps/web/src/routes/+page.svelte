@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button, Card, Icon, Section, icons } from "@facile/muse";
   import PcbViewer from "$lib/components/PcbViewer.svelte";
+  import SyncTopology from "$lib/components/SyncTopology.svelte";
   import {
     COMPARISON,
     FEATURES,
@@ -36,8 +37,8 @@
       38 mm open hardware voice charm for Bulle.
     </h1>
     <p class="text-fc-md sm:text-fc-lg text-fc-fg-muted">
-      Tap to wake in under 50 ms, stream full-duplex Opus audio over Wi-Fi, and render 60 FPS
-      companion expressions on a round IPS screen.
+      Tap to wake in under 50 ms, stream full-duplex 16 kHz voice over BLE 5.0 or Wi-Fi, and render
+      60 FPS companion expressions on a round IPS screen.
     </p>
   </div>
 
@@ -56,12 +57,12 @@
       variant="ghost"
       size="lg"
       class="bg-fc-surface text-fc-fg hover:bg-fc-component"
-      href="https://github.com/FacileStudio/Pastille/releases/tag/v0.2.2"
+      href="https://github.com/FacileStudio/Pastille/releases/tag/v0.3.0"
       target="_blank"
       rel="noreferrer"
       icon={icons.download}
     >
-      Gerbers & STEP (v0.2.2)
+      Enclosure CAD (v0.3.0)
     </Button>
   </div>
 
@@ -85,6 +86,16 @@
     description="Compiled from hardware/index.tsx with Fusible."
   >
     <PcbViewer />
+  </Section>
+</div>
+
+<div use:scrollReveal={{ y: 20 }}>
+  <Section
+    id="connectivity"
+    title="BLE 5.0 & Wi-Fi interconnection"
+    description="Pair a BOHS-01 device in one tap from the Bulle app, stream over BLE 5.0, or roam onto Wi-Fi."
+  >
+    <SyncTopology />
   </Section>
 </div>
 
@@ -119,7 +130,7 @@
   <Section
     id="protocol"
     title="Wire protocol"
-    description="One WebSocket (bohs.v1) multiplexes binary Opus frames and JSON-RPC 2.0 tool calls."
+    description="One bohs.v1 stream over BLE or Wi-Fi WSS multiplexes PCM16 audio, Reverse MCP, and pairing frames."
   >
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {#each PROTOCOL_PLANES as plane (plane.opcode)}

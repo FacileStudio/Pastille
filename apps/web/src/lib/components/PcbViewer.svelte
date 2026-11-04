@@ -6,8 +6,8 @@
   type ModelMode = "pcb" | "case";
 
   const MODELS: Record<ModelMode, string> = {
-    pcb: "/models/pastille.glb?v=0.2.2",
-    case: "/models/pastille_case.glb?v=0.2.2",
+    pcb: "/models/pastille.glb?v=0.3.0",
+    case: "/models/pastille_case.glb?v=0.3.0",
   };
 
   const PRESETS: Preset[] = ["iso", "top", "side"];
@@ -18,6 +18,7 @@
   let mode = $state<ModelMode>("pcb");
   let rotating = $state(true);
   let viewer: SceneControl | null = null;
+  let loadSeq = 0;
 
   /**
    * Moves the camera to a preset angle and pauses auto-rotation.
@@ -36,12 +37,14 @@
     if (mode === next || !viewer) return;
     mode = next;
     status = "loading";
+    const seq = ++loadSeq;
     try {
       await viewer.loadUrl(MODELS[next]);
+      if (seq !== loadSeq) return;
       preset = "iso";
       status = "ready";
     } catch {
-      status = "error";
+      if (seq === loadSeq) status = "error";
     }
   }
 

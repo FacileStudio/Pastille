@@ -4,6 +4,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [tailwindcss(), sveltekit()],
+  build: {
+    chunkSizeWarningLimit: 800
+  },
   optimizeDeps: {
     exclude: ['@facile/muse']
   }

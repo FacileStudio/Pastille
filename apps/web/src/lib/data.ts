@@ -36,6 +36,7 @@ export interface ProtocolPlane {
 
 export const NAV_SECTIONS = [
   { id: "viewer", label: "3D Board" },
+  { id: "connectivity", label: "Connectivity" },
   { id: "architecture", label: "Architecture" },
   { id: "protocol", label: "Protocol" },
   { id: "comparison", label: "Comparison" },
@@ -44,9 +45,9 @@ export const NAV_SECTIONS = [
 
 export const HERO_METRICS: Metric[] = [
   { label: "Diameter", value: "38.0 mm", detail: "4-layer ENIG PCB, 11.5 mm case" },
-  { label: "Deep sleep", value: "18 uA", detail: "14+ days standby on 250 mAh LiPo" },
-  { label: "Wake time", value: "< 50 ms", detail: "Capacitive RTC touch wake" },
-  { label: "Unit BOM", value: "$23.85", detail: "100-unit PCBA turnkey" },
+  { label: "Deep sleep", value: "18 uA", detail: "18+ days standby · 24h BLE talk (target)" },
+  { label: "Wake time", value: "< 6 ms", detail: "BLE 5.0 2M PHY & <50 ms RTC wake" },
+  { label: "Unit BOM", value: "$23.85", detail: "1,000-unit PCBA turnkey" },
 ];
 
 export const FEATURES: FeatureItem[] = [
@@ -59,8 +60,8 @@ export const FEATURES: FeatureItem[] = [
   {
     icon: "solar:soundwave-bold-duotone",
     title: "Full-duplex I2S audio",
-    description: "INMP441 MEMS microphone and MAX98357A Class-D amplifier with on-chip VAD.",
-    tag: "Opus 16 kHz · 20 ms",
+    description: "SPH0645LM4H-B / INMP441 I2S MEMS mic and MAX98357A Class-D amp with on-chip VAD.",
+    tag: "PCM16 16 kHz · 20 ms",
   },
   {
     icon: "solar:eye-bold-duotone",
@@ -82,9 +83,9 @@ export const FEATURES: FeatureItem[] = [
   },
   {
     icon: "solar:shield-keyhole-bold-duotone",
-    title: "Private Bulle gateway",
-    description: "Streams over bohs.v1 WebSocket with Casier bearer tokens and zero cloud relay.",
-    tag: "CERN-OHL-S v2",
+    title: "Dual BLE 5.0 & Wi-Fi WSS",
+    description: "One-tap BLE pairing in Bulle Mobile/Desktop with automatic Wi-Fi WSS roaming.",
+    tag: "bohs.v1 · CERN-OHL-S",
   },
 ];
 
@@ -92,7 +93,7 @@ export const COMPARISON: ComparisonRow[] = [
   { metric: "Form factor", pastille: "38 mm disc (14 g)", omi: "40 mm pendant", rabbit: "Handheld slab (115 g)" },
   { metric: "Unit BOM", pastille: "$23.85 open BOM", omi: "~$45 BOM", rabbit: "$199 retail" },
   { metric: "Display", pastille: '1.28" 240x240 IPS', omi: "None", rabbit: '2.88" TFT' },
-  { metric: "Standby life", pastille: "14+ days (18 uA)", omi: "~4 days", rabbit: "~12 hours" },
+  { metric: "Standby life", pastille: "18+ days (18 uA)", omi: "~4 days", rabbit: "~12 hours" },
   { metric: "Runtime", pastille: "Bare-metal Rust", omi: "BLE to phone app", rabbit: "Android AOSP" },
   { metric: "Wake latency", pastille: "< 50 ms", omi: "BLE pairing delay", rabbit: "> 45 s cold boot" },
   { metric: "Data custody", pastille: "Self-hosted Bulle", omi: "Companion app", rabbit: "Vendor cloud" },
@@ -102,24 +103,23 @@ const s = (text: string, tone?: TokenTone): CodeSpan => ({ text, tone });
 
 export const PROTOCOL_PLANES: ProtocolPlane[] = [
   {
-    opcode: "0x01 · Binary frame",
-    name: "Opus 16 kHz audio plane",
-    summary: "Each 20 ms voice frame prepends an 8-byte header with VAD and end-of-utterance flags.",
+    opcode: "0x01 · Binary audio frame",
+    name: "PCM16 16 kHz audio plane",
+    summary:
+      "Each 20 ms PCM16 voice frame carries a 4-byte header over BLE GATT (B002) or Wi-Fi WSS. " +
+      "BLE and USB add a u16be length prefix and splits frames into MTU-sized chunks.",
     lines: [
-      [s("0x00  ", "muted"), s("magic     ", "key"), s("0xB0        ", "num"), s("# BOHS sync byte", "muted")],
-      [s("0x01  ", "muted"), s("version   ", "key"), s("0x01        ", "num"), s("# bohs.v1", "muted")],
-      [s("0x02  ", "muted"), s("flags     ", "key"), s("0b0000_0011 ", "num"), s("# bit0: VAD, bit1: EOU", "muted")],
-      [s("0x03  ", "muted"), s("seq       ", "key"), s("u16be       ", "kw"), s("# frame counter", "muted")],
-      [s("0x05  ", "muted"), s("length    ", "key"), s("u16be       ", "kw"), s("# payload bytes", "muted")],
-      [s("0x07  ", "muted"), s("reserved  ", "key"), s("0x00", "num")],
-      [s("0x08  ", "muted"), s("payload   ", "key"), s("[u8; N]     ", "kw"), s("# 16 kHz Opus packet", "muted")],
+      [s("0x00  ", "muted"), s("opcode    ", "key"), s("0x01        ", "num"), s("# Audio data frame", "muted")],
+      [s("0x01  ", "muted"), s("flags     ", "key"), s("0b0000_0011 ", "num"), s("# bit0: EOU, bit1: VAD", "muted")],
+      [s("0x02  ", "muted"), s("seq       ", "key"), s("u16be       ", "kw"), s("# big-endian frame counter", "muted")],
+      [s("0x04  ", "muted"), s("payload   ", "key"), s("[u8; 640]   ", "kw"), s("# PCM16 LE, 16 kHz, 20 ms", "muted")],
     ],
   },
   {
-    opcode: "0x02 · Text frame",
+    opcode: "0x02 / 0x03 · Binary control & pairing frame",
     name: "Reverse MCP control plane",
     summary:
-      "Bulle calls edge tools over the same socket to set expressions, trigger haptics, or read voltage.",
+      "Opcode 0x02 dispatches Reverse MCP edge tools; Opcode 0x03 pairs and syncs tokens over BLE (B004).",
     lines: [
       [s("{", "muted")],
       [s('  "jsonrpc"', "key"), s(': "2.0",', "str")],
