@@ -1,0 +1,57 @@
+[tools]
+bun = "1.4"
+rust = { version = "1.98", components = "clippy" }
+
+[tasks.install]
+description = "Install hardware and web dependencies"
+run = [
+  "cd hardware && bun install --frozen-lockfile",
+  "cd apps/web && bun install --frozen-lockfile",
+]
+
+[tasks.dev]
+description = "Run the landing page dev server"
+dir = "apps/web"
+run = "bun run dev"
+
+[tasks.build]
+description = "Build the landing page"
+dir = "apps/web"
+run = "bun run build"
+
+[tasks.check-firmware]
+description = "Run firmware host tests and clippy"
+dir = "apps/firmware"
+run = ["cargo test", "cargo clippy --all-targets -- -D warnings"]
+
+[tasks.check-hardware]
+description = "Typecheck the tscircuit board"
+dir = "hardware"
+run = "bun run typecheck"
+
+[tasks.check-web]
+description = "Typecheck and build the landing page"
+dir = "apps/web"
+run = ["bun run check", "bun run build"]
+
+[tasks.check]
+description = "Run the full quality gate: firmware, hardware, web, then filet"
+depends = ["check-firmware", "check-hardware", "check-web"]
+run = "filet check"
+
+[tasks.drc]
+description = "Run Fusible electrical rules and regenerate firmware pin bindings"
+run = "fusible check"
+
+[tasks.studio]
+description = "Launch the Fusible Studio live preview"
+run = "fusible dev"
+
+[tasks.export]
+description = "Generate the enclosure and every fabrication and CAD export"
+run = ["fusible body", "fusible export --preset all"]
+
+[tasks.flash]
+description = "Flash the firmware onto a connected ESP32-S3 and open the monitor"
+dir = "apps/firmware"
+run = "cargo espflash flash --release --monitor"
