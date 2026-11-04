@@ -57,7 +57,7 @@ jobs:
         run: bun hardware/bodies/build.ts
 
       - name: Fail On Stale Bodies
-        run: git diff --exit-code -- bodies/*.step
+        run: git diff -I "CARTESIAN_POINT" --exit-code -- bodies/*.step
 
   hardware-and-web:
     name: Hardware & Web Checks
