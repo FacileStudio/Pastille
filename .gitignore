@@ -5,6 +5,8 @@ dist/
 !/dist/fab/
 /dist/fab/*
 !/dist/fab/gerbers.zip
+!/dist/fab/bom.csv
+!/dist/fab/cpl.csv
 !/dist/cad/
 /dist/cad/*
 !/dist/cad/board.step
