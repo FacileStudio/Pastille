@@ -80,10 +80,12 @@
     let disposed = false;
     let stopSteps: (() => void) | null = null;
     const stopNear = whenNear(root, () => boot(() => disposed));
-    watchSteps(list, { count: STEPS.length, scrub: !reduced, onProgress, onActive }).then((stop) => {
-      if (disposed) stop();
-      else stopSteps = stop;
-    });
+    watchSteps(list, { count: STEPS.length, scrub: !reduced, onProgress, onActive })
+      .then((stop) => {
+        if (disposed) stop();
+        else stopSteps = stop;
+      })
+      .catch(() => {});
     return () => {
       disposed = true;
       stopNear();
@@ -103,13 +105,14 @@
     <div bind:this={stage} class="relative size-full overflow-hidden rounded-fc-lg bg-fc-component">
       <div bind:this={host} role="img" aria-label={label} class="absolute inset-0"></div>
 
-      {#if status === "ready" && frame.opacity > 0}
+      {#if status === "ready"}
         <div
           class="pointer-events-none absolute left-0 top-0 origin-top-left"
           style:width="{OVERLAY_PX}px"
           style:height="{OVERLAY_PX}px"
           style:transform={frame.transform}
           style:opacity={frame.opacity}
+          style:visibility={frame.opacity > 0 ? "visible" : "hidden"}
         >
           <ScreenBlob still={reduced} />
         </div>
@@ -156,7 +159,9 @@
             {/each}
           </div>
           <h3 class="text-fc-md font-semibold text-fc-fg">{step.title}</h3>
-          <p class="text-fc-sm text-fc-fg-muted">{step.description}</p>
+          <p class="text-fc-sm text-fc-fg-muted">
+            {step.description}{#if step.motionNote && !reduced}{" "}{step.motionNote}{/if}
+          </p>
         </Card>
       </li>
     {/each}

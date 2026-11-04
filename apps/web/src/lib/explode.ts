@@ -16,6 +16,7 @@ export interface ExplodeStep {
   icons: string[];
   title: string;
   description: string;
+  motionNote?: string;
   offsets: Partial<Record<PartName, Vec3>>;
   rotation: { pitch: number; yaw: number };
 }
@@ -36,9 +37,8 @@ export const STEPS: ExplodeStep[] = [
     id: "front",
     icons: ["solar:watch-round-bold-duotone"],
     title: "The assembled charm",
-    description:
-      "Pastille as you wear it, a 42 mm disc with Bulle on a round screen. " +
-      "Move your pointer and Bulle's eyes follow it.",
+    description: "Pastille as you wear it, a 42 mm disc with Bulle on a round screen.",
+    motionNote: "Move your pointer and Bulle's eyes follow it.",
     offsets: {},
     rotation: FRONT,
   },

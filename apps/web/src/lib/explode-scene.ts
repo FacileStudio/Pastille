@@ -157,7 +157,13 @@ export async function mountExplodeScene(
     import("three/examples/jsm/loaders/GLTFLoader.js"),
   ]);
   const model = await loadExplodeModel(T, new GLTFLoader(), [ASSEMBLY_SOURCES]);
-  const view = new ExplodeScene(T, host, createRenderer(T, host), model, onFrame);
+  let view: ExplodeScene;
+  try {
+    view = new ExplodeScene(T, host, createRenderer(T, host), model, onFrame);
+  } catch (err) {
+    disposeObject(model.root);
+    throw err;
+  }
   const observer = new ResizeObserver(() => view.resize());
   observer.observe(host);
   return {
