@@ -1,3 +1,5 @@
+import { WirePadsFootprint } from "./wire-pads";
+
 export const Trigger = () => (
   <>
     <testpoint
@@ -5,8 +7,8 @@ export const Trigger = () => (
       footprintVariant="pad"
       padShape="circle"
       padDiameter="2mm"
-      pcbX={13.0}
-      pcbY={9.8}
+      pcbX={5.0}
+      pcbY={15.6}
       schX={-48}
       schY={-16}
     />
@@ -15,8 +17,8 @@ export const Trigger = () => (
       resistance="510"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-07510RL"
-      pcbX={15.0}
-      pcbY={7.8}
+      pcbX={2.6}
+      pcbY={14.6}
       schX={-40}
       schY={-16}
     />
@@ -24,9 +26,8 @@ export const Trigger = () => (
       name="U_HAP"
       footprint="msop10"
       manufacturerPartNumber="DRV2605LDGSR"
-      pcbX={7.9}
-      pcbY={-12.2}
-      pcbRotation={90}
+      pcbX={7.6}
+      pcbY={10.8}
       schX={-32}
       schY={-22}
       pinLabels={{
@@ -52,8 +53,8 @@ export const Trigger = () => (
       capacitance="1uF"
       footprint="0402"
       manufacturerPartNumber="GRM155R61A105KE15D"
-      pcbX={12.4}
-      pcbY={-11.8}
+      pcbX={5.6}
+      pcbY={13.6}
       schX={-24}
       schY={-16}
     />
@@ -62,8 +63,8 @@ export const Trigger = () => (
       capacitance="1uF"
       footprint="0402"
       manufacturerPartNumber="GRM155R61A105KE15D"
-      pcbX={8.6}
-      pcbY={-7.3}
+      pcbX={7.6}
+      pcbY={13.6}
       schX={-24}
       schY={-22}
     />
@@ -72,8 +73,8 @@ export const Trigger = () => (
       resistance="4.7k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-074K7L"
-      pcbX={5.4}
-      pcbY={3.5}
+      pcbX={9.8}
+      pcbY={13.6}
       schX={-40}
       schY={-22}
     />
@@ -82,21 +83,21 @@ export const Trigger = () => (
       resistance="4.7k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-074K7L"
-      pcbX={8.4}
-      pcbY={3.5}
+      pcbX={10.2}
+      pcbY={8.4}
       schX={-40}
       schY={-28}
     />
-    <pinheader
+    <chip
       name="J_HAP"
-      pinCount={2}
-      pitch="2.54mm"
-      footprint="pinrow2_p2.54"
-      manufacturerPartNumber="LRA-0827"
-      pcbX={-3.6}
-      pcbY={13.4}
+      footprint={<WirePadsFootprint />}
+      manufacturerPartNumber="VG0832012"
+      layer="bottom"
+      pcbX={12.6}
+      pcbY={-6.6}
       schX={-24}
       schY={-28}
+      pinLabels={{ pin1: "LRA_P", pin2: "LRA_N" }}
     />
     <trace from=".TP_TOUCH > .pin1" to=".R_TOUCH > .pin1" />
     <trace from=".R_TOUCH > .pin2" to="net.TOUCH_WAKE" />
@@ -114,7 +115,7 @@ export const Trigger = () => (
     <trace from=".R_SDA > .pin2" to="net.VDD3V3" />
     <trace from=".R_SCL > .pin1" to="net.I2C_SCL" />
     <trace from=".R_SCL > .pin2" to="net.VDD3V3" />
-    <trace from=".U_HAP > .OUT_P" to=".J_HAP > .pin1" />
-    <trace from=".U_HAP > .OUT_N" to=".J_HAP > .pin2" />
+    <trace from=".U_HAP > .OUT_P" to=".J_HAP > .LRA_P" />
+    <trace from=".U_HAP > .OUT_N" to=".J_HAP > .LRA_N" />
   </>
 );
