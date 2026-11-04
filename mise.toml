@@ -25,10 +25,13 @@ dir = "apps/firmware"
 run = ["cargo test", "cargo clippy --all-targets -- -D warnings"]
 
 [tasks.build-firmware]
-description = "Build the ESP32-S3 firmware image (needs espup's esp toolchain)"
+description = "Build the ESP32-S3 firmware and its 4 MB flash image (needs espup's esp toolchain)"
 dir = "apps/firmware"
 env = { RUSTUP_TOOLCHAIN = "esp" }
-run = "bash -c 'source ~/export-esp.sh && cargo build --release --target xtensa-esp32s3-none-elf'"
+run = [
+  "bash -c 'source ~/export-esp.sh && cargo build --release --target xtensa-esp32s3-none-elf'",
+  "espflash save-image --chip esp32s3 --flash-size 4mb --partition-table partitions.csv target/xtensa-esp32s3-none-elf/release/pastille-firmware target/pastille-firmware.bin",
+]
 
 [tasks.check-hardware]
 description = "Typecheck the tscircuit board"
