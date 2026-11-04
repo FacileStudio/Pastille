@@ -27,6 +27,11 @@ export interface ComparisonRow {
   rabbit: string;
 }
 
+export interface SourceLink {
+  label: string;
+  href: string;
+}
+
 export interface ProtocolPlane {
   opcode: string;
   name: string;
@@ -77,20 +82,20 @@ export const FEATURES: FeatureItem[] = [
   {
     icon: "solar:eye-bold-duotone",
     title: "Round screen",
-    description: "A 1.28 inch, 240x240 display where Bulle's face lives. It redraws at 60 FPS.",
+    description: "A 1.28 inch, 240x240 display where Bulle's face lives. It redraws at 30 FPS.",
     tag: "GC9A01 over SPI",
   },
   {
     icon: "solar:magic-stick-3-bold-duotone",
     title: "Touch and haptics",
     description: "Tap the pad to wake Pastille. A small vibration motor taps back for alerts.",
-    tag: "Wakes in under 50 ms",
+    tag: "Wake target: 50 ms",
   },
   {
     icon: "solar:battery-charge-bold-duotone",
     title: "Battery and charging",
-    description: "A 150 mAh cell charges from USB-C in about 90 minutes. A TVS diode guards the port.",
-    tag: "TP4056 at 146 mA",
+    description: `A ${BATTERY.capacity} cell charges from USB-C in about 90 minutes. A TVS diode guards the port.`,
+    tag: `TP4056 at ${BATTERY.chargeCurrent}`,
   },
   {
     icon: "solar:shield-keyhole-bold-duotone",
@@ -102,13 +107,40 @@ export const FEATURES: FeatureItem[] = [
 ];
 
 export const COMPARISON: ComparisonRow[] = [
-  { metric: "Form factor", pastille: "42 mm disc", omi: "40 mm pendant", rabbit: "Handheld slab (115 g)" },
-  { metric: "Unit BOM", pastille: "$23.85 open BOM", omi: "~$45 BOM", rabbit: "$199 retail" },
-  { metric: "Display", pastille: '1.28" 240x240 IPS', omi: "None", rabbit: '2.88" TFT' },
-  { metric: "Standby life", pastille: "7+ days (18 uA)", omi: "~4 days", rabbit: "~12 hours" },
-  { metric: "Runtime", pastille: "Bare-metal Rust", omi: "BLE to phone app", rabbit: "Android AOSP" },
-  { metric: "Wake latency", pastille: "< 50 ms", omi: "BLE pairing delay", rabbit: "> 45 s cold boot" },
-  { metric: "Your data", pastille: "Your own server", omi: "Companion app", rabbit: "Vendor cloud" },
+  { metric: "Form factor", pastille: "42 mm disc, 17 mm thick", omi: "Pendant on a chain", rabbit: "Handheld, 115 g" },
+  { metric: "Cost", pastille: "$23.85 in parts at 1,000 units", omi: "$169 retail", rabbit: "$199 retail" },
+  { metric: "Display", pastille: '1.28" 240x240 round IPS', omi: "No screen", rabbit: '2.88" touchscreen' },
+  {
+    metric: "Battery",
+    pastille: "10 h of talk (target)",
+    omi: "10 to 14 hours",
+    rabbit: "Under a day of moderate use",
+  },
+  {
+    metric: "Runtime",
+    pastille: "Bare-metal Rust on ESP32-S3",
+    omi: "nRF5340, Bluetooth to a phone app",
+    rabbit: "rabbit OS, built on AOSP",
+  },
+  {
+    metric: "Your data",
+    pastille: "Your own server",
+    omi: "Omi Cloud, no supported self-hosting",
+    rabbit: "Rabbit's cloud",
+  },
+];
+
+export const COMPARISON_SOURCES: SourceLink[] = [
+  { label: "Omi FAQ", href: "https://www.omi.me/pages/learn-omi-faq" },
+  { label: "Omi product page", href: "https://www.omi.me/pages/omi-product" },
+  { label: "Omi CV1 specs", href: "https://docs.omi.me/doc/hardware/OmiConsumer" },
+  { label: "Omi Cloud", href: "https://docs.omi.me/doc/get_started/open-source-and-omi-cloud" },
+  { label: "XDA, Rabbit R1 review", href: "https://www.xda-developers.com/rabbit-r1-review/" },
+  { label: "The Shortcut, Rabbit R1 review", href: "https://www.theshortcut.com/p/rabbit-r1-review-ai" },
+  {
+    label: "Rabbit, built on AOSP",
+    href: "https://www.rabbit.tech/blog/making-r1-more-accessible-to-the-developer-community",
+  },
 ];
 
 const s = (text: string, tone?: TokenTone): CodeSpan => ({ text, tone });

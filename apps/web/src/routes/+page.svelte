@@ -5,6 +5,7 @@
   import SyncTopology from "$lib/components/SyncTopology.svelte";
   import {
     COMPARISON,
+    COMPARISON_SOURCES,
     FEATURES,
     HERO_METRICS,
     PROTOCOL_PLANES,
@@ -182,8 +183,8 @@
     <div class="grid grid-cols-1 gap-2.5">
       <div class="hidden md:grid md:grid-cols-4 gap-4 px-5 py-2 text-fc-xs font-mono uppercase text-fc-fg-muted">
         <span>Metric</span>
-        <span>Pastille (BOHS-01)</span>
-        <span>OMI (Friend)</span>
+        <span>Pastille {RELEASE_TAG}</span>
+        <span>Omi</span>
         <span>Rabbit R1</span>
       </div>
       {#each COMPARISON as row (row.metric)}
@@ -198,6 +199,15 @@
           </Card>
         </div>
       {/each}
+      <p data-reveal-item class="px-1 pt-2 text-fc-xs text-fc-fg-muted">
+        Pastille battery figures are design targets from the BOHS-01 spec, not measurements. Omi and Rabbit
+        figures come from
+        {#each COMPARISON_SOURCES as source, i (source.href)}
+          <a href={source.href} target="_blank" rel="noreferrer" class="underline hover:text-fc-fg"
+            >{source.label}</a
+          >{i < COMPARISON_SOURCES.length - 1 ? ", " : "."}
+        {/each}
+      </p>
     </div>
   </Section>
 </div>
