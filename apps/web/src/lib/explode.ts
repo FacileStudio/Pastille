@@ -67,7 +67,7 @@ export const STEPS: ExplodeStep[] = [
     icons: ["solar:cpu-bolt-bold-duotone"],
     title: "Main board",
     description:
-      "A 38 mm round board carries the ESP32-S3R8, with 8 MB of PSRAM, BLE 5.0 and Wi-Fi. " +
+      "A 38 mm round board carries an ESP32-S3 module with 4 MB of flash, 2 MB of PSRAM, Bluetooth and Wi-Fi. " +
       "It runs bare-metal Rust firmware built on Embassy.",
     offsets: { main: [0, 0, 14] },
     rotation: THREE_QUARTER,

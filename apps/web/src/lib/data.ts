@@ -55,22 +55,22 @@ export const NAV_SECTIONS = [
 
 export const BATTERY = {
   cell: "402020",
-  capacity: "150 mAh",
-  chargeCurrent: "about 146 mA",
+  capacity: "120 mAh",
+  chargeCurrent: "about 67 mA",
 };
 
 export const HERO_METRICS: Metric[] = [
-  { label: "Size", value: "42 mm", detail: "17 mm thick, with a lanyard loop" },
-  { label: "Talk time", value: "10 h", detail: "Over Bluetooth (design target)" },
-  { label: "Standby", value: "7 days", detail: "On one charge (design target)" },
-  { label: "Parts cost", value: "$23.85", detail: "Per unit, at 1,000 units" },
+  { label: "Size", value: "42 mm", detail: "14 mm thick, with a lanyard loop" },
+  { label: "Daily use", value: "3.5 days", detail: "With 20 min of talk a day (estimate)" },
+  { label: "Standby", value: "80 days", detail: "Asleep, on one charge (estimate)" },
+  { label: "Parts cost", value: "$21.80", detail: "Per unit, at 1,000 units" },
 ];
 
 export const FEATURES: FeatureItem[] = [
   {
     icon: "solar:cpu-bolt-bold-duotone",
-    title: "ESP32-S3 chip",
-    description: "A 240 MHz dual-core chip with 8 MB of memory, Bluetooth and Wi-Fi. It runs bare-metal Rust.",
+    title: "ESP32-S3 module",
+    description: "An ESP32-S3 module with 4 MB of flash, 2 MB of PSRAM, Bluetooth and Wi-Fi. It runs bare-metal Rust.",
     tag: "Embassy Rust",
   },
   {
@@ -94,7 +94,9 @@ export const FEATURES: FeatureItem[] = [
   {
     icon: "solar:battery-charge-bold-duotone",
     title: "Battery and charging",
-    description: `A ${BATTERY.capacity} cell charges from USB-C in about 90 minutes. A TVS diode guards the port.`,
+    description:
+      `A ${BATTERY.capacity} cell charges from USB-C in about 2.5 hours. ` +
+      "The cell has its own protection circuit.",
     tag: `TP4056 at ${BATTERY.chargeCurrent}`,
   },
   {
@@ -107,12 +109,12 @@ export const FEATURES: FeatureItem[] = [
 ];
 
 export const COMPARISON: ComparisonRow[] = [
-  { metric: "Form factor", pastille: "42 mm disc, 17 mm thick", omi: "Pendant on a chain", rabbit: "Handheld, 115 g" },
-  { metric: "Cost", pastille: "$23.85 in parts at 1,000 units", omi: "$169 retail", rabbit: "$199 retail" },
+  { metric: "Form factor", pastille: "42 mm disc, 14 mm thick", omi: "Pendant on a chain", rabbit: "Handheld, 115 g" },
+  { metric: "Cost", pastille: "$21.80 in parts at 1,000 units", omi: "$169 retail", rabbit: "$199 retail" },
   { metric: "Display", pastille: '1.28" 240x240 round IPS', omi: "No screen", rabbit: '2.88" touchscreen' },
   {
     metric: "Battery",
-    pastille: "10 h of talk (target)",
+    pastille: "About 1.3 h of talk, 3.5 days at 20 min a day (estimate)",
     omi: "10 to 14 hours",
     rabbit: "Under a day of moderate use",
   },
