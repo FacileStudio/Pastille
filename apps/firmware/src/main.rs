@@ -132,11 +132,12 @@ fn queue_outbound(result: Result<usize, ProtocolError>, pkt: [u8; MAX_PACKET_BYT
     true
 }
 
+/// Runs the network loop for the charm whose eFuse hardware id is `hardware_id`.
 #[embassy_executor::task]
-pub async fn network_task() {
+pub async fn network_task(hardware_id: [u8; 4]) {
     let mut dispatcher = ProtocolDispatcher::new();
     let mut avatar = AvatarRenderer::new();
-    let mut prov = BleProvisioner::new();
+    let mut prov = BleProvisioner::new(hardware_id);
     let mut power = PowerManager::new();
     power.on_wake_trigger();
     power.on_hardware_ready(prov.transport);

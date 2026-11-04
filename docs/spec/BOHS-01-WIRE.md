@@ -511,7 +511,7 @@ Request:
 Response, a status result:
 
 ```json
-{"jsonrpc":"2.0","id":1,"result":{"state":"awaiting_tap","transport":"ble","link_encrypted":true}}
+{"jsonrpc":"2.0","id":1,"result":{"state":"awaiting_tap","transport":"ble","link_encrypted":true,"hardware_id":"4f2a91c0"}}
 ```
 
 ### prov.status
@@ -527,14 +527,15 @@ Request:
 Response:
 
 ```json
-{"jsonrpc":"2.0","id":2,"result":{"state":"authorized","transport":"ble","link_encrypted":true}}
+{"jsonrpc":"2.0","id":2,"result":{"state":"authorized","transport":"ble","link_encrypted":true,"hardware_id":"4f2a91c0"}}
 ```
 
-A status result has three fields:
+A status result has four fields:
 
 - `state`: one of `unclaimed`, `awaiting_tap`, `authorized`, `provisioned`.
 - `transport`: one of `ble`, `wifi`, `usb`.
 - `link_encrypted`: `true` when the BLE link is encrypted.
+- `hardware_id`: 8 lowercase hex characters. They encode the same 4 bytes as `hw_id` in the advertising service data, in the same order. The value is fixed per device, so the app can use it to recognize a charm across browsers and reinstalls.
 
 ### prov.state notification
 

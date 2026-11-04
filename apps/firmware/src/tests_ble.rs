@@ -10,6 +10,7 @@ use crate::stream::{encode_stream_frame, StreamReassembler};
 use crate::{handle_inbound_packet, AUDIO_RX_CHANNEL, MAX_PACKET_BYTES, OUTBOUND_PKT_CHANNEL};
 
 const TOKEN: &str = "bohs_tok_0123456789abcdef0123456789abcdef";
+const HW_ID: [u8; 4] = [0x4F, 0x2A, 0x91, 0xC0];
 
 fn configure_req(token: &str) -> std::string::String {
     format!(
@@ -30,9 +31,9 @@ fn prov_call(prov: &mut BleProvisioner, req: &str) -> std::string::String {
 
 #[test]
 fn test_provisioner_rejects_unauthorized_configure() {
-    let mut prov = BleProvisioner::new();
+    let mut prov = BleProvisioner::new(HW_ID);
     assert_eq!(prov.state, ProvisionState::Unclaimed);
-    assert_eq!(prov.advertisement_service_data([1, 2, 3, 4]), [0x00, 0x0F, 1, 2, 3, 4]);
+    assert_eq!(prov.advertisement_service_data(), [0x00, 0x0F, 0x4F, 0x2A, 0x91, 0xC0]);
     assert!(prov_call(&mut prov, &configure_req(TOKEN)).contains(r#""code":-32001,"message":"unauthorized""#));
 
     let cfg = ProvisionConfig {
@@ -53,9 +54,10 @@ fn test_provisioner_rejects_unauthorized_configure() {
 
 #[test]
 fn test_provisioning_happy_path() {
-    let mut prov = BleProvisioner::new();
+    let mut prov = BleProvisioner::new(HW_ID);
     let identify = prov_call(&mut prov, r#"{"jsonrpc":"2.0","id":1,"method":"prov.identify"}"#);
     assert!(identify.contains(r#""state":"awaiting_tap""#));
+    assert!(identify.ends_with(r#","hardware_id":"4f2a91c0"}}"#));
     prov.on_physical_tap();
     prov.on_link_encrypted(true);
 
@@ -68,7 +70,8 @@ fn test_provisioning_happy_path() {
     let done = prov_call(&mut prov, &configure_req(TOKEN));
     assert_eq!(done, r#"{"jsonrpc":"2.0","id":7,"result":{"status":"provisioned"}}"#);
     let status = prov_call(&mut prov, r#"{"jsonrpc":"2.0","id":8,"method":"prov.status"}"#);
-    assert!(status.contains(r#""state":"provisioned","transport":"ble","link_encrypted":true"#));
+    let expected = r#""state":"provisioned","transport":"ble","link_encrypted":true,"hardware_id":"4f2a91c0""#;
+    assert!(status.contains(expected));
     assert_eq!(prov.state, ProvisionState::Provisioned);
     assert_eq!(prov.transport, TransportKind::BleRelay);
     assert_eq!(prov.config.as_ref().unwrap().device_token.as_str(), TOKEN);
@@ -78,8 +81,15 @@ fn test_provisioning_happy_path() {
 
 #[test]
 fn test_auth_window_timeout_resets() {
-    let mut prov = BleProvisioner::new();
-    prov.on_identify_request();
+    let mut prov = BleProvisioner::new([0xFF; 4]);
+    prov.transport = TransportKind::WifiDirect;
+    let uuid = "00000000-0000-0000-0000-000000000000";
+    let req = format!(r#"{{"jsonrpc":"2.0","id":"{}","method":"prov.identify"}}"#, uuid);
+    let longest_status = concat!(
+        r#"{"jsonrpc":"2.0","id":"00000000-0000-0000-0000-000000000000","result":{"state":"awaiting_tap","#,
+        r#""transport":"wifi","link_encrypted":false,"hardware_id":"ffffffff"}}"#
+    );
+    assert_eq!(prov_call(&mut prov, &req), longest_status);
     prov.tick(AUTH_WINDOW_MS - 1);
     assert_eq!(prov.state, ProvisionState::AwaitingTap);
     prov.tick(1);
@@ -136,7 +146,7 @@ fn test_stream_reassembly() {
 fn test_inbound_routing_and_outbound_queue() {
     let mut dispatcher = ProtocolDispatcher::new();
     let mut avatar = AvatarRenderer::new();
-    let mut prov = BleProvisioner::new();
+    let mut prov = BleProvisioner::new(HW_ID);
     let mut audio = [0u8; 4 + BYTES_PER_FRAME];
     let payload = AudioFrame::new();
     let len = ProtocolDispatcher::encode_audio_frame(0, 9, payload.as_bytes(), &mut audio).unwrap();

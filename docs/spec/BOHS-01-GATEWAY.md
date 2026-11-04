@@ -45,7 +45,7 @@ The Bulle app claims a device after the user authorizes pairing with a physical 
 `POST /api/hardware/devices/claim` requires an authenticated user session. Cookie-authenticated calls also send the `X-Facile-CSRF` header.
 
 ```json
-{"hardware_id": "4F2A91C0", "name": "Pastille", "device_class": "charm"}
+{"hardware_id": "4f2a91c0", "name": "Pastille", "device_class": "charm"}
 ```
 
 `hardware_id` is the 4-byte hardware ID from the device's advertising data, in hex. `device_class` is one of `charm`, `field`, `totem`.

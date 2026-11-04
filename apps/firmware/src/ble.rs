@@ -64,23 +64,27 @@ pub struct BleProvisioner {
     pub auth_timer_ms: u32,
     pub link_encrypted: bool,
     pub config: Option<ProvisionConfig>,
+    pub hardware_id: [u8; 4],
 }
 
 impl BleProvisioner {
-    pub const fn new() -> Self {
+    /// Builds an unclaimed provisioner for the charm whose hardware id is `hardware_id`.
+    pub const fn new(hardware_id: [u8; 4]) -> Self {
         Self {
             state: ProvisionState::Unclaimed,
             transport: TransportKind::BleRelay,
             auth_timer_ms: 0,
             link_encrypted: false,
             config: None,
+            hardware_id,
         }
     }
 
     /// Builds the 6-byte service data: state, capability bits, then the first 4 bytes of the hardware id.
-    pub fn advertisement_service_data(&self, hw_id: [u8; 4]) -> [u8; 6] {
+    pub fn advertisement_service_data(&self) -> [u8; 6] {
         let caps = CAP_MIC | CAP_SPK | CAP_LCD | CAP_HAP;
-        [self.state as u8, caps, hw_id[0], hw_id[1], hw_id[2], hw_id[3]]
+        let [a, b, c, d] = self.hardware_id;
+        [self.state as u8, caps, a, b, c, d]
     }
 
     /// Opens the physical-tap authorization window.

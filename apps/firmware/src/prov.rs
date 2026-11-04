@@ -83,9 +83,16 @@ fn write_status(prov: &BleProvisioner, id: &Value, out: &mut String<256>) -> Res
         out,
         concat!(
             r#"{{"jsonrpc":"2.0","id":{},"result":{{"state":"{}","#,
-            r#""transport":"{}","link_encrypted":{}}}}}"#
+            r#""transport":"{}","link_encrypted":{},"hardware_id":"{:02x}{:02x}{:02x}{:02x}"}}}}"#
         ),
-        id, STATE_NAMES[prov.state as usize], TRANSPORT_NAMES[prov.transport as usize], prov.link_encrypted
+        id,
+        STATE_NAMES[prov.state as usize],
+        TRANSPORT_NAMES[prov.transport as usize],
+        prov.link_encrypted,
+        prov.hardware_id[0],
+        prov.hardware_id[1],
+        prov.hardware_id[2],
+        prov.hardware_id[3]
     )
     .map_err(|_| ProtocolError::BufferTooSmall)
 }
