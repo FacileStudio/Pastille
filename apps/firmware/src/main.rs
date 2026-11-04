@@ -10,6 +10,8 @@ mod battery;
 mod ble;
 #[cfg_attr(not(test), allow(dead_code))]
 mod ble_link;
+#[cfg(target_arch = "xtensa")]
+mod device;
 mod events;
 mod haptic;
 mod link;
@@ -33,6 +35,9 @@ mod tests_rpc;
 mod tests_wire;
 mod tools;
 mod trig;
+
+#[cfg(target_arch = "xtensa")]
+extern crate alloc;
 
 /// Largest bohs.v1 frame on any transport: a 644-byte audio frame or a JSON-RPC message.
 pub const MAX_PACKET_BYTES: usize = 1024;

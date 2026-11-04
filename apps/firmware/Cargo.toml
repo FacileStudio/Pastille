@@ -2,24 +2,41 @@
 name = "pastille-firmware"
 version = "0.3.0"
 edition = "2021"
+rust-version = "1.95"
 
 [dependencies]
-embassy-executor = { version = "0.6", features = ["arch-spin"] }
-embassy-time = { version = "0.3", features = ["generic-queue-64"] }
-embassy-sync = "0.6"
+embassy-executor = "0.10"
+embassy-futures = "0.1"
+embassy-sync = "0.8"
+embassy-time = "0.5"
 embedded-graphics = "0.8"
-embedded-hal = "1.0"
+heapless = { version = "0.8", default-features = false, features = ["serde"] }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
-heapless = { version = "0.8", default-features = false, features = ["serde"] }
 
 [target.'cfg(not(target_arch = "xtensa"))'.dependencies]
 critical-section = { version = "1.2", features = ["std"] }
 
 [target.'cfg(target_arch = "xtensa")'.dependencies]
-esp-hal = { version = "0.22", features = ["esp32s3"] }
-esp-wifi = { version = "0.11", features = ["esp32s3", "wifi"] }
+embedded-hal-bus = "0.3"
+embedded-io-async = "0.7"
+esp-alloc = "0.11"
+esp-backtrace = { version = "0.20", features = ["esp32s3", "panic-handler", "println"] }
+esp-bootloader-esp-idf = { version = "0.6", features = ["esp32s3"] }
+esp-hal = { version = "~1.2.2", features = ["esp32s3", "unstable"] }
+esp-println = { version = "0.18", features = ["esp32s3"] }
+esp-rtos = { version = "0.4", features = ["esp32s3", "embassy", "esp-alloc"] }
+mipidsi = "0.10"
 
 [[bin]]
 name = "pastille-firmware"
 path = "src/main.rs"
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = "s"
+debug = 2
+
+[profile.dev]
+opt-level = "s"
