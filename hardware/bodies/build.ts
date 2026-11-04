@@ -8,7 +8,11 @@ const PLA_G_PER_MM3 = 1.24e-3;
 const STL_DEFLECTION = 0.05;
 const ROOT = `${import.meta.dir}/../..`;
 const STEP_STAMP = /(FILE_NAME\('[^']*',')[^']*'/;
-const stableStep = (step: string): string => step.replace(STEP_STAMP, (_, head) => `${head}1970-01-01T00:00:00'`);
+const STEP_TRANSLATOR = /Open CASCADE STEP translator 8\.0 \d+/g;
+const stableStep = (step: string): string =>
+  step
+    .replace(STEP_STAMP, (_, head) => `${head}1970-01-01T00:00:00'`)
+    .replace(STEP_TRANSLATOR, "Open CASCADE STEP translator 8.0 1");
 
 const BODIES: Record<string, (s: Stack) => Shape> = {
   front_bezel: frontBezel,

@@ -1,4 +1,5 @@
 import { createViewport, demandLoop, stepTransition, type Transition } from "$lib/pcb-viewport";
+import { enrichBoard } from "$lib/pcb-components";
 
 export type Preset = "iso" | "top" | "side";
 
@@ -140,6 +141,9 @@ export async function mountPcbScene(
       disposeObject(currentModel);
     }
     currentModel = gltf.scene;
+    if (url.includes("pastille.glb")) {
+      enrichBoard(THREE, currentModel);
+    }
     scene.add(currentModel);
     transition = null;
     frameModel(currentModel);

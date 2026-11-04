@@ -3,6 +3,7 @@ import type { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { PARTS, type ModelSource, type PartName } from "$lib/explode";
 import { partOffset } from "$lib/explode-math";
 import { disposeObject } from "$lib/pcb-scene";
+import { enrichBoard, styleAssemblyParts } from "$lib/pcb-components";
 
 type Three = typeof import("three");
 
@@ -61,7 +62,16 @@ async function loadAll(T: Three, loader: GLTFLoader, sources: ModelSource[]) {
  */
 function buildModel(T: Three, objects: THREE.Object3D[]): ExplodeModel {
   const root = new T.Group();
-  objects.forEach((obj) => root.add(obj));
+  const explicitMain = objects.find((obj) => obj.name === "main");
+  for (const obj of objects) {
+    if (explicitMain && obj !== explicitMain) {
+      const dummy = obj.getObjectByName("main");
+      if (dummy && dummy.parent) dummy.parent.remove(dummy);
+    }
+    root.add(obj);
+  }
+  enrichBoard(T, root);
+  styleAssemblyParts(T, root);
   root.updateMatrixWorld(true);
   const parts = new Map<PartName, PartNode>();
   for (const name of PARTS) {

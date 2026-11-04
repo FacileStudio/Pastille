@@ -23,7 +23,10 @@ export interface ExplodeStep {
 
 export const PARTS: PartName[] = ["front_bezel", "lens", "lcd", "main", "speaker", "lra", "battery", "back_shell"];
 
-export const ASSEMBLY_SOURCES: ModelSource[] = [{ url: `/models/pastille_assembly.glb?v=${VERSION}` }];
+export const ASSEMBLY_SOURCES: ModelSource[] = [
+  { url: `/models/pastille_assembly.glb?v=${VERSION}` },
+  { url: `/models/pastille.glb?v=${VERSION}`, name: "main", rotation: [Math.PI / 2, 0, 0] },
+];
 
 export const LCD_WINDOW_RADIUS_MM = 16.2;
 

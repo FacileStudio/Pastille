@@ -23,6 +23,8 @@ jobs:
 
       - name: Run Firmware Tests
         working-directory: apps/firmware
+        env:
+          RUSTUP_TOOLCHAIN: stable
         run: cargo test
 
       - name: Setup Bun

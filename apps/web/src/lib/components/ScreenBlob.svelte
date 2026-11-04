@@ -6,7 +6,7 @@
   const eyes = gaze({ travel: 6, target: "pointer" });
 </script>
 
-<div class="flex size-full items-center justify-center overflow-hidden rounded-full" aria-hidden="true">
+<div class="flex size-full items-center justify-center overflow-hidden rounded-full bg-black" aria-hidden="true">
   {#if still}
     <Blob name="Bulle" class="block size-4/5" />
   {:else}

@@ -95,13 +95,14 @@
     <header
       class="pointer-events-auto flex h-14 w-full items-center justify-between gap-3 transition-all duration-500 ease-fc
         {scrolled
-        ? 'mt-3 max-w-4xl rounded-fc-pill bg-fc-surface/65 px-4 sm:px-6 backdrop-blur-xl'
+        ? 'mt-3 max-w-4xl rounded-fc-pill bg-fc-surface/65 px-2.5 backdrop-blur-xl'
         : 'mt-0 max-w-fc-xl rounded-none bg-fc-page/80 px-2 sm:px-4 backdrop-blur-md'}"
     >
       <a
         href="/"
-        class="inline-flex items-center gap-2 rounded-fc-pill px-2 py-1 text-fc-md font-semibold text-fc-fg
-          focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fc-ring"
+        class="inline-flex h-9 items-center gap-2 rounded-fc-pill px-3 text-fc-md font-semibold text-fc-fg
+          transition-colors hover:bg-fc-component/70 focus-visible:outline-2
+          focus-visible:outline-offset-2 focus-visible:outline-fc-ring"
       >
         <Icon icon={PASTILLE_LOGO} size={22} class="text-fc-fg" />
         <span>Pastille</span>
@@ -128,10 +129,10 @@
         {/each}
       </nav>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5">
         <IconButton
           variant="ghost"
-          class="size-9 pointer-coarse:size-11 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface"
+          class="size-9 pointer-coarse:size-10 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface rounded-fc-pill"
           aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
           onclick={toggleTheme}
         >
@@ -140,7 +141,7 @@
         <Button
           variant="primary"
           size="md"
-          class="hidden sm:inline-flex h-9 px-4"
+          class="hidden sm:inline-flex h-9 px-3.5 rounded-fc-pill"
           href="https://github.com/FacileStudio/Pastille"
           target="_blank"
           rel="noreferrer"
@@ -148,7 +149,8 @@
         >
         <IconButton
           variant="ghost"
-          class="size-9 pointer-coarse:size-11 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface md:hidden"
+          class="size-9 pointer-coarse:size-10 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface
+            md:hidden rounded-fc-pill"
           aria-label="Open navigation menu"
           aria-expanded={mobileOpen}
           onclick={openSidebar}

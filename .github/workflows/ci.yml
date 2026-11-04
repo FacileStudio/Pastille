@@ -26,10 +26,14 @@ jobs:
 
       - name: Test Firmware Protocol & Avatar
         working-directory: apps/firmware
+        env:
+          RUSTUP_TOOLCHAIN: stable
         run: cargo test
 
       - name: Run Clippy
         working-directory: apps/firmware
+        env:
+          RUSTUP_TOOLCHAIN: stable
         run: cargo clippy --all-targets -- -D warnings
 
   hardware-files:
