@@ -7,6 +7,8 @@ import { stackOf, type Kit, type Stack } from "./stack";
 const PLA_G_PER_MM3 = 1.24e-3;
 const STL_DEFLECTION = 0.05;
 const ROOT = `${import.meta.dir}/../..`;
+const STEP_STAMP = /(FILE_NAME\('[^']*',')[^']*'/;
+const stableStep = (step: string): string => step.replace(STEP_STAMP, (_, head) => `${head}1970-01-01T00:00:00'`);
 
 const BODIES: Record<string, (s: Stack) => Shape> = {
   front_bezel: frontBezel,
@@ -23,7 +25,7 @@ const write = async (name: string, shape: Shape): Promise<void> => {
   const box = k.getBoundingBox(shape);
   const size = [box.xmax - box.xmin, box.ymax - box.ymin, box.zmax - box.zmin].map((v) => v.toFixed(2));
   const grams = (Math.abs(k.getVolume(shape)) * PLA_G_PER_MM3).toFixed(2);
-  await Bun.write(`${ROOT}/bodies/${name}.step`, k.exportStep(shape));
+  await Bun.write(`${ROOT}/bodies/${name}.step`, stableStep(k.exportStep(shape)));
   await Bun.write(`${ROOT}/bodies/${name}.stl`, k.exportStl(shape, STL_DEFLECTION));
   console.log(`${name}: ${size.join(" x ")} mm, z ${box.zmin.toFixed(2)}..${box.zmax.toFixed(2)}, ${grams} g PLA`);
 };
