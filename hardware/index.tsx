@@ -5,13 +5,21 @@ import { Display } from "./subcircuits/display";
 import { Trigger } from "./subcircuits/trigger";
 
 const BOARD_RADIUS_MM = 19;
-const BOARD_OUTLINE = Array.from({ length: 64 }, (_, i) => {
+const USB_Y_MM = -12.7;
+const USB_FRONT_MM = 5.857;
+const FLAT_Y_MM = USB_Y_MM - USB_FRONT_MM;
+const FLAT_X_MM = Math.sqrt(BOARD_RADIUS_MM ** 2 - FLAT_Y_MM ** 2);
+const round3 = (v: number) => Number(v.toFixed(3));
+const angleOf = (p: { x: number; y: number }) => (Math.atan2(p.y, p.x) + 2 * Math.PI) % (2 * Math.PI);
+const CIRCLE = Array.from({ length: 64 }, (_, i) => {
   const angle = (2 * Math.PI * i) / 64;
-  return {
-    x: Number((BOARD_RADIUS_MM * Math.cos(angle)).toFixed(3)),
-    y: Number((BOARD_RADIUS_MM * Math.sin(angle)).toFixed(3)),
-  };
+  return { x: round3(BOARD_RADIUS_MM * Math.cos(angle)), y: round3(BOARD_RADIUS_MM * Math.sin(angle)) };
 });
+const BOARD_OUTLINE = [
+  ...CIRCLE.filter((p) => p.y > FLAT_Y_MM + 0.05),
+  { x: round3(-FLAT_X_MM), y: round3(FLAT_Y_MM) },
+  { x: round3(FLAT_X_MM), y: round3(FLAT_Y_MM) },
+].sort((a, b) => angleOf(a) - angleOf(b));
 
 export default () => (
   <board
@@ -33,7 +41,7 @@ export default () => (
       name="J_USB"
       standard="usb_c"
       pcbX={0}
-      pcbY={-13.0}
+      pcbY={USB_Y_MM}
       schX={-50}
       schY={18}
     />
@@ -122,10 +130,10 @@ export default () => (
     <hole diameter="2.2mm" pcbX={11.5} pcbY={12.8} />
     <fiducial name="FID1" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={-16.5} pcbY={-5.5} />
     <fiducial name="FID2" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={16.5} pcbY={3.0} />
-    <fiducial name="FID3" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={0} pcbY={16.8} />
-    <silkscreentext text="PASTILLE BOHS-01" layer="top" fontSize="1mm" pcbX={0} pcbY={10.4} />
-    <silkscreentext text="REV 0.3.0" layer="top" fontSize="0.75mm" pcbX={0} pcbY={8.8} />
+    <fiducial name="FID3" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={-8.5} pcbY={15.0} />
+    <silkscreentext text="PASTILLE BOHS-01" layer="top" fontSize="1mm" pcbX={0} pcbY={16.9} />
+    <silkscreentext text="REV 0.4.0" layer="top" fontSize="0.75mm" pcbX={0} pcbY={15.8} />
 
-    <copperpour layer="bottom" connectsTo="net.GND" />
+    <copperpour layer="bottom" connectsTo="net.GND" boardEdgeMargin="0.3mm" />
   </board>
 );

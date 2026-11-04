@@ -54,8 +54,9 @@ export const Power = () => (
       capacitance="10uF"
       footprint="0603"
       manufacturerPartNumber="GRM188R61A106KE69D"
-      pcbX={-6.6}
+      pcbX={-6.4}
       pcbY={-11.6}
+      pcbRotation={90}
       schX={-38}
       schY={18}
     />
@@ -95,9 +96,9 @@ export const Power = () => (
     />
     <resistor
       name="R_PROG"
-      resistance="3.6k"
+      resistance="8.2k"
       footprint="0402"
-      manufacturerPartNumber="RC0402FR-073K6L"
+      manufacturerPartNumber="RC0402FR-078K2L"
       pcbX={-6.4}
       pcbY={-9.0}
       schX={-32}
@@ -137,7 +138,7 @@ export const Power = () => (
       resistance="100k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-07100KL"
-      pcbX={-5.8}
+      pcbX={-6.0}
       pcbY={-1.4}
       schX={-26}
       schY={4}
@@ -147,7 +148,7 @@ export const Power = () => (
       resistance="100k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-07100KL"
-      pcbX={-12.2}
+      pcbX={-8.8}
       pcbY={6.4}
       schX={-26}
       schY={-2}
@@ -157,8 +158,9 @@ export const Power = () => (
       capacitance="100nF"
       footprint="0402"
       manufacturerPartNumber="GRM155R71C104KA88D"
-      pcbX={-5.4}
-      pcbY={3.6}
+      pcbX={-4.4}
+      pcbY={3.4}
+      pcbRotation={90}
       schX={-20}
       schY={-2}
     />
@@ -166,7 +168,7 @@ export const Power = () => (
       name="D_SYS"
       footprint="sod123"
       manufacturerPartNumber="1N5819WS"
-      pcbX={-2.3}
+      pcbX={-2.4}
       pcbY={-3.1}
       schX={-20}
       schY={18}
@@ -175,7 +177,7 @@ export const Power = () => (
       name="D_PATH"
       footprint="sod123"
       manufacturerPartNumber="1N5819WS"
-      pcbX={2.2}
+      pcbX={2.4}
       pcbY={-3.1}
       schX={-20}
       schY={12}
@@ -185,8 +187,9 @@ export const Power = () => (
       capacitance="4.7uF"
       footprint="0603"
       manufacturerPartNumber="GRM188R61A475KE15D"
-      pcbX={5.5}
-      pcbY={-4.6}
+      pcbX={5.6}
+      pcbY={-5.2}
+      pcbRotation={90}
       schX={-20}
       schY={6}
     />
@@ -195,7 +198,7 @@ export const Power = () => (
       capacitance="100nF"
       footprint="0402"
       manufacturerPartNumber="GRM155R71C104KA88D"
-      pcbX={5.6}
+      pcbX={5.8}
       pcbY={-1.8}
       schX={-14}
       schY={6}
@@ -204,8 +207,8 @@ export const Power = () => (
       name="U_LDO"
       footprint="sot23_5"
       manufacturerPartNumber="TPS7A0533PDBVR"
-      pcbX={-9.2}
-      pcbY={4.2}
+      pcbX={-7.6}
+      pcbY={3.6}
       schX={-14}
       schY={18}
       pinLabels={{
@@ -226,8 +229,8 @@ export const Power = () => (
       capacitance="10uF"
       footprint="0603"
       manufacturerPartNumber="GRM188R61A106KE69D"
-      pcbX={-9.5}
-      pcbY={0.8}
+      pcbX={-8.2}
+      pcbY={0.7}
       schX={-14}
       schY={12}
     />

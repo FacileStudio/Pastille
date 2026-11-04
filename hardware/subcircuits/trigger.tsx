@@ -5,8 +5,8 @@ export const Trigger = () => (
       footprintVariant="pad"
       padShape="circle"
       padDiameter="2mm"
-      pcbX={-7.8}
-      pcbY={9.5}
+      pcbX={13.0}
+      pcbY={9.8}
       schX={-48}
       schY={-16}
     />
@@ -15,8 +15,8 @@ export const Trigger = () => (
       resistance="510"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-07510RL"
-      pcbX={-11.0}
-      pcbY={9.5}
+      pcbX={15.0}
+      pcbY={7.8}
       schX={-40}
       schY={-16}
     />
@@ -93,8 +93,8 @@ export const Trigger = () => (
       pitch="2.54mm"
       footprint="pinrow2_p2.54"
       manufacturerPartNumber="LRA-0827"
-      pcbX={11.5}
-      pcbY={4.4}
+      pcbX={-3.6}
+      pcbY={13.4}
       schX={-24}
       schY={-28}
     />

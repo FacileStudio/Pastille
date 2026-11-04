@@ -108,8 +108,8 @@ export const Mcu = () => (
         ["pin1", "pin2"],
         ["pin3", "pin4"],
       ]}
-      pcbX={-14.2}
-      pcbY={2.4}
+      pcbX={-13.6}
+      pcbY={4.4}
       schX={-8}
       schY={-12}
     />
