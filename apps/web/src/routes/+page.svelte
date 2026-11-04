@@ -9,6 +9,7 @@
     HERO_METRICS,
     PROTOCOL_PLANES,
     QUICKSTART_STEPS,
+    RELEASE_TAG,
     type TokenTone,
   } from "$lib/data";
   import { GITHUB_ICON } from "$lib/icons";
@@ -58,12 +59,12 @@
       variant="ghost"
       size="lg"
       class="bg-fc-surface text-fc-fg hover:bg-fc-component"
-      href="https://github.com/FacileStudio/Pastille/releases/tag/v0.4.0"
+      href="https://github.com/FacileStudio/Pastille/releases/tag/{RELEASE_TAG}"
       target="_blank"
       rel="noreferrer"
       icon={icons.download}
     >
-      Build files (v0.4.0)
+      Build files ({RELEASE_TAG})
     </Button>
   </div>
 
@@ -92,7 +93,8 @@
   <Section
     id="viewer"
     title="The board in 3D"
-    description="Drag to turn it. Fusible builds this model from the circuit source, so it matches the real board."
+    description={"Tap Explore in 3D, then drag to turn it. " +
+      "Fusible builds this model from the circuit source, so it matches the real board."}
   >
     <PcbViewer />
   </Section>

@@ -34,6 +34,10 @@ export interface ProtocolPlane {
   lines: CodeLine[];
 }
 
+export const VERSION = "0.4.0";
+
+export const RELEASE_TAG = `v${VERSION}`;
+
 export const NAV_SECTIONS = [
   { id: "disassembly", label: "Inside" },
   { id: "viewer", label: "Board" },

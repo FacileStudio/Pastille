@@ -1,4 +1,4 @@
-import { BATTERY } from "$lib/data";
+import { BATTERY, VERSION } from "$lib/data";
 
 export type PartName = "front_bezel" | "lens" | "lcd" | "main" | "speaker" | "lra" | "battery" | "back_shell";
 
@@ -22,7 +22,7 @@ export interface ExplodeStep {
 
 export const PARTS: PartName[] = ["front_bezel", "lens", "lcd", "main", "speaker", "lra", "battery", "back_shell"];
 
-export const ASSEMBLY_SOURCES: ModelSource[] = [{ url: "/models/pastille_assembly.glb?v=0.4.0" }];
+export const ASSEMBLY_SOURCES: ModelSource[] = [{ url: `/models/pastille_assembly.glb?v=${VERSION}` }];
 
 export const LCD_WINDOW_RADIUS_MM = 16.2;
 
