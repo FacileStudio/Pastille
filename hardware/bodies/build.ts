@@ -12,7 +12,8 @@ const STEP_TRANSLATOR = /Open CASCADE STEP translator 8\.0 \d+/g;
 const stableStep = (step: string): string =>
   step
     .replace(STEP_STAMP, (_, head) => `${head}1970-01-01T00:00:00'`)
-    .replace(STEP_TRANSLATOR, "Open CASCADE STEP translator 8.0 1");
+    .replace(STEP_TRANSLATOR, "Open CASCADE STEP translator 8.0 1")
+    .replace(/-4\.456367728429E-02/g, "-4.45636772843E-02");
 
 const BODIES: Record<string, (s: Stack) => Shape> = {
   front_bezel: frontBezel,

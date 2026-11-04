@@ -1,6 +1,6 @@
 import type * as THREE from "three";
 import {
-  ASSEMBLY_SOURCES, BLOB_FADE_STEPS, LCD_WINDOW_RADIUS_MM, STEPS,
+  ASSEMBLY_SOURCES, LCD_WINDOW_RADIUS_MM, STEPS,
 } from "$lib/explode";
 import { clamp01, partOffset, rotationAt } from "$lib/explode-math";
 import { applyParts, loadExplodeModel, type ExplodeModel } from "$lib/explode-model";
@@ -132,8 +132,7 @@ class ExplodeScene {
     const k = OVERLAY_PX / 2;
     const a = (u.x - c.x) / k, b = (u.y - c.y) / k, cc = (c.x - v.x) / k, d = (c.y - v.y) / k;
     const e = c.x - (a + cc) * k, f = c.y - (b + d) * k;
-    const [from, to] = BLOB_FADE_STEPS;
-    return { transform: `matrix(${a}, ${b}, ${cc}, ${d}, ${e}, ${f})`, opacity: 1 - clamp01((s - from) / (to - from)) };
+    return { transform: `matrix(${a}, ${b}, ${cc}, ${d}, ${e}, ${f})`, opacity: 1 };
   }
 
   dispose() {

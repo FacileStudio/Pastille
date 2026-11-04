@@ -156,11 +156,9 @@
         style:margin-bottom={i === LAST ? "0" : "36vh"}
       >
         <Card
-          class="flex w-full flex-col gap-3 p-6 bg-fc-surface backdrop-blur-md transition-all duration-300 {current
-            ? 'border-fc-accent/50 shadow-fc-lg scale-[1.01]'
-            : i < active
-              ? 'border-fc-line/60 opacity-80 shadow-fc-sm'
-              : 'border-fc-line opacity-95'}"
+          class="flex w-full flex-col gap-3 p-6 !bg-fc-component border transition-all duration-300 {current
+            ? 'border-fc-accent shadow-fc-lg scale-[1.01]'
+            : 'border-fc-line shadow-fc-sm'}"
         >
           <div class="flex items-center gap-3">
             <span
