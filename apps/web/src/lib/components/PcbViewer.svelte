@@ -6,8 +6,8 @@
   type ModelMode = "pcb" | "case";
 
   const MODELS: Record<ModelMode, string> = {
-    pcb: "/models/pastille.glb",
-    case: "/models/pastille_case.glb",
+    pcb: "/models/pastille.glb?v=0.2.2",
+    case: "/models/pastille_case.glb?v=0.2.2",
   };
 
   const PRESETS: Preset[] = ["iso", "top", "side"];
