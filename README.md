@@ -6,9 +6,9 @@
 
 Pastille is an open-source wearable AI charm and the reference hardware implementation of the Bulle Open Hardware Standard (BOHS-01).
 
-It is a 38 mm disc that clips to clothing or hangs as a pendant. Pastille captures your voice with digital microphones, streams bidirectional audio over WebSocket to your private Bulle gateway, displays animated companion expressions on a round LCD, and provides tactile haptic feedback.
+It is a 38 mm disc that clips to clothing or hangs as a pendant. Pastille captures your voice with a digital microphone and streams bidirectional audio to your private Bulle gateway. It talks over BLE 5.0 through the Bulle app when your phone or laptop is near, and over Wi-Fi straight to the gateway when it is not. It shows animated companion expressions on a round LCD and gives haptic feedback.
 
-Pastille costs under $25 to assemble, stays cool against your skin, wakes from deep sleep in under 50 ms, and lasts over two weeks on a single charge.
+Pastille targets a BOM under $25, a case that stays cool against your skin, a wake from deep sleep in under 50 ms, and over two weeks of standby on a single charge. These are design targets, not measurements.
 
 Live landing page and interactive 3D board viewer: https://pastille.facile.studio
 
@@ -30,9 +30,19 @@ Live landing page and interactive 3D board viewer: https://pastille.facile.studi
 
 Pastille implements the complete BOHS-01 specification suite:
 
-- [BOHS-01 Architecture Specification](docs/spec/BOHS-01-ARCH.md): System architecture, 38 mm physical geometry, thermal envelope under 40°C, $23.85 BOM, and 5-stage power state machine.
-- [BOHS-01 Wire Protocol Specification](docs/spec/BOHS-01-WIRE.md): Multiplexed WebSocket protocol (`bohs.v1`), Opus 16 kHz audio streaming (Opcode `0x01`), and Reverse MCP edge tool execution (Opcode `0x02`).
-- [BOHS-01 Gateway Integration Guide](docs/spec/BOHS-01-GATEWAY.md): Bulle server integration, mutual token authentication via Registre and Casier, Whisper.cpp ingestion, Piper TTS egress, and LLM edge tool calling.
+- [BOHS-01 Architecture Specification](docs/spec/BOHS-01-ARCH.md): System architecture, 38 mm physical geometry, thermal envelope under 40°C, $23.85 BOM, TP4056 charging, transport selection, BLE pairing, and the 6-state power state machine.
+- [BOHS-01 Wire Protocol Specification](docs/spec/BOHS-01-WIRE.md): The `bohs.v1` frame format over Wi-Fi WSS, BLE 5.0 GATT, and USB-C CDC, PCM16 16 kHz audio (opcode `0x01`), Reverse MCP edge tools (opcode `0x02`), and BLE provisioning (opcode `0x03`).
+- [BOHS-01 Gateway Integration Guide](docs/spec/BOHS-01-GATEWAY.md): Bulle device claim and revocation, `bohs_tok_` device tokens, direct and app-relay sessions, Whisper.cpp ingestion, Piper TTS egress, and LLM edge tool calling.
+
+## Connectivity and pairing
+
+Pastille carries the same `bohs.v1` frames over three links:
+
+- **BLE 5.0 relay.** Pastille talks to the Bulle mobile or desktop app over GATT service `b0010000-f4c1-4e00-b001-000000000001`. The app forwards frames to the gateway over its own WebSocket.
+- **Wi-Fi direct.** Pastille connects to `wss://<gateway>/api/hardware/ws` with its `bohs_tok_` device token when no bonded phone or laptop is in range.
+- **USB-C CDC.** Plugged into a computer running Bulle, Pastille sends frames over the USB serial port.
+
+To pair, open the Bulle app and choose "Pair device". The app bonds over BLE and asks Pastille to identify itself. Pastille buzzes and shows a pairing ring. Tap the pad within 60 seconds. The app then claims the device, and sends it a device token and optional Wi-Fi credentials over the encrypted link.
 
 ## Architectural comparison
 
@@ -43,12 +53,12 @@ Standalone AI hardware often fails because designers build miniature smartphones
 | Form factor | 38 mm circular disc | Screenless brooch | 40 mm circular pendant | Handheld rectangular slab |
 | Target BOM cost | < $25 ($23.85) | ~ $18 | ~ $45 | ~ $199 retail |
 | Display | 1.28-inch round IPS LCD (240x240) | None | None | 2.88-inch touchscreen |
-| Battery life (standby) | > 14 days (18 uA deep sleep) | > 20 days | ~ 4 days | ~ 12 hours |
-| Battery life (streaming) | > 8 hours active talk | > 12 hours | ~ 6 hours | ~ 4 hours |
+| Battery life (standby) | > 14 days (18 uA deep sleep, target) | > 20 days | ~ 4 days | ~ 12 hours |
+| Battery life (streaming) | > 24 h on BLE relay, > 8 h on Wi-Fi direct (targets) | > 12 hours | ~ 6 hours | ~ 4 hours |
 | System architecture | Sensor / Actuator peripheral | Sensor peripheral | BLE audio streamer | Full Android OS (MediaTek MT6765) |
 | Onboard operating system | None (Bare-metal Rust / Embassy) | None | None | Full Android AOSP fork |
 | Boot / Wake latency | < 50 ms to wake, < 800 ms to audio | < 100 ms | Variable BLE pairing | > 45 seconds cold boot |
-| Server protocol | WebSocket (`bohs.v1`) + Reverse MCP | WebSocket | BLE to smartphone app | Proprietary cloud bridge |
+| Server protocol | Dual-transport `bohs.v1` (BLE 5.0 + Wi-Fi WSS) + Reverse MCP | WebSocket | BLE to smartphone app | Proprietary cloud bridge |
 | Self-hostable | Yes (Local Bulle gateway) | Yes | Partial | No (Proprietary cloud only) |
 | Privacy and data custody | Zero third-party telemetry | Zero third-party telemetry | Requires phone sync | Routes all traffic through cloud servers |
 | Open hardware | Fully open (Fusible / KiCad) | Open | Partially open | Closed proprietary |
@@ -108,7 +118,7 @@ Pastille firmware runs bare-metal on the ESP32-S3 using Rust (`embassy-executor`
 
 ### Host unit tests
 
-Run the host test suite covering the BOHS-01 wire protocol, Reverse MCP tool validation, I2S DMA audio VAD pipeline, 5-stage power state machine, and integer trigonometric avatar renderer:
+Run the host test suite covering the BOHS-01 wire protocol, BLE provisioning, Reverse MCP tool validation, I2S DMA audio VAD pipeline, power state machine, and integer trigonometric avatar renderer:
 
 ```bash
 cd apps/firmware
