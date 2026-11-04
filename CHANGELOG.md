@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-11-05
+
+### Added
+- Printable enclosure CAD (back shell, front bezel, lens, internal pockets) with a 14.0 mm assembled thickness and automated clearance verification.
+- ESP32-S3 device firmware image (1.35 MB) targeting the ESP32-S3-MINI-1 module with esp-hal 1.2 and esp-rtos.
+- BLE GATT server with LE Secure Connections bonding and Wi-Fi TLS 1.3 WebSocket client connecting to the Bulle gateway.
+- Full-duplex I2S audio streaming for the SPH0645 microphone and MAX98357A amplifier, plus SNTP wall-clock synchronization.
+- Capacitive touch support via RTC IO registers and wear-levelled settings storage with flash encryption support.
+- Complete fabrication outputs: 4-layer Gerbers with ground pour, BOM, and pick-and-place CPL.
+- Interactive scroll disassembly section and social share cards on the landing page.
+
+### Changed
+- Moved hardware design to the ESP32-S3-MINI-1-N4R2 module, 600 mA regulator, 12-pin LCD flex connector, and SMD-only components.
+- Adjusted battery specifications to a protected 120 mAh cell (~1.3 hours continuous talk time, ~3.5 days standby).
+- Resolved all PCB placement errors; board autorouting now completes with clean copper spans.
+- Web viewer now lazy-loads models on demand and serves GLB assets with gzip compression.
+
 ## [0.3.0] - 2026-11-04
 
 ### Added
