@@ -9,16 +9,15 @@
   let ringOuter: HTMLDivElement | null = $state(null);
   let ringInner: HTMLDivElement | null = $state(null);
   let mark: HTMLDivElement | null = $state(null);
-  let caption: HTMLDivElement | null = $state(null);
   let bar: HTMLDivElement | null = $state(null);
 
   onMount(() => {
-    if (!overlay || !ringOuter || !ringInner || !mark || !caption || !bar) {
+    if (!overlay || !ringOuter || !ringInner || !mark || !bar) {
       visible = false;
       return;
     }
     return runIntroSequence(
-      { overlay, ringOuter, ringInner, mark, caption, bar },
+      { overlay, ringOuter, ringInner, mark, bar },
       () => {
         visible = false;
       },
@@ -49,15 +48,7 @@
       </div>
     </div>
 
-    <div
-      bind:this={caption}
-      class="mt-2 flex flex-col items-center gap-1.5 opacity-0"
-    >
-      <span class="text-fc-sm font-semibold tracking-tight text-fc-fg">Pastille</span>
-      <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">BOHS-01 · 38 mm charm</span>
-    </div>
-
-    <div class="mt-5 h-1 w-32 overflow-hidden rounded-fc-pill bg-fc-surface">
+    <div class="mt-4 h-1 w-28 overflow-hidden rounded-fc-pill bg-fc-surface">
       <div
         bind:this={bar}
         class="h-full w-full origin-left scale-x-0 rounded-fc-pill bg-fc-fg"

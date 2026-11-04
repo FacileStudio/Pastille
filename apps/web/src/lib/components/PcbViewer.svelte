@@ -5,15 +5,9 @@
 
   type ModelMode = "pcb" | "case";
 
-  const MODELS: Record<ModelMode, { url: string; label: string }> = {
-    pcb: {
-      url: "/models/pastille.glb",
-      label: "PASTILLE BOHS-01 · 38 MM 4-LAYER PCB",
-    },
-    case: {
-      url: "/models/pastille_case.glb",
-      label: "PASTILLE BOHS-01 · SNAP-FIT ENCLOSURE",
-    },
+  const MODELS: Record<ModelMode, string> = {
+    pcb: "/models/pastille.glb",
+    case: "/models/pastille_case.glb",
   };
 
   const PRESETS: Preset[] = ["iso", "top", "side"];
@@ -43,7 +37,7 @@
     mode = next;
     status = "loading";
     try {
-      await viewer.loadUrl(MODELS[next].url);
+      await viewer.loadUrl(MODELS[next]);
       preset = "iso";
       status = "ready";
     } catch {
@@ -68,7 +62,7 @@
       if (disposed || status !== "idle") return;
       status = "loading";
       try {
-        const ctrl = await mountPcbScene(host, MODELS[mode].url, rotating, () => {
+        const ctrl = await mountPcbScene(host, MODELS[mode], rotating, () => {
           rotating = false;
         });
         if (disposed) {
@@ -96,11 +90,14 @@
   <div bind:this={host} class="absolute inset-0" aria-hidden="true"></div>
 
   <div class="absolute top-0 left-0 right-0 flex flex-wrap items-center justify-between gap-2 p-4 pointer-events-none">
-    <div class="flex flex-wrap items-center gap-1.5 pointer-events-auto">
+    <div
+      class="flex flex-wrap items-center gap-1 rounded-fc-pill bg-fc-surface/90 p-1
+        backdrop-blur pointer-events-auto"
+    >
       <Button
         size="sm"
         variant={mode === "pcb" ? "primary" : "ghost"}
-        class="bg-fc-surface/85 backdrop-blur"
+        class={mode === "pcb" ? "" : "text-fc-fg hover:bg-fc-component"}
         aria-pressed={mode === "pcb"}
         onclick={() => chooseMode("pcb")}
       >
@@ -109,27 +106,24 @@
       <Button
         size="sm"
         variant={mode === "case" ? "primary" : "ghost"}
-        class="bg-fc-surface/85 backdrop-blur"
+        class={mode === "case" ? "" : "text-fc-fg hover:bg-fc-component"}
         aria-pressed={mode === "case"}
         onclick={() => chooseMode("case")}
       >
         Enclosure
       </Button>
-      <span
-        class="hidden sm:inline-flex items-center rounded-fc-pill bg-fc-surface/85
-          backdrop-blur px-3 py-1 text-fc-xs font-mono text-fc-fg-muted"
-      >
-        {MODELS[mode].label}
-      </span>
     </div>
 
     {#if status === "ready"}
-      <div class="flex flex-wrap items-center gap-1.5 pointer-events-auto">
+      <div
+        class="flex flex-wrap items-center gap-1 rounded-fc-pill bg-fc-surface/90 p-1
+          backdrop-blur pointer-events-auto"
+      >
         {#each PRESETS as option (option)}
           <Button
             size="sm"
             variant={preset === option ? "primary" : "ghost"}
-            class="uppercase bg-fc-surface/85 backdrop-blur"
+            class={preset === option ? "uppercase" : "uppercase text-fc-fg hover:bg-fc-component"}
             aria-pressed={preset === option}
             onclick={() => choosePreset(option)}
           >
@@ -139,7 +133,7 @@
         <Button
           size="sm"
           variant={rotating ? "primary" : "ghost"}
-          class="uppercase bg-fc-surface/85 backdrop-blur"
+          class={rotating ? "uppercase" : "uppercase text-fc-fg hover:bg-fc-component"}
           aria-pressed={rotating}
           onclick={toggleRotate}
         >

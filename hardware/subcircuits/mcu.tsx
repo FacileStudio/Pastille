@@ -5,7 +5,7 @@ export const Mcu = () => (
       footprint="qfn32_w6_h6_p0.5"
       manufacturerPartNumber="ESP32-S3R8"
       pcbX={0}
-      pcbY={2}
+      pcbY={1.5}
       schX={0}
       schY={0}
       pinLabels={{
@@ -45,8 +45,8 @@ export const Mcu = () => (
       resistance="10k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-0710KL"
-      pcbX={-3.5}
-      pcbY={9.5}
+      pcbX={-7.5}
+      pcbY={6.8}
       schX={-8}
       schY={6}
     />
@@ -55,8 +55,8 @@ export const Mcu = () => (
       capacitance="1uF"
       footprint="0402"
       manufacturerPartNumber="GRM155R61A105KE15D"
-      pcbX={-1.0}
-      pcbY={9.5}
+      pcbX={-5.0}
+      pcbY={6.8}
       schX={-8}
       schY={0}
     />
@@ -65,8 +65,8 @@ export const Mcu = () => (
       capacitance="100nF"
       footprint="0402"
       manufacturerPartNumber="GRM155R71C104KA88D"
-      pcbX={-3.5}
-      pcbY={7.5}
+      pcbX={-2.2}
+      pcbY={6.8}
       schX={8}
       schY={6}
     />
@@ -75,8 +75,8 @@ export const Mcu = () => (
       capacitance="1uF"
       footprint="0402"
       manufacturerPartNumber="GRM155R61A105KE15D"
-      pcbX={-1.0}
-      pcbY={7.5}
+      pcbX={0.6}
+      pcbY={6.8}
       schX={8}
       schY={0}
     />
@@ -85,8 +85,8 @@ export const Mcu = () => (
       capacitance="10uF"
       footprint="0603"
       manufacturerPartNumber="GRM188R61A106KE69D"
-      pcbX={2.0}
-      pcbY={7.5}
+      pcbX={3.8}
+      pcbY={6.8}
       schX={8}
       schY={-6}
     />
@@ -95,8 +95,8 @@ export const Mcu = () => (
       resistance="10k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-0710KL"
-      pcbX={1.5}
-      pcbY={9.5}
+      pcbX={6.8}
+      pcbY={6.8}
       schX={-8}
       schY={-6}
     />
@@ -108,8 +108,8 @@ export const Mcu = () => (
         ["pin1", "pin2"],
         ["pin3", "pin4"],
       ]}
-      pcbX={-8.0}
-      pcbY={8.0}
+      pcbX={-12.2}
+      pcbY={3.2}
       schX={-8}
       schY={-12}
     />

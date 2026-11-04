@@ -4,10 +4,22 @@ import { Audio } from "./subcircuits/audio";
 import { Display } from "./subcircuits/display";
 import { Trigger } from "./subcircuits/trigger";
 
+const BOARD_RADIUS_MM = 19;
+const BOARD_OUTLINE = Array.from({ length: 64 }, (_, i) => {
+  const angle = (2 * Math.PI * i) / 64;
+  return {
+    x: Number((BOARD_RADIUS_MM * Math.cos(angle)).toFixed(3)),
+    y: Number((BOARD_RADIUS_MM * Math.sin(angle)).toFixed(3)),
+  };
+});
+
 export default () => (
   <board
     width="38mm"
     height="38mm"
+    outline={BOARD_OUTLINE}
+    solderMaskColor="black"
+    silkscreenColor="white"
     layers={4}
     routeRemaining={true}
     autorouterVersion="beta_pipeline9"
@@ -20,9 +32,8 @@ export default () => (
     <connector
       name="J_USB"
       standard="usb_c"
-      manufacturerPartNumber="TYPE-C-31-M-12"
       pcbX={0}
-      pcbY={-15}
+      pcbY={-13.8}
       schX={-50}
       schY={18}
     />
@@ -48,17 +59,23 @@ export default () => (
     <trace from=".U_ESP32_S3 > .GPIO20" to="net.USB_DP" />
     <trace from=".U_ESP32_S3 > .GPIO21" to="net.LCD_BL" />
 
-    <trace from=".J_USB > .VBUS" to="net.VBUS" />
-    <trace from=".J_USB > .GND" to="net.GND" />
+    <trace from=".J_USB > .VBUS1" to="net.VBUS" />
+    <trace from=".J_USB > .VBUS2" to="net.VBUS" />
+    <trace from=".J_USB > .GND1" to="net.GND" />
+    <trace from=".J_USB > .GND2" to="net.GND" />
+    <trace from=".J_USB > .SHELL1" to="net.GND" />
+    <trace from=".J_USB > .SHELL2" to="net.GND" />
     <trace from=".D_TVS > .cathode" to="net.VBUS" />
     <trace from=".D_TVS > .anode" to="net.GND" />
     <trace from=".J_USB > .CC1" to=".R_CC1 > .pin1" />
     <trace from=".R_CC1 > .pin2" to="net.GND" />
     <trace from=".J_USB > .CC2" to=".R_CC2 > .pin1" />
     <trace from=".R_CC2 > .pin2" to="net.GND" />
-    <trace from=".J_USB > .D_NEG" to=".R_USB_DM > .pin1" />
+    <trace from=".J_USB > .DM1" to=".R_USB_DM > .pin1" />
+    <trace from=".J_USB > .DM2" to=".R_USB_DM > .pin1" />
     <trace from=".R_USB_DM > .pin2" to="net.USB_DM" />
-    <trace from=".J_USB > .D_POS" to=".R_USB_DP > .pin1" />
+    <trace from=".J_USB > .DP1" to=".R_USB_DP > .pin1" />
+    <trace from=".J_USB > .DP2" to=".R_USB_DP > .pin1" />
     <trace from=".R_USB_DP > .pin2" to="net.USB_DP" />
     <trace from=".C_VBUS > .pin1" to="net.VBUS" />
     <trace from=".C_VBUS > .pin2" to="net.GND" />
@@ -101,13 +118,13 @@ export default () => (
     <trace from=".C_LDO_OUT_HF > .pin1" to="net.VDD3V3" />
     <trace from=".C_LDO_OUT_HF > .pin2" to="net.GND" />
 
-    <hole diameter="2.2mm" pcbX={-14.5} pcbY={6.5} />
-    <hole diameter="2.2mm" pcbX={14.5} pcbY={6.5} />
-    <fiducial name="FID1" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={-13} pcbY={-12} />
-    <fiducial name="FID2" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={15} pcbY={-6} />
-    <fiducial name="FID3" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={0} pcbY={16.8} />
-    <silkscreentext text="PASTILLE BOHS-01" layer="top" fontSize="1mm" pcbX={0} pcbY={11.5} />
-    <silkscreentext text="REV 0.2.0" layer="top" fontSize="0.8mm" pcbX={0} pcbY={-2.2} />
+    <hole diameter="2.2mm" pcbX={-13.5} pcbY={9.5} />
+    <hole diameter="2.2mm" pcbX={13.5} pcbY={9.5} />
+    <fiducial name="FID1" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={-14.5} pcbY={-7.5} />
+    <fiducial name="FID2" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={14.5} pcbY={-7.5} />
+    <fiducial name="FID3" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={0} pcbY={17.2} />
+    <silkscreentext text="PASTILLE BOHS-01" layer="top" fontSize="1mm" pcbX={0} pcbY={10.8} />
+    <silkscreentext text="REV 0.2.1" layer="top" fontSize="0.75mm" pcbX={0} pcbY={9.3} />
 
     <copperpour layer="bottom" connectsTo="net.GND" />
   </board>

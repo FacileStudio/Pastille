@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-11-04
+
+### Added
+- **Floating Glassmorphic Topbar & Scroll-Spy Navigation**: Added scroll-reactive top navigation that morphs into a floating blurred pill on scroll, tracks the active section with a smooth sliding indicator, and smoothly scrolls to section anchors.
+- **Responsive Mobile Sidebar**: Added slide-in mobile navigation drawer with GSAP open and close animations.
+- **Syntax-Highlighted Code Blocks**: Formatted BOHS-01 binary frame layout, Reverse MCP JSON-RPC 2.0 payloads, and quickstart commands with multi-line theme-aware syntax highlighting.
+- **Minimal Facile Studio Footer**: Replaced generic legal links with a minimal project footer crediting Facile Studio and linking specifications and releases.
+
+### Changed
+- **Tightened Landing Page Copy**: Removed redundant subsystem cards, topbar badge, hero badge, and intro loader caption; tightened section headings and descriptions.
+- **Harmonized Topbar Actions**: Replaced generic code icon with the GitHub mark and matched theme toggle and GitHub button dimensions.
+
+### Fixed
+- **3D Viewer Control Contrast**: Fixed active and inactive button contrast in both dark and light themes by grouping controls inside a pill surface without overriding primary button accent tokens.
+- **Circular PCB Outline & USB-C Pad Routing**: Added 64-vertex circular 38 mm outline (`BOARD_OUTLINE`), black solder mask, `REV 0.2.1` silkscreen, and dual-row USB-C shield/power net bindings in `hardware/index.tsx`.
+
 ## [0.2.0] - 2026-11-04
 
 ### Added
