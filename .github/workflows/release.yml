@@ -34,10 +34,15 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            bodies/pastille_case.step
-            bodies/pastille_case.stl
-            bodies/pastille_case.glb
-            bodies/pastille_case.brep
+            bodies/front_bezel.step
+            bodies/front_bezel.stl
+            bodies/lens.step
+            bodies/lens.stl
+            bodies/back_shell.step
+            bodies/back_shell.stl
+            dist/fab/gerbers.zip
+            dist/cad/board.step
+            dist/cad/kicad.zip
             apps/web/static/models/pastille.glb
             assets/pcb-2d.png
             assets/pcb-3d.png
