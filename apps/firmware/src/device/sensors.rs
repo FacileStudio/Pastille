@@ -4,11 +4,10 @@
 use super::board_pin;
 use crate::battery::BatteryMonitor;
 use super::net::TELEMETRY_SIGNAL;
-use crate::link::OUTBOUND_PKT_CHANNEL;
+use crate::link::{device_info, set_device_info, DeviceInfo, Inbound, INBOUND_CHANNEL};
 use crate::pins::POWER_PINS;
 use crate::power::PowerManager;
-use crate::protocol::{DeviceTelemetry, ProtocolDispatcher};
-use crate::MAX_PACKET_BYTES;
+use crate::protocol::DeviceTelemetry;
 use embassy_time::{Duration, Timer};
 use esp_hal::analog::adc::{Adc, AdcCalCurve, AdcConfig, AdcPin, Attenuation};
 use esp_hal::gpio::{Input, InputConfig};
@@ -28,13 +27,6 @@ async fn battery_mv(adc: &mut Adc<'static, ADC1<'static>, Async>, pin: &mut Batt
     adc.read_oneshot(pin).await.saturating_mul(DIVIDER_RATIO)
 }
 
-fn send_alert(pct: u8, voltage_mv: u16) {
-    let mut out = [0u8; MAX_PACKET_BYTES];
-    if let Ok(len) = ProtocolDispatcher::encode_low_battery_alert(pct, voltage_mv, &mut out) {
-        let _ = OUTBOUND_PKT_CHANNEL.try_send((out, len));
-    }
-}
-
 /// Samples the sensors every 10 s and publishes the readings to the network task.
 #[embassy_executor::task]
 pub async fn power_task(adc1: ADC1<'static>, batt_sense: GPIO1<'static>) {
@@ -52,8 +44,9 @@ pub async fn power_task(adc1: ADC1<'static>, batt_sense: GPIO1<'static>) {
             rssi_dbm: None,
             temp_c: None,
         });
+        set_device_info(DeviceInfo { battery_pct, ..device_info() });
         if monitor.update(battery_pct).is_some() {
-            send_alert(battery_pct, voltage_mv);
+            let _ = INBOUND_CHANNEL.try_send(Inbound::LowBattery(battery_pct, voltage_mv));
         }
         Timer::after(SAMPLE_PERIOD).await;
     }

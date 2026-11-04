@@ -1,4 +1,5 @@
-use crate::ble::{BleProvisioner, ProvisionConfig};
+use crate::ble::{BleProvisioner, ProvisionConfig, ProvisionState, DEVICE_CAPS};
+use crate::link::DeviceInfo;
 use core::fmt;
 
 impl BleProvisioner {
@@ -35,4 +36,22 @@ impl fmt::Debug for ProvisionConfig {
             .field("prefer_ble", &self.prefer_ble)
             .finish()
     }
+}
+
+/// The firmware version from `Cargo.toml`, as reported in the `B001` record.
+pub fn firmware_version() -> [u8; 3] {
+    [env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR"), env!("CARGO_PKG_VERSION_PATCH")]
+        .map(|part| part.parse().unwrap_or(u8::MAX))
+}
+
+/// Builds the 8-byte `B001` device info record.
+pub fn info_record(info: &DeviceInfo) -> [u8; 8] {
+    let [major, minor, patch] = firmware_version();
+    [0x01, info.state as u8, DEVICE_CAPS, info.battery_pct, major, minor, patch, info.transport as u8]
+}
+
+/// Builds the 6-byte service data: state, capability bits, then the 4-byte hardware id.
+pub fn service_data(state: ProvisionState, hardware_id: [u8; 4]) -> [u8; 6] {
+    let [a, b, c, d] = hardware_id;
+    [state as u8, DEVICE_CAPS, a, b, c, d]
 }

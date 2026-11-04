@@ -2,7 +2,8 @@
 
 use super::board_pin;
 use crate::avatar::AvatarRenderer;
-use crate::link::AVATAR_SIGNAL;
+use crate::link::{Overlay, AVATAR_SIGNAL, OVERLAY_SIGNAL};
+use crate::overlay::draw_overlay;
 use crate::pins::BOARD_PINS;
 use alloc::boxed::Box;
 use embassy_time::{Duration, Timer};
@@ -52,17 +53,20 @@ pub fn panel(spi2: SPI2<'static>) -> Option<Panel> {
     Some(Panel { lcd, _backlight: output(pins.lcd_bl, Level::High) })
 }
 
-/// Draws the avatar, switching face as soon as the network task signals a new one.
+/// Draws the avatar and the pairing overlay, switching as soon as a new value is signalled.
 #[embassy_executor::task]
 pub async fn display_task(mut panel: Panel) {
     let mut renderer = AvatarRenderer::new();
+    let mut overlay = Overlay::None;
     loop {
         if let Some((state, emotion)) = AVATAR_SIGNAL.try_take() {
             renderer.state = state;
             renderer.emotion = emotion;
         }
+        overlay = OVERLAY_SIGNAL.try_take().unwrap_or(overlay);
         renderer.step();
         let _ = renderer.render(&mut panel.lcd);
+        let _ = draw_overlay(overlay, &mut panel.lcd);
         Timer::after(FRAME_PERIOD).await;
     }
 }

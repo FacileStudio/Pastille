@@ -18,10 +18,10 @@ pub mod gatt {
 }
 
 pub const AUTH_WINDOW_MS: u32 = 60_000;
-pub const CAP_MIC: u8 = 0x01;
-pub const CAP_SPK: u8 = 0x02;
 pub const CAP_LCD: u8 = 0x04;
 pub const CAP_HAP: u8 = 0x08;
+/// Capabilities this firmware can run: the display and the haptic motor. Audio is not in v0.4.0.
+pub const DEVICE_CAPS: u8 = CAP_LCD | CAP_HAP;
 pub const DEVICE_TOKEN_PREFIX: &str = "bohs_tok_";
 pub const DEVICE_TOKEN_LEN: usize = 41;
 
@@ -86,11 +86,11 @@ impl BleProvisioner {
         }
     }
 
-    /// Builds the 6-byte service data: state, capability bits, then the first 4 bytes of the hardware id.
-    pub fn advertisement_service_data(&self) -> [u8; 6] {
-        let caps = CAP_MIC | CAP_SPK | CAP_LCD | CAP_HAP;
-        let [a, b, c, d] = self.hardware_id;
-        [self.state as u8, caps, a, b, c, d]
+    /// Restores a config loaded from flash at boot.
+    pub fn restore(&mut self, cfg: ProvisionConfig) {
+        self.transport = if cfg.prefer_ble { TransportKind::BleRelay } else { TransportKind::WifiDirect };
+        self.config = Some(cfg);
+        self.state = ProvisionState::Provisioned;
     }
 
     /// Opens the physical-tap window for the current connection. A window that is already open
@@ -128,13 +128,7 @@ impl BleProvisioner {
         if self.state != ProvisionState::Authorized || !self.link_encrypted || !same_conn {
             return Err(ProtocolError::Unauthorized);
         }
-        self.transport = if cfg.prefer_ble {
-            TransportKind::BleRelay
-        } else {
-            TransportKind::WifiDirect
-        };
-        self.config = Some(cfg);
-        self.state = ProvisionState::Provisioned;
+        self.restore(cfg);
         self.auth_timer_ms = 0;
         self.auth_conn = None;
         Ok(())

@@ -1,8 +1,7 @@
 //! USB CDC transport over the ESP32-S3 USB Serial/JTAG controller (`USB_DM` / `USB_DP`).
 
 use crate::ble::TransportKind;
-use super::net::INBOUND_CHANNEL;
-use crate::link::OUTBOUND_PKT_CHANNEL;
+use crate::link::{Inbound, INBOUND_CHANNEL, OUTBOUND_USB};
 use crate::stream::{encode_stream_frame, StreamReassembler, LENGTH_PREFIX_BYTES};
 use crate::MAX_PACKET_BYTES;
 use embedded_io_async::{Read, Write};
@@ -24,7 +23,7 @@ pub async fn usb_rx_task(mut rx: UsbSerialJtagRx<'static, Async>) {
             };
             let len = frame.len();
             packet[..len].copy_from_slice(frame);
-            INBOUND_CHANNEL.send((TransportKind::UsbSerial, (packet, len))).await;
+            INBOUND_CHANNEL.send(Inbound::Frame(TransportKind::UsbSerial, (packet, len))).await;
         }
     }
 }
@@ -34,7 +33,7 @@ pub async fn usb_rx_task(mut rx: UsbSerialJtagRx<'static, Async>) {
 pub async fn usb_tx_task(mut tx: UsbSerialJtagTx<'static, Async>) {
     let mut wire = [0u8; LENGTH_PREFIX_BYTES + MAX_PACKET_BYTES];
     loop {
-        let (packet, len) = OUTBOUND_PKT_CHANNEL.receive().await;
+        let (packet, len) = OUTBOUND_USB.receive().await;
         let Ok(total) = encode_stream_frame(&packet[..len], &mut wire) else {
             continue;
         };

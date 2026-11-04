@@ -2,6 +2,8 @@ use crate::audio::{AudioFrame, InvalidFrameLength, BYTES_PER_FRAME, DEFAULT_VAD_
 use crate::avatar::{AvatarRenderer, AvatarState};
 use crate::battery::BatteryMonitor;
 use crate::ble::TransportKind;
+use crate::link::Overlay;
+use crate::overlay::draw_overlay;
 use crate::pins::BOARD_PINS;
 use crate::power::{PowerManager, PowerState, SLEEP_GRACE_TIMEOUT_MS};
 use crate::protocol::{
@@ -137,6 +139,14 @@ fn test_avatar_and_trig() {
         renderer.render(&mut buf).unwrap();
         assert!(buf.drawn_pixels > 0);
     }
+    for overlay in [Overlay::PairingRing, Overlay::Passkey(42)] {
+        let mut buf = TestBuffer { drawn_pixels: 0 };
+        draw_overlay(overlay, &mut buf).unwrap();
+        assert!(buf.drawn_pixels > 0);
+    }
+    let mut buf = TestBuffer { drawn_pixels: 0 };
+    draw_overlay(Overlay::None, &mut buf).unwrap();
+    assert_eq!(buf.drawn_pixels, 0);
 }
 
 #[test]

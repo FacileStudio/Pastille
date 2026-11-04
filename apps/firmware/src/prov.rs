@@ -1,4 +1,4 @@
-use crate::ble::{BleProvisioner, ProvisionConfig, TransportKind, DEVICE_TOKEN_LEN, DEVICE_TOKEN_PREFIX};
+use crate::ble::{BleProvisioner, ProvisionConfig, ProvisionState, TransportKind, DEVICE_TOKEN_LEN, DEVICE_TOKEN_PREFIX};
 use crate::protocol::{write_framed_json, ProtocolError, OPCODE_PROVISION};
 use crate::rpc::{parse_request, write_error, Incoming};
 use core::fmt::Write;
@@ -6,6 +6,11 @@ use heapless::String;
 use serde_json::Value;
 
 const STATE_NAMES: [&str; 4] = ["unclaimed", "awaiting_tap", "authorized", "provisioned"];
+
+/// The wire name of a provisioning state.
+pub fn state_name(state: ProvisionState) -> &'static str {
+    STATE_NAMES[state as usize]
+}
 const TRANSPORT_NAMES: [&str; 3] = ["ble", "wifi", "usb"];
 const GATEWAY_SCHEME: &str = "wss://";
 
@@ -95,7 +100,7 @@ fn write_status(prov: &BleProvisioner, id: &Value, out: &mut String<256>) -> Res
             r#""transport":"{}","link_encrypted":{},"hardware_id":"{:02x}{:02x}{:02x}{:02x}"}}}}"#
         ),
         id,
-        STATE_NAMES[prov.state as usize],
+        state_name(prov.state),
         TRANSPORT_NAMES[prov.transport as usize],
         prov.link_encrypted,
         prov.hardware_id[0],
