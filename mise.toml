@@ -24,6 +24,12 @@ description = "Run firmware host tests and clippy"
 dir = "apps/firmware"
 run = ["cargo test", "cargo clippy --all-targets -- -D warnings"]
 
+[tasks.build-firmware]
+description = "Build the ESP32-S3 firmware image (needs espup's esp toolchain)"
+dir = "apps/firmware"
+env = { RUSTUP_TOOLCHAIN = "esp" }
+run = "bash -c 'source ~/export-esp.sh && cargo build --release --target xtensa-esp32s3-none-elf'"
+
 [tasks.check-hardware]
 description = "Typecheck the tscircuit board"
 dir = "hardware"
@@ -52,6 +58,7 @@ description = "Generate the enclosure and every fabrication and CAD export"
 run = ["fusible body", "fusible export --preset all"]
 
 [tasks.flash]
-description = "Flash the firmware onto a connected ESP32-S3 and open the monitor"
+description = "Build, flash the firmware onto a connected ESP32-S3 and open the monitor"
 dir = "apps/firmware"
-run = "cargo espflash flash --release --monitor"
+env = { RUSTUP_TOOLCHAIN = "esp" }
+run = "bash -c 'source ~/export-esp.sh && cargo run --release --target xtensa-esp32s3-none-elf'"
