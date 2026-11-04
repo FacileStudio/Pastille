@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-04
+
+### Added
+- BOHS-01 now runs over BLE 5.0 GATT, Wi-Fi WSS and USB-C. The spec defines a 128-bit GATT service with four characteristics, and a u16be length prefix with chunking for BLE and USB.
+- Opcode `0x03` provisioning (`prov.identify`, `prov.status`, `prov.configure`): one-tap pairing from the Bulle app, with a 60 s tap window and an encrypted BLE link required before the device accepts its token or Wi-Fi credentials.
+- Firmware modules `ble.rs`, `prov.rs` and `stream.rs` with host tests, an outbound packet queue, and the `BleFastConnect` power state.
+- Landing page connectivity section with an animated topology diagram for the BLE relay, direct Wi-Fi and pairing modes.
+- `mise.toml` with toolchain pins and `check`, `dev`, `drc`, `export` and `flash` tasks.
+
+### Changed
+- Audio frames are documented as what the firmware sends: PCM16 LE, 16 kHz, 640-byte payload behind a 4-byte header. No Opus.
+- Battery figures for BLE and Wi-Fi streaming are labelled as targets.
+- `tools/list` no longer advertises `charm.snapshot`, so the response fits the 1024-byte frame limit.
+- Release button on the landing page now reads "Enclosure CAD", which matches the attached files.
+
+### Fixed
+- Charger `U_CHG` is the TP4056 its pinout matches, and `R_PROG` is 3.6k, which sets charge current to about 333 mA (0.95C) instead of 600 mA.
+- Amp `U_AMP` uses the real MAX98357A TQFN-16 footprint and pinout, with both VDD pins and every GND pin plus the exposed pad wired.
+- Haptic driver `U_HAP` uses the DRV2605L VSSOP-10 footprint and drives the LRA differentially, as the datasheet requires. `C_HAP` is now 1 uF.
+- Firmware inbound packets are 1024 bytes, so a full 644-byte audio frame no longer fails to decode. JSON-RPC responses are now queued instead of dropped.
+- The landing page protocol diagram matches the wire spec and the firmware.
+- PCB viewer ignores stale model loads after quick mode switches.
+- `bom.yml` is populated with keys fusible matches.
+
+### Known issues
+- The PCB has 10 placement errors carried over from v0.2.2, so tscircuit skips autorouting and the board has no traces. No Gerbers are attached to this release. v0.4.0 fixes placement and routing.
+
 ## [0.2.2] - 2026-11-04
 
 ### Changed
