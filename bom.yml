@@ -2,65 +2,138 @@ currency: USD
 print:
   price_per_kg: 25.0
 parts:
-  chip-esp32-s3r8:
-    mpn: ESP32-S3R8
-    unit_price: 2.85
+  chip-esp32-s3-mini-1-n4r2:
+    description: Espressif ESP32-S3-MINI-1 module, 4 MB flash, 2 MB PSRAM, PCB antenna
+    supplier: LCSC C3013941
+    url: https://documentation.espressif.com/esp32-s3-mini-1_mini-1u_datasheet_en.pdf
+    unit_price: 3.10
   chip-sph0645lm4h-b:
-    mpn: SPH0645LM4H-B
+    description: Knowles I2S MEMS microphone, bottom port
+    url: https://media.digikey.com/pdf/Data%20Sheets/Knowles%20Acoustics%20PDFs/SPH0645LM4H-B.pdf
     unit_price: 0.95
   chip-max98357aete:
-    mpn: MAX98357AETE+
+    description: Analog Devices I2S class-D amplifier, gain set to 6 dB
     unit_price: 0.85
-  pin-header-cms-151125-18s-x8:
-    mpn: CMS-151125-18S-X8
-    description: Same Sky 15 x 11 x 2.5 mm micro speaker, 8 ohm, 1 W
+  chip-cms-151125-18s-x8:
+    description: Same Sky 15 x 11 x 2.5 mm micro speaker, 8 ohm, 1 W, wire leads to the J_SPK pads
     unit_price: 1.60
-  pin-header-gc9a01-128:
-    mpn: GC9A01-128
-    unit_price: 3.40
   chip-drv2605ldgsr:
-    mpn: DRV2605LDGSR
+    description: TI haptic driver for LRA and ERM motors
     unit_price: 1.10
-  pin-header-lra-0827:
-    mpn: LRA-0827
-    unit_price: 0.30
-  chip-tp4056:
-    mpn: TP4056
-    unit_price: 0.35
-  chip-tps7a0533pdbvr:
-    mpn: TPS7A0533PDBVR
-    unit_price: 0.35
-  diode-1n5819ws:
-    mpn: 1N5819WS
-    unit_price: 0.08
-  diode-smf5-0a:
-    mpn: SMF5.0A
+  chip-vg0832012:
+    description: Vybronics 8 x 3.2 mm coin LRA, 235 Hz, wire leads to the J_HAP pads
+    url: https://www.digikey.com/en/products/detail/vybronics-inc/VG0832012/7364317
+    unit_price: 1.50
+  chip-tp4056-42-esop8:
+    description: Top Power TP4056 linear Li-ion charger, ESOP-8, 67 mA with R_PROG 18 k
+    supplier: LCSC C16581
+    url: https://www.lcsc.com/product-detail/C16581.html
+    unit_price: 0.12
+  chip-rt9080-33gj5:
+    description: Richtek 3.3 V LDO, 600 mA, 2 uA quiescent, TSOT-23-5
+    supplier: LCSC C841192
+    url: https://www.richtek.com/assets/product_file/RT9080/DS9080-09.pdf
+    unit_price: 0.12
+  chip-usblc6-2sc6:
+    description: ST USB D+/D- ESD array
+    supplier: LCSC C7519
     unit_price: 0.10
+  chip-ao3401a:
+    description: AOS P-MOSFET, battery side of the power path
+    supplier: LCSC C15127
+    unit_price: 0.03
+  chip-ao3400a:
+    description: AOS N-MOSFET, LCD backlight low-side switch
+    supplier: LCSC C20917
+    unit_price: 0.03
+  chip-fh34srj-12s-0-5sh-50:
+    description: Hirose 12-pin 0.5 mm FPC connector, top and bottom contact, 1.0 mm tall
+    supplier: LCSC C424659
+    url: https://www.hirose.com/en/product/p/CL0580-1253-0-50
+    unit_price: 0.45
+  connector-sm02b-srss-tb-lf-sn:
+    description: JST SH 2-pin side-entry SMT header for the battery leads
+    supplier: LCSC C160402
+    unit_price: 0.20
+  connector-type-c-16pin-2md-073:
+    description: SHOU HAN 16-pin top-mount USB-C receptacle
+    supplier: LCSC C2765186
+    unit_price: 0.10
+  diode-1n5819ws:
+    description: 1N5819WS Schottky, SOD-323, USB side of the power path
+    url: https://www.digikey.com/en/products/detail/shenzhen-slkormicro-semicon-co-ltd/1N5819WS/26112850
+    unit_price: 0.02
+  diode-smf5-0a:
+    description: SMF5.0A TVS on VBUS
+    unit_price: 0.03
+  capacitor-100nf-grm155r71c104ka88d:
+    unit_price: 0.004
+  capacitor-10uf-grm155r60j106me15d:
+    unit_price: 0.02
+  capacitor-10uf-grm188r61a106ke69d:
+    unit_price: 0.015
+  capacitor-1uf-grm155r61a105ke15d:
+    unit_price: 0.006
+  capacitor-22uf-grm188r61a226me15d:
+    unit_price: 0.03
+  capacitor-4-7uf-grm188r61a475ke15d:
+    unit_price: 0.01
   resistor-100kohm-rc0402fr-07100kl:
-    mpn: RC0402FR-07100KL
-    unit_price: 0.01
-  resistor-8-2kohm-rc0402fr-078k2l:
-    mpn: RC0402FR-078K2L
-    unit_price: 0.01
-  battery-402020:
-    description: LiPo pouch cell 402020, 3.7 V 150 mAh, 20 x 20 x 4 mm, with leads
-    mpn: LP402020
+    unit_price: 0.002
+  resistor-10kohm-rc0402fr-0710kl:
+    unit_price: 0.002
+  resistor-10ohm-rc0402fr-0710rl:
+    unit_price: 0.002
+  resistor-18kohm-rc0402fr-0718kl:
+    unit_price: 0.002
+  resistor-1mohm-rc0402fr-071ml:
+    unit_price: 0.002
+  resistor-4-7kohm-rc0402fr-074k7l:
+    unit_price: 0.002
+  resistor-5-1kohm-rc0402fr-075k1l:
+    unit_price: 0.002
+  resistor-510ohm-rc0402fr-07510rl:
+    unit_price: 0.002
+  test-point-tp-boot:
+    description: Bare copper pad on the board, no part
+    unit_price: 0
+  test-point-tp-en:
+    description: Bare copper pad on the board, no part
+    unit_price: 0
+  test-point-tp-gnd:
+    description: Bare copper pad on the board, no part
+    unit_price: 0
+  test-point-tp-touch:
+    description: Bare copper touch electrode on the board, no part
+    unit_price: 0
+  lcd-zjy128r-ig01:
+    description: GC9A01 1.28 in round IPS panel, 240 x 240, 12-pin FPC (Zhongjingyuan ZJY128R-IG01)
+    mpn: ZJY128R-IG01
+    url: https://www.elecrow.com/download/1.28_inch_round_LCD_datasheet.pdf
     quantity: 1
-    unit_price: 1.80
-  screw-m2x10-self-tapping:
-    description: M2 x 10 mm pan head self-tapping screw for plastic (back shell to bezel)
+    unit_price: 3.40
+  battery-402020:
+    description: LiPo pouch cell 402020, 3.7 V 120 mAh, 20 x 20 x 4 mm, with PCM, no NTC, JST SH 2-pin plug
+    mpn: LP402020
+    supplier: li-polymer-battery.com
+    url: https://li-polymer-battery.com/3-7v-rechargeable-li-polymer-battery-lp402020-120mah-with-pcm-and-wires
+    quantity: 1
+    unit_price: 1.60
+  foam-pad-1mm:
+    description: 1 mm foam pad, 10 x 10 mm, on the ESP32 module shield to back the LCD panel
+    quantity: 1
+    unit_price: 0.02
+  screw-m2x8-self-tapping:
+    description: M2 x 8 mm pan head self-tapping screw for plastic (back shell to bezel)
     quantity: 2
     unit_price: 0.05
-  push-button-tl3305af160qg:
-    mpn: TL3305AF160QG
-    unit_price: 0.15
 prints:
   front_bezel:
-    grams: 2.75
+    grams: 2.32
   lens:
     grams: 0.95
   back_shell:
-    grams: 4.34
+    grams: 3.90
   lcd:
     grams: 0
     quantity: 0
