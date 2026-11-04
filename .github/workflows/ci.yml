@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  firmware-tests:
+    name: Embassy Firmware Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/firmware
+
+      - name: Test Firmware Protocol & Avatar
+        working-directory: apps/firmware
+        run: cargo test
+
+      - name: Run Clippy
+        working-directory: apps/firmware
+        run: cargo clippy -- -D warnings
+
+  hardware-lint:
+    name: Hardware Linter (Fusible)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Hardware Dependencies
+        working-directory: hardware
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck TSX Circuit
+        working-directory: hardware
+        run: bun run typecheck
