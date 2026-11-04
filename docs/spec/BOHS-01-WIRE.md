@@ -4,20 +4,23 @@ The BOHS-01 wire protocol `bohs.v1` multiplexes real-time audio, Reverse MCP con
 
 ## Pastille v0.4.0 implementation status
 
-The Pastille v0.4.0 firmware implements part of this specification. The rest is defined here for the gateway, the apps, and later firmware.
+The Pastille v0.4.0 firmware implements most of this specification. Hardware testing of the radio, display, touch and haptic drivers is still pending.
 
 | Feature | Pastille v0.4.0 |
 | :--- | :--- |
+| Transport A, Wi-Fi WSS: station mode, TLS 1.3, `bohs.v1` WebSocket with the bearer token, reconnect with backoff | Runs on the device when the config has `prefer_ble: false` and a `wifi_ssid` |
+| Transport B, BLE GATT: advertising, `B001` to `B004`, stream framing, LE Secure Connections with bonding | Runs on the device |
 | Transport C, USB CDC (stream framing, `0x01`, `0x02`, `0x03` rejected with `-32001`) | Runs on the device |
+| `0x03` provisioning on `B004`, the tap window, `prov.state`, config and bond kept in flash | Runs on the device |
 | Reverse MCP: `tools/list`, `charm.display_avatar`, `charm.haptic_pulse`, `charm.get_telemetry` | Runs on the device |
-| `charm.low_battery` notification | Runs on the device |
-| Transport A, Wi-Fi WSS | Not implemented |
-| Transport B, BLE GATT: advertising, `B001` to `B004`, link security | Not implemented |
-| `0x03` provisioning on BLE, `prov.state`, NVS storage of the config | Not implemented. The provisioning state machine exists and is host-tested, but no BLE stack drives it. |
-| `charm.tap_event` notification | Not implemented. esp-hal has no touch driver for the ESP32-S3. |
-| Microphone capture and speaker playback | Not implemented. The device validates inbound `0x01` frames and discards them, and sends none. |
+| `charm.low_battery` and `charm.tap_event` notifications | Runs on the device |
+| Microphone capture and speaker playback | Not implemented. The device validates inbound `0x01` frames and discards them, and sends none. Its capability bits are `0x0C` (display, haptic). |
 
-On the device, `charm.get_telemetry` reports `rssi_dbm` and `temp_c` as `null`: v0.4.0 has no radio link and esp-hal has no ESP32-S3 temperature sensor driver.
+On the device, `charm.get_telemetry` reports `rssi_dbm` and `temp_c` as `null`: the firmware does not read the radio RSSI yet, and esp-hal has no ESP32-S3 temperature sensor driver.
+
+The device verifies the gateway's TLS chain against four pinned roots: ISRG Root X1, ISRG Root X2, GTS Root R4 and GlobalSign Root CA. It checks the host name but not the validity dates, because it has no trusted clock. A gateway behind another CA cannot be reached over Wi-Fi direct.
+
+The firmware keeps the config and one BLE bond in a CRC-checked record in the `pastille` flash partition, written alternately to two sectors. Flash encryption is not enabled, so the device token and Wi-Fi PSK are stored in plain text on the chip's flash.
 
 ## Frames
 
@@ -107,7 +110,9 @@ The device advertises the service UUID with 6 bytes of service data:
 | 1 | `caps` | Capability bitfield (see below) |
 | 2-5 | `hw_id` | Hardware ID: the last 4 bytes of the eFuse base MAC. The first 3 bytes are the vendor OUI and repeat across devices. |
 
-Pastille advertises `[0x00, 0x0F, hw_id[0], hw_id[1], hw_id[2], hw_id[3]]` when unclaimed.
+Pastille v0.4.0 advertises `[0x00, 0x0C, hw_id[0], hw_id[1], hw_id[2], hw_id[3]]` when unclaimed: display and haptic, no audio yet.
+
+The advertising packet holds the flags and one Service Data (128-bit UUID) structure: the service UUID followed by these 6 bytes. The device name `Pastille` is in the scan response. The device restarts advertising whenever the state code changes.
 
 #### Device info record (`B001`)
 
@@ -134,7 +139,9 @@ Transport codes: `0x00` BLE, `0x01` Wi-Fi, `0x02` USB.
 
 #### Link security
 
-- The device accepts writes to `B004` only over an encrypted, bonded link using LE Secure Connections. On an unencrypted link, the device rejects the write with ATT error Insufficient Encryption (`0x0F`). The central then pairs and retries.
+- The device accepts writes to `B004`, and subscriptions to it, only over an encrypted link. On an unencrypted link, the device rejects the write with ATT error Insufficient Encryption (`0x0F`). The central then pairs and retries. The provisioner also requires the key to come from a bonded LE Secure Connections pairing; on an encrypted link without a bond, every `0x03` request gets `-32001`.
+- When numeric comparison is used, the LCD shows the 6-digit code and the user confirms it on the device with a tap within 30 seconds. No tap cancels the pairing.
+- The device keeps the most recent bond in flash and restores it at boot, so a bonded phone reconnects without pairing again.
 - The device advertises IO capability DisplayYesNo. When the central supports it, the pairing uses Numeric Comparison: the LCD shows the 6-digit code and the user confirms on both sides. When the central only supports Just Works, the physical tap during the `prov.identify` window is the proof that the user holds the device.
 - The device token and the Wi-Fi PSK never travel over an unencrypted link.
 - The app should bond before it subscribes to `B002` and `B003`, so voice audio and tool calls also travel encrypted.
@@ -485,7 +492,7 @@ Triggered when the user taps or holds the capacitive front surface.
 
 Supported `type` values: `single_tap`, `double_tap`, `long_press`.
 
-Pastille v0.4.0 does not send this notification.
+Pastille v0.4.0 sends this notification to the transport the gateway session last used, and drops it when no session is open. `timestamp_ms` counts milliseconds since boot, because the device has no wall clock. A press held 800 ms is a `long_press`, and two taps within 350 ms make a `double_tap`.
 
 ### Low battery alert notification
 
@@ -640,4 +647,4 @@ Error response:
 {"jsonrpc":"2.0","id":3,"error":{"code":-32001,"message":"unauthorized"}}
 ```
 
-On success the device writes the config to NVS, moves to `provisioned`, and sends a `prov.state` notification.
+On success the device writes the config to flash, moves to `provisioned`, and sends a `prov.state` notification. When the config selects Wi-Fi direct, the device then joins the network and opens the gateway session.

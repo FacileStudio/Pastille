@@ -36,7 +36,7 @@ flowchart LR
 1. **Direct Wi-Fi.** The device opens WSS to `/api/hardware/ws` and authenticates with `Authorization: Bearer bohs_tok_...`.
 2. **App relay.** The device talks to the Bulle app over BLE GATT or USB CDC. The app opens WSS to `/api/hardware/ws?device_id=hw_...` with the user's authenticated session and forwards frames in both directions.
 
-Pastille v0.4.0 firmware runs only the USB CDC side of the app relay path. It has no Wi-Fi WSS client and no BLE stack, so it cannot open a direct session, advertise, or run the claim flow below. See the implementation status in [BOHS-01-WIRE.md](BOHS-01-WIRE.md).
+Pastille v0.4.0 firmware runs both paths. It opens the direct session when its config has `prefer_ble: false` and a Wi-Fi network; otherwise it waits for the app relay over BLE or USB. Over Wi-Fi it only trusts gateway certificates that chain to ISRG Root X1, ISRG Root X2, GTS Root R4 or GlobalSign Root CA. See the implementation status in [BOHS-01-WIRE.md](BOHS-01-WIRE.md).
 
 ## Device claim
 
