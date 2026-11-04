@@ -7,7 +7,7 @@ export const Display = () => (
       footprint="pinrow8_p2.54"
       manufacturerPartNumber="GC9A01-128"
       pcbX={0}
-      pcbY={12.8}
+      pcbY={12.4}
       schX={36}
       schY={-18}
     />
@@ -16,8 +16,8 @@ export const Display = () => (
       capacitance="100nF"
       footprint="0402"
       manufacturerPartNumber="GRM155R71C104KA88D"
-      pcbX={9.4}
-      pcbY={6.8}
+      pcbX={6.8}
+      pcbY={9.2}
       schX={44}
       schY={-18}
     />

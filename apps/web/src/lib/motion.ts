@@ -122,13 +122,13 @@ export function scrollToSection(id: string, event?: MouseEvent) {
  * Computes which section ID is currently active in the viewport.
  */
 function detectActiveSection(ids: string[]): string {
-  const nearBottom =
-    window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 48;
-  if (nearBottom && ids.length > 0) return ids[ids.length - 1];
+  const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+  const triggerLine = window.innerHeight * (0.24 + progress * 0.56);
   let current = ids[0] ?? "";
   for (const id of ids) {
     const el = document.getElementById(id);
-    if (el && el.getBoundingClientRect().top <= 180) {
+    if (el && el.getBoundingClientRect().top <= triggerLine) {
       current = id;
     }
   }

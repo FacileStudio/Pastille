@@ -4,8 +4,8 @@ export const Audio = () => (
       name="U_MIC"
       footprint="soic8"
       manufacturerPartNumber="SPH0645LM4H-B"
-      pcbX={12.5}
-      pcbY={4.8}
+      pcbX={13.5}
+      pcbY={-0.8}
       schX={32}
       schY={18}
       pinLabels={{
@@ -26,8 +26,8 @@ export const Audio = () => (
       capacitance="100nF"
       footprint="0402"
       manufacturerPartNumber="GRM155R71C104KA88D"
-      pcbX={9.2}
-      pcbY={4.2}
+      pcbX={8.2}
+      pcbY={0.8}
       schX={40}
       schY={18}
     />
@@ -36,17 +36,17 @@ export const Audio = () => (
       capacitance="1uF"
       footprint="0402"
       manufacturerPartNumber="GRM155R61A105KE15D"
-      pcbX={9.2}
-      pcbY={1.5}
+      pcbX={8.4}
+      pcbY={-1.8}
       schX={40}
       schY={12}
     />
     <chip
       name="U_AMP"
-      footprint="soic14"
+      footprint="soic8"
       manufacturerPartNumber="MAX98357AETE+"
-      pcbX={12.5}
-      pcbY={-3.2}
+      pcbX={12.8}
+      pcbY={-6.8}
       schX={32}
       schY={6}
       pinLabels={{
@@ -69,8 +69,8 @@ export const Audio = () => (
       resistance="100k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-07100KL"
-      pcbX={6.0}
-      pcbY={4.2}
+      pcbX={5.4}
+      pcbY={0.8}
       schX={24}
       schY={6}
     />
@@ -79,8 +79,8 @@ export const Audio = () => (
       capacitance="10uF"
       footprint="0603"
       manufacturerPartNumber="GRM188R61A106KE69D"
-      pcbX={9.2}
-      pcbY={-1.2}
+      pcbX={8.6}
+      pcbY={-4.6}
       schX={40}
       schY={6}
     />
@@ -89,8 +89,8 @@ export const Audio = () => (
       capacitance="100nF"
       footprint="0402"
       manufacturerPartNumber="GRM155R71C104KA88D"
-      pcbX={9.2}
-      pcbY={-4.0}
+      pcbX={5.5}
+      pcbY={-7.3}
       schX={40}
       schY={0}
     />
@@ -100,8 +100,8 @@ export const Audio = () => (
       pitch="2.54mm"
       footprint="pinrow2_p2.54"
       manufacturerPartNumber="CDS-20148"
-      pcbX={9.0}
-      pcbY={9.5}
+      pcbX={11.5}
+      pcbY={8.4}
       schX={48}
       schY={6}
     />

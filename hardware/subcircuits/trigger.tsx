@@ -5,8 +5,8 @@ export const Trigger = () => (
       footprintVariant="pad"
       padShape="circle"
       padDiameter="2mm"
-      pcbX={-10.2}
-      pcbY={9.8}
+      pcbX={-7.8}
+      pcbY={9.5}
       schX={-48}
       schY={-16}
     />
@@ -15,8 +15,8 @@ export const Trigger = () => (
       resistance="510"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-07510RL"
-      pcbX={-7.5}
-      pcbY={9.8}
+      pcbX={-11.0}
+      pcbY={9.5}
       schX={-40}
       schY={-16}
     />
@@ -24,8 +24,8 @@ export const Trigger = () => (
       name="U_HAP"
       footprint="soic8"
       manufacturerPartNumber="DRV2605LDGSR"
-      pcbX={10.5}
-      pcbY={-11.2}
+      pcbX={7.9}
+      pcbY={-12.2}
       schX={-32}
       schY={-22}
       pinLabels={{
@@ -48,8 +48,8 @@ export const Trigger = () => (
       capacitance="100nF"
       footprint="0402"
       manufacturerPartNumber="GRM155R71C104KA88D"
-      pcbX={6.5}
-      pcbY={-14.5}
+      pcbX={12.4}
+      pcbY={-11.8}
       schX={-24}
       schY={-16}
     />
@@ -58,8 +58,8 @@ export const Trigger = () => (
       capacitance="1uF"
       footprint="0402"
       manufacturerPartNumber="GRM155R61A105KE15D"
-      pcbX={9.2}
-      pcbY={-15.0}
+      pcbX={8.6}
+      pcbY={-7.3}
       schX={-24}
       schY={-22}
     />
@@ -68,8 +68,8 @@ export const Trigger = () => (
       resistance="4.7k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-074K7L"
-      pcbX={3.5}
-      pcbY={4.2}
+      pcbX={5.4}
+      pcbY={3.5}
       schX={-40}
       schY={-22}
     />
@@ -78,8 +78,8 @@ export const Trigger = () => (
       resistance="4.7k"
       footprint="0402"
       manufacturerPartNumber="RC0402FR-074K7L"
-      pcbX={3.5}
-      pcbY={1.5}
+      pcbX={8.4}
+      pcbY={3.5}
       schX={-40}
       schY={-28}
     />
@@ -89,8 +89,8 @@ export const Trigger = () => (
       pitch="2.54mm"
       footprint="pinrow2_p2.54"
       manufacturerPartNumber="LRA-0827"
-      pcbX={-12.5}
-      pcbY={-1.0}
+      pcbX={11.5}
+      pcbY={4.4}
       schX={-24}
       schY={-28}
     />

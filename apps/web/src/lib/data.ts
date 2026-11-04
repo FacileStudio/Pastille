@@ -98,53 +98,21 @@ export const COMPARISON: ComparisonRow[] = [
   { metric: "Data custody", pastille: "Self-hosted Bulle", omi: "Companion app", rabbit: "Vendor cloud" },
 ];
 
+const s = (text: string, tone?: TokenTone): CodeSpan => ({ text, tone });
+
 export const PROTOCOL_PLANES: ProtocolPlane[] = [
   {
     opcode: "0x01 · Binary frame",
     name: "Opus 16 kHz audio plane",
     summary: "Each 20 ms voice frame prepends an 8-byte header with VAD and end-of-utterance flags.",
     lines: [
-      [
-        { text: "0x00  ", tone: "muted" },
-        { text: "magic     ", tone: "key" },
-        { text: "0xB0        ", tone: "num" },
-        { text: "# BOHS sync byte", tone: "muted" },
-      ],
-      [
-        { text: "0x01  ", tone: "muted" },
-        { text: "version   ", tone: "key" },
-        { text: "0x01        ", tone: "num" },
-        { text: "# bohs.v1", tone: "muted" },
-      ],
-      [
-        { text: "0x02  ", tone: "muted" },
-        { text: "flags     ", tone: "key" },
-        { text: "0b0000_0011 ", tone: "num" },
-        { text: "# bit0: VAD, bit1: EOU", tone: "muted" },
-      ],
-      [
-        { text: "0x03  ", tone: "muted" },
-        { text: "seq       ", tone: "key" },
-        { text: "u16be       ", tone: "kw" },
-        { text: "# frame counter", tone: "muted" },
-      ],
-      [
-        { text: "0x05  ", tone: "muted" },
-        { text: "length    ", tone: "key" },
-        { text: "u16be       ", tone: "kw" },
-        { text: "# payload bytes", tone: "muted" },
-      ],
-      [
-        { text: "0x07  ", tone: "muted" },
-        { text: "reserved  ", tone: "key" },
-        { text: "0x00", tone: "num" },
-      ],
-      [
-        { text: "0x08  ", tone: "muted" },
-        { text: "payload   ", tone: "key" },
-        { text: "[u8; N]     ", tone: "kw" },
-        { text: "# 16 kHz Opus packet", tone: "muted" },
-      ],
+      [s("0x00  ", "muted"), s("magic     ", "key"), s("0xB0        ", "num"), s("# BOHS sync byte", "muted")],
+      [s("0x01  ", "muted"), s("version   ", "key"), s("0x01        ", "num"), s("# bohs.v1", "muted")],
+      [s("0x02  ", "muted"), s("flags     ", "key"), s("0b0000_0011 ", "num"), s("# bit0: VAD, bit1: EOU", "muted")],
+      [s("0x03  ", "muted"), s("seq       ", "key"), s("u16be       ", "kw"), s("# frame counter", "muted")],
+      [s("0x05  ", "muted"), s("length    ", "key"), s("u16be       ", "kw"), s("# payload bytes", "muted")],
+      [s("0x07  ", "muted"), s("reserved  ", "key"), s("0x00", "num")],
+      [s("0x08  ", "muted"), s("payload   ", "key"), s("[u8; N]     ", "kw"), s("# 16 kHz Opus packet", "muted")],
     ],
   },
   {
@@ -153,71 +121,74 @@ export const PROTOCOL_PLANES: ProtocolPlane[] = [
     summary:
       "Bulle calls edge tools over the same socket to set expressions, trigger haptics, or read voltage.",
     lines: [
-      [{ text: "{", tone: "muted" }],
+      [s("{", "muted")],
+      [s('  "jsonrpc"', "key"), s(': "2.0",', "str")],
+      [s('  "id"', "key"), s(": 42,", "num")],
+      [s('  "method"', "key"), s(": ", "muted"), s('"tools/call"', "str"), s(",", "muted")],
+      [s('  "params"', "key"), s(": {", "muted")],
+      [s('    "name"', "key"), s(": ", "muted"), s('"charm.display_avatar"', "str"), s(",", "muted")],
       [
-        { text: '  "jsonrpc"', tone: "key" },
-        { text: ': "2.0",', tone: "str" },
+        s('    "arguments"', "key"),
+        s(": { ", "muted"),
+        s('"state"', "key"),
+        s(': "thinking"', "str"),
+        s(" }", "muted"),
       ],
-      [
-        { text: '  "id"', tone: "key" },
-        { text: ": 42,", tone: "num" },
-      ],
-      [
-        { text: '  "method"', tone: "key" },
-        { text: ": ", tone: "muted" },
-        { text: '"tools/call"', tone: "str" },
-        { text: ",", tone: "muted" },
-      ],
-      [{ text: '  "params"', tone: "key" }, { text: ": {", tone: "muted" }],
-      [
-        { text: '    "name"', tone: "key" },
-        { text: ": ", tone: "muted" },
-        { text: '"charm.display_avatar"', tone: "str" },
-        { text: ",", tone: "muted" },
-      ],
-      [
-        { text: '    "arguments"', tone: "key" },
-        { text: ": { ", tone: "muted" },
-        { text: '"state"', tone: "key" },
-        { text: ": ", tone: "muted" },
-        { text: '"thinking"', tone: "str" },
-        { text: " }", tone: "muted" },
-      ],
-      [{ text: "  }", tone: "muted" }],
-      [{ text: "}", tone: "muted" }],
+      [s("  }", "muted")],
+      [s("}", "muted")],
     ],
   },
 ];
 
-export const QUICKSTART_LINES: CodeLine[] = [
-  [
-    { text: "$ ", tone: "muted" },
-    { text: "git ", tone: "key" },
-    { text: "clone ", tone: "kw" },
-    { text: "https://github.com/FacileStudio/Pastille.git", tone: "str" },
-    { text: " && ", tone: "muted" },
-    { text: "cd ", tone: "key" },
-    { text: "Pastille", tone: "fg" },
-  ],
-  [
-    { text: "$ ", tone: "muted" },
-    { text: "fusible ", tone: "key" },
-    { text: "check", tone: "kw" },
-    { text: "                     # ERC, DRC, and pin contract", tone: "muted" },
-  ],
-  [
-    { text: "$ ", tone: "muted" },
-    { text: "fusible ", tone: "key" },
-    { text: "export ", tone: "kw" },
-    { text: "--preset ", tone: "num" },
-    { text: "all", tone: "str" },
-    { text: "       # Gerbers, BOM, STEP, glTF", tone: "muted" },
-  ],
-  [
-    { text: "$ ", tone: "muted" },
-    { text: "cargo ", tone: "key" },
-    { text: "test ", tone: "kw" },
-    { text: "--manifest-path ", tone: "num" },
-    { text: "apps/firmware/Cargo.toml", tone: "str" },
-  ],
+export interface QuickstartStep {
+  badge: string;
+  title: string;
+  summary: string;
+  lines: CodeLine[];
+}
+
+export const QUICKSTART_STEPS: QuickstartStep[] = [
+  {
+    badge: "01 · Hardware & CAD",
+    title: "Compile circuit, enclosure, and Gerbers",
+    summary: "Validate ERC/DRC rules, build the snap-fit case, and export manufacturing files.",
+    lines: [
+      [
+        s("$ ", "muted"),
+        s("git ", "key"),
+        s("clone ", "kw"),
+        s("https://github.com/FacileStudio/Pastille.git", "str"),
+      ],
+      [s("$ ", "muted"), s("cd ", "key"), s("Pastille && ", "fg"), s("fusible ", "key"), s("check", "kw")],
+      [
+        s("$ ", "muted"),
+        s("fusible ", "key"),
+        s("body", "kw"),
+        s("                      # STEP, STL, glTF case", "muted"),
+      ],
+      [
+        s("$ ", "muted"),
+        s("fusible ", "key"),
+        s("export ", "kw"),
+        s("--preset all", "str"),
+        s("       # Gerbers, KiCad, BOM", "muted"),
+      ],
+    ],
+  },
+  {
+    badge: "02 · Embassy Firmware",
+    title: "Test and flash bare-metal Rust",
+    summary: "Run host unit tests for the BOHS-01 stack or flash directly over USB-C JTAG.",
+    lines: [
+      [s("$ ", "muted"), s("cd ", "key"), s("apps/firmware", "fg")],
+      [
+        s("$ ", "muted"),
+        s("cargo ", "key"),
+        s("test", "kw"),
+        s("                        # VAD, wire, MCP, avatar", "muted"),
+      ],
+      [s("$ ", "muted"), s("cargo ", "key"), s("clippy ", "kw"), s("--all-targets", "num")],
+      [s("$ ", "muted"), s("cargo ", "key"), s("espflash flash ", "kw"), s("--release --monitor", "num")],
+    ],
+  },
 ];

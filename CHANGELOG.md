@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-11-04
+
+### Changed
+- **Circular 38 mm PCB Layout & Silkscreen Organization**: Re-arranged all 35 components, mounting holes, fiducials, and board markings (`PASTILLE BOHS-01`, `REV 0.2.2`) across the circular 38 mm (`R = 19 mm`) matte-black PCB so every reference designator and signature sits in an open, unobstructed space with zero overlaps.
+- **Updated Hardware Previews & Interactive 3D Models**: Re-baked `apps/web/static/models/pastille.glb`, `apps/web/static/models/pastille_case.glb`, `bodies/pastille_case.*`, and `assets/{pcb-2d,pcb-3d,schematic}.png`.
+- **Two-Column Quickstart & Proportional Scroll-Spy**: Expanded `Quickstart` into dual Hardware (`fusible`) and Firmware (`cargo`) cards and replaced the abrupt bottom scroll-spy clamp with a continuous scroll-progress focal line so `Comparison` never gets skipped.
+
+### Fixed
+- **3D USB-C Receptacle, JST-PH Battery Header & Boot Switch Models**: Restored the 3D EasyEDA CAD models for `J_USB` (`C2765186`) and `J_BAT` (`C131337`), updated `SW_BOOT` to `pushbutton_w4.2_h4.2` to satisfy `jscad-electronics` rounding constraints, and replaced `TP_TOUCH` with a native 2 mm circular SMT test pad so `circuit-json-to-gltf` exports every 3D component without error.
+
 ## [0.2.1] - 2026-11-04
 
 ### Added

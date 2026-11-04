@@ -6,7 +6,7 @@
     FEATURES,
     HERO_METRICS,
     PROTOCOL_PLANES,
-    QUICKSTART_LINES,
+    QUICKSTART_STEPS,
     type TokenTone,
   } from "$lib/data";
   import { GITHUB_ICON } from "$lib/icons";
@@ -56,12 +56,12 @@
       variant="ghost"
       size="lg"
       class="bg-fc-surface text-fc-fg hover:bg-fc-component"
-      href="https://github.com/FacileStudio/Pastille/releases/tag/v0.2.1"
+      href="https://github.com/FacileStudio/Pastille/releases/tag/v0.2.2"
       target="_blank"
       rel="noreferrer"
       icon={icons.download}
     >
-      Gerbers & STEP (v0.2.1)
+      Gerbers & STEP (v0.2.2)
     </Button>
   </div>
 
@@ -180,25 +180,38 @@
   </Section>
 </div>
 
-<div use:scrollReveal={{ y: 18 }}>
+<div use:scrollReveal={{ stagger: 0.07 }} class="pb-12">
   <Section
     id="quickstart"
     title="Quickstart"
-    description="Compile the circuit, run DRC checks, and test the Embassy firmware."
+    description="Compile the circuit, run DRC checks, and test or flash the Embassy firmware."
   >
-    <Card class="p-6">
-      <div
-        class="flex flex-col gap-1.5 rounded-fc-md bg-fc-surface p-4 font-mono text-fc-xs
-          sm:text-fc-sm leading-relaxed overflow-x-auto"
-      >
-        {#each QUICKSTART_LINES as line, idx (idx)}
-          <div class="flex">
-            {#each line as token, tIdx (tIdx)}
-              <span class="whitespace-pre {TONE_CLASS[token.tone ?? 'fg']}">{token.text}</span>
-            {/each}
-          </div>
-        {/each}
-      </div>
-    </Card>
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {#each QUICKSTART_STEPS as step (step.badge)}
+        <div data-reveal-item>
+          <Card class="flex h-full flex-col justify-between gap-4 p-6">
+            <div class="flex flex-col gap-2">
+              <span class="w-fit rounded-fc-pill bg-fc-surface px-3 py-1 text-fc-xs font-mono text-fc-fg-muted">
+                {step.badge}
+              </span>
+              <h3 class="text-fc-md font-semibold text-fc-fg">{step.title}</h3>
+              <p class="text-fc-sm text-fc-fg-muted">{step.summary}</p>
+            </div>
+            <div
+              class="flex flex-col gap-1 rounded-fc-md bg-fc-surface p-4 font-mono text-fc-xs
+                leading-relaxed overflow-x-auto"
+            >
+              {#each step.lines as line, idx (idx)}
+                <div class="flex">
+                  {#each line as token, tIdx (tIdx)}
+                    <span class="whitespace-pre {TONE_CLASS[token.tone ?? 'fg']}">{token.text}</span>
+                  {/each}
+                </div>
+              {/each}
+            </div>
+          </Card>
+        </div>
+      {/each}
+    </div>
   </Section>
 </div>

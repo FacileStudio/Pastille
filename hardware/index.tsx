@@ -33,7 +33,7 @@ export default () => (
       name="J_USB"
       standard="usb_c"
       pcbX={0}
-      pcbY={-13.8}
+      pcbY={-13.0}
       schX={-50}
       schY={18}
     />
@@ -118,13 +118,13 @@ export default () => (
     <trace from=".C_LDO_OUT_HF > .pin1" to="net.VDD3V3" />
     <trace from=".C_LDO_OUT_HF > .pin2" to="net.GND" />
 
-    <hole diameter="2.2mm" pcbX={-13.5} pcbY={9.5} />
-    <hole diameter="2.2mm" pcbX={13.5} pcbY={9.5} />
-    <fiducial name="FID1" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={-14.5} pcbY={-7.5} />
-    <fiducial name="FID2" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={14.5} pcbY={-7.5} />
-    <fiducial name="FID3" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={0} pcbY={17.2} />
-    <silkscreentext text="PASTILLE BOHS-01" layer="top" fontSize="1mm" pcbX={0} pcbY={10.8} />
-    <silkscreentext text="REV 0.2.1" layer="top" fontSize="0.75mm" pcbX={0} pcbY={9.3} />
+    <hole diameter="2.2mm" pcbX={-11.5} pcbY={12.8} />
+    <hole diameter="2.2mm" pcbX={11.5} pcbY={12.8} />
+    <fiducial name="FID1" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={-16.5} pcbY={-5.5} />
+    <fiducial name="FID2" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={16.5} pcbY={3.0} />
+    <fiducial name="FID3" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={0} pcbY={16.8} />
+    <silkscreentext text="PASTILLE BOHS-01" layer="top" fontSize="1mm" pcbX={0} pcbY={10.4} />
+    <silkscreentext text="REV 0.2.2" layer="top" fontSize="0.75mm" pcbX={0} pcbY={8.8} />
 
     <copperpour layer="bottom" connectsTo="net.GND" />
   </board>
