@@ -1,5 +1,6 @@
 use crate::audio::{AudioError, AudioFrame, I2sPipeline, BYTES_PER_FRAME, DEFAULT_VAD_THRESHOLD};
 use crate::avatar::{AvatarEmotion, AvatarRenderer, AvatarState};
+use crate::ble::TransportKind;
 use crate::pins::BOARD_PINS;
 use crate::power::{PowerManager, PowerState, SLEEP_GRACE_TIMEOUT_MS};
 use crate::protocol::{
@@ -60,7 +61,7 @@ fn test_power_state_machine() {
     assert_eq!(pm.state, PowerState::DeepSleep);
     pm.on_wake_trigger();
     assert_eq!(pm.state, PowerState::BootWake);
-    pm.on_hardware_ready();
+    pm.on_hardware_ready(TransportKind::WifiDirect);
     assert_eq!(pm.state, PowerState::WifiFastAssociate);
     pm.on_ws_connected();
     assert_eq!(pm.state, PowerState::StreamFullDuplex);
@@ -146,7 +147,7 @@ fn test_bohs_wire_framing() {
     let list_len = dispatcher.dispatch_json_rpc(list_req, &mut avatar, &mut buf).unwrap();
     assert_eq!(buf[0], OPCODE_CONTROL);
     let list_str = core::str::from_utf8(&buf[1..list_len]).unwrap();
-    assert!(list_str.contains("charm.snapshot"));
+    assert!(list_str.contains("charm.get_telemetry") && !list_str.contains("charm.snapshot"));
 }
 
 #[test]

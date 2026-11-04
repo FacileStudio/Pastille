@@ -5,6 +5,7 @@ use heapless::String;
 
 pub const OPCODE_AUDIO: u8 = 0x01;
 pub const OPCODE_CONTROL: u8 = 0x02;
+pub const OPCODE_PROVISION: u8 = 0x03;
 
 pub const FLAG_END_OF_UTTERANCE: u8 = 0x01;
 pub const FLAG_VOICE_ACTIVITY: u8 = 0x02;
@@ -20,6 +21,8 @@ pub enum ProtocolError {
     UnknownMethod,
     UnknownTool,
     InvalidArguments,
+    Unauthorized,
+    InvalidFrameLength,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -30,6 +33,9 @@ pub enum BohsFrame<'a> {
         payload: &'a [u8],
     },
     Control {
+        json: &'a str,
+    },
+    Provision {
         json: &'a str,
     },
 }
@@ -87,11 +93,12 @@ impl ProtocolDispatcher {
                     payload: &packet[4..],
                 })
             }
-            OPCODE_CONTROL => {
-                let json =
-                    core::str::from_utf8(&packet[1..]).map_err(|_| ProtocolError::InvalidUtf8)?;
-                Ok(BohsFrame::Control { json })
-            }
+            OPCODE_CONTROL => Ok(BohsFrame::Control {
+                json: json_body(packet)?,
+            }),
+            OPCODE_PROVISION => Ok(BohsFrame::Provision {
+                json: json_body(packet)?,
+            }),
             other => Err(ProtocolError::InvalidOpcode(other)),
         }
     }
@@ -135,7 +142,7 @@ impl ProtocolDispatcher {
             kind, timestamp_ms
         )
         .map_err(|_| ProtocolError::BufferTooSmall)?;
-        write_control_frame(buf.as_bytes(), out)
+        write_framed_json(OPCODE_CONTROL, buf.as_bytes(), out)
     }
 
     pub fn encode_low_battery_alert(
@@ -153,7 +160,7 @@ impl ProtocolDispatcher {
             battery_pct, voltage_mv
         )
         .map_err(|_| ProtocolError::BufferTooSmall)?;
-        write_control_frame(buf.as_bytes(), out)
+        write_framed_json(OPCODE_CONTROL, buf.as_bytes(), out)
     }
 
     pub fn dispatch_json_rpc(
@@ -179,16 +186,21 @@ impl ProtocolDispatcher {
             }
             _ => return Err(ProtocolError::UnknownMethod),
         }
-        write_control_frame(heap_str.as_bytes(), out)
+        write_framed_json(OPCODE_CONTROL, heap_str.as_bytes(), out)
     }
 }
 
-fn write_control_frame(payload: &[u8], out: &mut [u8]) -> Result<usize, ProtocolError> {
+fn json_body(packet: &[u8]) -> Result<&str, ProtocolError> {
+    core::str::from_utf8(&packet[1..]).map_err(|_| ProtocolError::InvalidUtf8)
+}
+
+/// Writes a one-byte opcode followed by a JSON payload, shared by `0x02` and `0x03` frames.
+pub fn write_framed_json(opcode: u8, payload: &[u8], out: &mut [u8]) -> Result<usize, ProtocolError> {
     let total_len = 1 + payload.len();
     if out.len() < total_len {
         return Err(ProtocolError::BufferTooSmall);
     }
-    out[0] = OPCODE_CONTROL;
+    out[0] = opcode;
     out[1..total_len].copy_from_slice(payload);
     Ok(total_len)
 }

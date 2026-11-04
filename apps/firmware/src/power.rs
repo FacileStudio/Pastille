@@ -1,12 +1,13 @@
+use crate::ble::TransportKind;
+
 pub const SLEEP_GRACE_TIMEOUT_MS: u32 = 30_000;
-pub const LOW_BATTERY_WARN_PCT: u8 = 15;
-pub const LOW_BATTERY_CRIT_PCT: u8 = 5;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum PowerState {
     #[default]
     DeepSleep,
     BootWake,
+    BleFastConnect,
     WifiFastAssociate,
     StreamFullDuplex,
     SleepGrace,
@@ -35,9 +36,25 @@ impl PowerManager {
         };
     }
 
-    pub fn on_hardware_ready(&mut self) {
+    /// Leaves `BootWake` for the radio that matches the selected transport.
+    /// BLE advertising stays on for relay and USB modes, so only `WifiDirect` associates Wi-Fi.
+    pub fn on_hardware_ready(&mut self, transport: TransportKind) {
         if self.state == PowerState::BootWake {
-            self.state = PowerState::WifiFastAssociate;
+            self.state = match transport {
+                TransportKind::WifiDirect => PowerState::WifiFastAssociate,
+                _ => PowerState::BleFastConnect,
+            };
+        }
+    }
+
+    /// Enters full-duplex streaming once a BLE central has connected.
+    pub fn on_ble_connected(&mut self) {
+        if matches!(
+            self.state,
+            PowerState::BootWake | PowerState::BleFastConnect | PowerState::WifiFastAssociate
+        ) {
+            self.silence_ms = 0;
+            self.state = PowerState::StreamFullDuplex;
         }
     }
 
@@ -75,24 +92,5 @@ impl PowerManager {
 
     pub const fn is_amp_active(&self) -> bool {
         matches!(self.state, PowerState::StreamFullDuplex)
-    }
-
-    pub fn battery_pct_from_mv(voltage_mv: u16) -> u8 {
-        if voltage_mv <= 3300 {
-            return 0;
-        }
-        if voltage_mv >= 4200 {
-            return 100;
-        }
-        (((voltage_mv - 3300) as u32 * 100) / 900) as u8
-    }
-
-    pub fn low_battery_threshold(voltage_mv: u16) -> Option<u8> {
-        let pct = Self::battery_pct_from_mv(voltage_mv);
-        if pct <= LOW_BATTERY_CRIT_PCT || pct <= LOW_BATTERY_WARN_PCT {
-            Some(pct)
-        } else {
-            None
-        }
     }
 }

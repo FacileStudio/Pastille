@@ -18,12 +18,7 @@ const TOOLS_SCHEMA: &str = concat!(
     r#""intensity":{"type":"integer","minimum":1,"maximum":100}},"required":["pattern"]}},"#,
     r#"{"name":"charm.get_telemetry","#,
     r#""description":"Reads physical battery status, RSSI, and temperature from the peripheral","#,
-    r#""inputSchema":{"type":"object","properties":{}}},"#,
-    r#"{"name":"charm.snapshot","#,
-    r#""description":"Captures a still image from an optional camera sensor","#,
-    r#""inputSchema":{"type":"object","properties":{"#,
-    r#""resolution":{"type":"string","enum":["160x120","320x240","640x480"]},"#,
-    r#""format":{"type":"string","enum":["jpeg"]}}}}]"#
+    r#""inputSchema":{"type":"object","properties":{}}}]"#
 );
 
 fn parse_avatar_args(

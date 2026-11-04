@@ -3,21 +3,28 @@
 
 mod audio;
 mod avatar;
+mod battery;
+mod ble;
 mod pins;
 mod power;
+mod prov;
 mod protocol;
+/// Length-prefix framing for the BLE and USB byte streams; their drivers are not in this release.
+#[cfg_attr(not(test), allow(dead_code))]
+mod stream;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod tests_ble;
 mod tools;
 mod trig;
 
 use audio::{AudioFrame, I2sPipeline, DEFAULT_VAD_THRESHOLD, FRAME_DURATION_MS};
 use avatar::{AvatarEmotion, AvatarRenderer, AvatarState};
+use ble::{BleProvisioner, TransportKind};
 use pins::BOARD_PINS;
 use power::PowerManager;
-use protocol::{
-    BohsFrame, ProtocolDispatcher, FLAG_END_OF_UTTERANCE, FLAG_VOICE_ACTIVITY,
-};
+use protocol::{BohsFrame, ProtocolDispatcher, ProtocolError, FLAG_END_OF_UTTERANCE, FLAG_VOICE_ACTIVITY};
 
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::channel::Channel;
@@ -25,7 +32,13 @@ use embassy_time::{Duration, Timer};
 
 pub static AUDIO_TX_CHANNEL: Channel<CriticalSectionRawMutex, AudioFrame, 4> = Channel::new();
 pub static AUDIO_RX_CHANNEL: Channel<CriticalSectionRawMutex, AudioFrame, 4> = Channel::new();
-pub static INBOUND_WS_CHANNEL: Channel<CriticalSectionRawMutex, [u8; 512], 2> = Channel::new();
+/// Largest bohs.v1 frame on any transport: a 644-byte audio frame or a JSON-RPC message.
+pub const MAX_PACKET_BYTES: usize = 1024;
+/// A packet buffer paired with the number of bytes it actually holds.
+pub type Packet = ([u8; MAX_PACKET_BYTES], usize);
+
+pub static INBOUND_WS_CHANNEL: Channel<CriticalSectionRawMutex, Packet, 2> = Channel::new();
+pub static OUTBOUND_PKT_CHANNEL: Channel<CriticalSectionRawMutex, Packet, 4> = Channel::new();
 pub static AVATAR_STATE_CHANNEL: Channel<CriticalSectionRawMutex, (AvatarState, AvatarEmotion), 2> =
     Channel::new();
 
@@ -81,12 +94,16 @@ pub fn encode_next_audio_packet(
     Some(len)
 }
 
+/// Routes one frame received over `link`: audio to playback, `0x02` and `0x03` requests to
+/// their handlers, with every response queued on `OUTBOUND_PKT_CHANNEL`.
 pub fn handle_inbound_packet(
     dispatcher: &mut ProtocolDispatcher,
     avatar: &mut AvatarRenderer,
+    prov: &mut BleProvisioner,
+    link: TransportKind,
     packet: &[u8],
-    response_buf: &mut [u8],
 ) {
+    let mut out = [0u8; MAX_PACKET_BYTES];
     match dispatcher.decode_packet(packet) {
         Ok(BohsFrame::Audio { payload, .. }) => {
             let mut rx_frame = AudioFrame::new();
@@ -95,40 +112,50 @@ pub fn handle_inbound_packet(
             }
         }
         Ok(BohsFrame::Control { json }) => {
-            if dispatcher.dispatch_json_rpc(json, avatar, response_buf).is_ok() {
+            let result = dispatcher.dispatch_json_rpc(json, avatar, &mut out);
+            if queue_outbound(result, out) {
                 let _ = AVATAR_STATE_CHANNEL.try_send((avatar.state, avatar.emotion));
             }
         }
+        Ok(BohsFrame::Provision { json }) => {
+            queue_outbound(prov.dispatch_provision_rpc(json, link, &mut out), out);
+        }
         Err(_) => {}
     }
+}
+
+fn queue_outbound(result: Result<usize, ProtocolError>, pkt: [u8; MAX_PACKET_BYTES]) -> bool {
+    let Ok(len) = result else {
+        return false;
+    };
+    let _ = OUTBOUND_PKT_CHANNEL.try_send((pkt, len));
+    true
 }
 
 #[embassy_executor::task]
 pub async fn network_task() {
     let mut dispatcher = ProtocolDispatcher::new();
     let mut avatar = AvatarRenderer::new();
+    let mut prov = BleProvisioner::new();
     let mut power = PowerManager::new();
     power.on_wake_trigger();
-    power.on_hardware_ready();
-    power.on_ws_connected();
+    power.on_hardware_ready(prov.transport);
+    power.on_ble_connected();
 
-    let mut packet_buf = [0u8; 1024];
     let mut seq: u16 = 0;
     let mut was_active = false;
 
     loop {
         if let Ok(captured) = AUDIO_TX_CHANNEL.try_receive() {
-            let _ = encode_next_audio_packet(
-                &captured,
-                &mut was_active,
-                &mut seq,
-                &mut power,
-                &mut packet_buf,
-            );
+            let mut pkt = [0u8; MAX_PACKET_BYTES];
+            let len = encode_next_audio_packet(&captured, &mut was_active, &mut seq, &mut power, &mut pkt);
+            queue_outbound(len.ok_or(ProtocolError::BufferTooSmall), pkt);
         }
-        if let Ok(inbound) = INBOUND_WS_CHANNEL.try_receive() {
-            handle_inbound_packet(&mut dispatcher, &mut avatar, &inbound, &mut packet_buf);
+        if let Ok((inbound, len)) = INBOUND_WS_CHANNEL.try_receive() {
+            let packet = &inbound[..len.min(MAX_PACKET_BYTES)];
+            handle_inbound_packet(&mut dispatcher, &mut avatar, &mut prov, TransportKind::WifiDirect, packet);
         }
+        prov.tick(20);
         Timer::after(Duration::from_millis(20)).await;
     }
 }
