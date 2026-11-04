@@ -23,7 +23,7 @@ const DEVICE_NAME: &str = "Pastille";
 /// AD type "Service Data - 128-bit UUID".
 const AD_SERVICE_DATA_128: u8 = 0x21;
 
-type Ble = ExternalController<BleConnector<'static>, 20>;
+pub(super) type Ble = ExternalController<BleConnector<'static>, 20>;
 
 /// Builds the advertising payload: flags, then the service UUID with the 6-byte service data.
 fn advertising_data(hardware_id: [u8; 4], out: &mut [u8; 31]) -> Option<usize> {
@@ -35,10 +35,10 @@ fn advertising_data(hardware_id: [u8; 4], out: &mut [u8; 31]) -> Option<usize> {
     AdStructure::encode_slice(&[AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED), service], out).ok()
 }
 
-async fn advertise_once<C: Controller>(
-    peripheral: &mut Peripheral<'_, C, DefaultPacketPool>,
+async fn advertise_once(
+    peripheral: &mut Peripheral<'_, Ble, DefaultPacketPool>,
     server: &Server<'_>,
-    stack: &Stack<'_, C, DefaultPacketPool>,
+    stack: &Stack<'_, Ble, DefaultPacketPool>,
     hardware_id: [u8; 4],
 ) {
     let _ = server.set(&server.bohs.info, &info_record(&device_info()));

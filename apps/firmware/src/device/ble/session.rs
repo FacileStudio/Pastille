@@ -2,6 +2,7 @@
 //! as notifications or indications, and reports pairing and encryption to the provisioner.
 
 use super::gatt::{Server, CHUNK_BYTES};
+use super::Ble;
 use crate::ble::TransportKind;
 use crate::ble_link::info_record;
 use crate::device::touch::PRESS_SIGNAL;
@@ -15,6 +16,19 @@ use embassy_futures::select::{select, Either};
 use embassy_time::{Duration, Timer};
 use trouble_host::prelude::*;
 
+/// Largest LE data packet payload and its air time on the 1M PHY, as the spec defines them.
+const LL_MAX_OCTETS: u16 = 251;
+const LL_MAX_TIME_US: u16 = 2120;
+/// Connection parameters for full-duplex audio.
+const AUDIO_CONN_PARAMS: RequestedConnParams = RequestedConnParams {
+    min_connection_interval: Duration::from_micros(7_500),
+    max_connection_interval: Duration::from_millis(15),
+    max_latency: 0,
+    min_event_length: Duration::from_micros(0),
+    max_event_length: Duration::from_millis(15),
+    supervision_timeout: Duration::from_secs(4),
+};
+
 /// How long the user has to confirm a numeric comparison code with a tap.
 const CONFIRM_WINDOW: Duration = Duration::from_secs(30);
 
@@ -26,14 +40,15 @@ struct Streams {
 }
 
 /// Serves one connection until the central disconnects.
-pub async fn serve<C: Controller>(
+pub async fn serve(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, DefaultPacketPool>,
-    _stack: &Stack<'_, C, DefaultPacketPool>,
+    stack: &Stack<'_, Ble, DefaultPacketPool>,
 ) {
     while OUTBOUND_BLE.try_receive().is_ok() {}
     INBOUND_CHANNEL.send(Inbound::BleConnected(conn.raw().handle().raw())).await;
     let _ = conn.raw().set_bondable(true);
+    request_audio_link(conn, stack).await;
     select(events(server, conn), writer(server, conn)).await;
     OVERLAY_SIGNAL.signal(Overlay::None);
     INBOUND_CHANNEL.send(Inbound::BleDisconnected).await;
@@ -64,6 +79,17 @@ async fn events(server: &Server<'_>, conn: &GattConnection<'_, '_, DefaultPacket
             _ => {}
         }
     }
+}
+
+/// Asks for the link PCM16 audio needs: 2M PHY, 251-byte data packets and a 7.5-15 ms interval.
+async fn request_audio_link(
+    conn: &GattConnection<'_, '_, DefaultPacketPool>,
+    stack: &Stack<'_, Ble, DefaultPacketPool>,
+) {
+    let link = conn.raw();
+    let _ = link.set_phy(stack, PhyKind::Le2M).await;
+    let _ = link.update_data_length(stack, LL_MAX_OCTETS, LL_MAX_TIME_US).await;
+    let _ = link.update_connection_params(stack, &AUDIO_CONN_PARAMS).await;
 }
 
 /// Shows the comparison code and confirms it when the user taps within the window.
