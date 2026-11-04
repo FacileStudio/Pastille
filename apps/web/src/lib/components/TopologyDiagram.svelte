@@ -1,6 +1,13 @@
 <script lang="ts">
   import SvgIcon from "$lib/components/SvgIcon.svelte";
-  import { LAYOUTS, TOPOLOGY_DEVICES, TOPOLOGY_HUB, TOPOLOGY_SERVER, type TopologyMode, type TopologyNode } from "$lib/topology";
+  import {
+    LAYOUTS,
+    TOPOLOGY_DEVICES,
+    TOPOLOGY_HUB,
+    TOPOLOGY_SERVER,
+    type TopologyMode,
+    type TopologyNode,
+  } from "$lib/topology";
 
   let { mode, vertical = false }: { mode: TopologyMode; vertical?: boolean } = $props();
 
@@ -12,7 +19,13 @@
   const linkIcon = $derived(pairing ? "solar:key-bold-duotone" : "solar:bluetooth-wave-bold-duotone");
 </script>
 
-<svg viewBox={L.viewBox} role="img" aria-labelledby="topology-title" class="topology mx-auto h-auto w-full" class:max-w-sm={vertical}>
+<svg
+  viewBox={L.viewBox}
+  role="img"
+  aria-labelledby="topology-title"
+  class="topology mx-auto h-auto w-full"
+  class:max-w-sm={vertical}
+>
   <title id="topology-title">{mode.button}: {mode.summary}</title>
 
   {#each TOPOLOGY_DEVICES as node, i (node.id)}
