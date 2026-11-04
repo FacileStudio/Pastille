@@ -11,9 +11,10 @@ parts:
   chip-max98357aete:
     mpn: MAX98357AETE+
     unit_price: 0.85
-  pin-header-cds-20148:
-    mpn: CDS-20148
-    unit_price: 1.20
+  pin-header-cms-151125-18s-x8:
+    mpn: CMS-151125-18S-X8
+    description: Same Sky 15 x 11 x 2.5 mm micro speaker, 8 ohm, 1 W
+    unit_price: 1.60
   pin-header-gc9a01-128:
     mpn: GC9A01-128
     unit_price: 3.40
@@ -35,9 +36,40 @@ parts:
   diode-smf5-0a:
     mpn: SMF5.0A
     unit_price: 0.10
+  resistor-100kohm-rc0402fr-07100kl:
+    mpn: RC0402FR-07100KL
+    unit_price: 0.01
+  resistor-8-2kohm-rc0402fr-078k2l:
+    mpn: RC0402FR-078K2L
+    unit_price: 0.01
+  battery-402020:
+    description: LiPo pouch cell 402020, 3.7 V 150 mAh, 20 x 20 x 4 mm, with leads
+    mpn: LP402020
+    quantity: 1
+    unit_price: 1.80
+  screw-m2x10-self-tapping:
+    description: M2 x 10 mm pan head self-tapping screw for plastic (back shell to bezel)
+    quantity: 2
+    unit_price: 0.05
   push-button-tl3305af160qg:
     mpn: TL3305AF160QG
     unit_price: 0.15
 prints:
-  pastille_case:
-    grams: 8.5
+  front_bezel:
+    grams: 2.75
+  lens:
+    grams: 0.95
+  back_shell:
+    grams: 4.34
+  lcd:
+    grams: 0
+    quantity: 0
+  speaker:
+    grams: 0
+    quantity: 0
+  lra:
+    grams: 0
+    quantity: 0
+  battery:
+    grams: 0
+    quantity: 0

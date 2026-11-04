@@ -1,6 +1,17 @@
 node_modules/
 dist/
+!/dist/
+/dist/*
+!/dist/fab/
+/dist/fab/*
+!/dist/fab/gerbers.zip
+!/dist/cad/
+/dist/cad/*
+!/dist/cad/board.step
+!/dist/cad/kicad.zip
+bodies/kit/*/board.step
 .tscircuit/
+.fusible/
 target/
 .svelte-kit/
 apps/web/build/

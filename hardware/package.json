@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "occt-wasm": "5.7.1",
     "tscircuit": "latest",
     "typescript": "^5.0.0"
   },

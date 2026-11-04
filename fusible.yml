@@ -16,12 +16,23 @@ firmware:
     build_cmd: cargo test
 
 bodies:
-  pastille_case:
-    generate: enclosure
-    board: main
-    format: all
-    out_dir: bodies
-    height: 11.5
-    wall_thickness: 2.0
-    cutouts: true
-    mounting: true
+  front_bezel: { source: bodies/front_bezel.step, build: bun hardware/bodies/build.ts front_bezel }
+  lens: { source: bodies/lens.step, build: bun hardware/bodies/build.ts lens }
+  lcd: { source: bodies/lcd.step, build: bun hardware/bodies/build.ts lcd }
+  speaker: { source: bodies/speaker.step, build: bun hardware/bodies/build.ts speaker }
+  lra: { source: bodies/lra.step, build: bun hardware/bodies/build.ts lra }
+  battery: { source: bodies/battery.step, build: bun hardware/bodies/build.ts battery }
+  back_shell: { source: bodies/back_shell.step, build: bun hardware/bodies/build.ts back_shell }
+
+assembly:
+  out_dir: dist
+  format: all
+  parts:
+    main: { at: [0, 0, 0] }
+    front_bezel: { at: [0, 0, 0] }
+    lens: { at: [0, 0, 0] }
+    lcd: { at: [0, 0, 0] }
+    speaker: { at: [0, 0, 0] }
+    lra: { at: [0, 0, 0] }
+    battery: { at: [0, 0, 0] }
+    back_shell: { at: [0, 0, 0] }
