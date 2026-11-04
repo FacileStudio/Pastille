@@ -1,12 +1,16 @@
 <script lang="ts">
-  import { Button, Card, prefersReducedMotion } from "@facile/muse";
+  import { Button, Card, Icon, prefersReducedMotion, registerIcons } from "@facile/muse";
   import TopologyDiagram from "$lib/components/TopologyDiagram.svelte";
+  import { TOPOLOGY_ICONS } from "$lib/topology-icons";
   import { TOPOLOGY_MODES, type TopologyModeId } from "$lib/topology";
 
-  const CYCLE_MS = 6000;
+  const CYCLE_MS = 5000;
+
+  registerIcons(TOPOLOGY_ICONS);
 
   let activeId = $state<TopologyModeId>("ble");
   let pinned = $state(false);
+  let vertical = $state(false);
   const active = $derived(TOPOLOGY_MODES.find((m) => m.id === activeId) ?? TOPOLOGY_MODES[0]);
 
   /**
@@ -26,17 +30,26 @@
   }
 
   $effect(() => {
+    const query = window.matchMedia("(max-width: 639px)");
+    const sync = () => (vertical = query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  });
+
+  $effect(() => {
     if (pinned || prefersReducedMotion()) return;
     const timer = setInterval(advance, CYCLE_MS);
     return () => clearInterval(timer);
   });
 </script>
 
-<Card class="flex flex-col gap-5 p-4 sm:p-6">
-  <div role="group" aria-label="Transport mode" class="flex flex-wrap gap-1 rounded-fc-pill bg-fc-surface p-1 w-fit">
+<Card class="flex flex-col items-center gap-5 p-4 sm:p-6">
+  <div role="group" aria-label="Connection mode" class="flex flex-wrap gap-1 rounded-fc-pill bg-fc-surface p-1">
     {#each TOPOLOGY_MODES as option (option.id)}
       <Button
         size="sm"
+        icon={option.icon}
         variant={activeId === option.id ? "primary" : "ghost"}
         class={activeId === option.id ? "" : "text-fc-fg hover:bg-fc-component"}
         aria-pressed={activeId === option.id}
@@ -47,21 +60,18 @@
     {/each}
   </div>
 
-  <div class="flex flex-col gap-1.5" aria-live={pinned ? "polite" : "off"}>
-    <h3 class="text-fc-md font-semibold text-fc-fg">{active.title}</h3>
-    <p class="max-w-3xl text-fc-sm text-fc-fg-muted">{active.summary}</p>
+  <p class="text-center text-fc-sm text-fc-fg-muted" aria-live={pinned ? "polite" : "off"}>{active.summary}</p>
+
+  <div class="w-full rounded-fc-md bg-fc-component">
+    <TopologyDiagram mode={active} {vertical} />
   </div>
 
-  <div class="overflow-x-auto rounded-fc-md bg-fc-component">
-    <TopologyDiagram mode={active} />
-  </div>
-
-  <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-    {#each active.telemetry as pill (pill.label)}
-      <div class="flex flex-col gap-0.5 rounded-fc-md bg-fc-surface px-4 py-3">
-        <dt class="text-fc-xs font-mono uppercase text-fc-fg-muted">{pill.label}</dt>
-        <dd class="text-fc-sm font-medium text-fc-fg">{pill.value}</dd>
-      </div>
+  <ul class="flex flex-wrap justify-center gap-2">
+    {#each active.pills as pill (pill.value)}
+      <li class="flex items-center gap-2 rounded-fc-pill bg-fc-surface px-3 py-1.5 text-fc-sm text-fc-fg">
+        <Icon icon={pill.icon} size={18} class="text-fc-accent" />
+        {pill.value}
+      </li>
     {/each}
-  </dl>
+  </ul>
 </Card>

@@ -92,8 +92,8 @@
 <div use:scrollReveal={{ y: 20 }}>
   <Section
     id="connectivity"
-    title="BLE 5.0 & Wi-Fi interconnection"
-    description="Pair a BOHS-01 device in one tap from the Bulle app, stream over BLE 5.0, or roam onto Wi-Fi."
+    title="One app, many devices"
+    description="Bluetooth on the go, Wi-Fi at home, one tap to pair."
   >
     <SyncTopology />
   </Section>

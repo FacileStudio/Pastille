@@ -1,65 +1,115 @@
 export type TopologyModeId = "ble" | "wifi" | "pair";
 
-export type TopologyLink = "relay" | "direct" | "provision";
+export type DeviceId = "pastille" | "speaker" | "headset";
 
-export interface TelemetryPill {
-  label: string;
+export interface TopologyPill {
+  icon: string;
   value: string;
 }
 
 export interface TopologyMode {
   id: TopologyModeId;
   button: string;
-  title: string;
+  icon: string;
   summary: string;
-  links: TopologyLink[];
-  telemetry: TelemetryPill[];
+  devices: DeviceId[];
+  direct: boolean;
+  pills: TopologyPill[];
 }
+
+export interface TopologyNode {
+  id: DeviceId;
+  label: string;
+  icon: string;
+}
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface TopologyLayout {
+  viewBox: string;
+  devices: Point[];
+  hub: Point;
+  server: Point;
+  direct: Point;
+  uplink: Point;
+  wifi: Point;
+  labelDy: number;
+}
+
+export const LAYOUTS: Record<"horizontal" | "vertical", TopologyLayout> = {
+  horizontal: {
+    viewBox: "0 0 880 360",
+    devices: [{ x: 110, y: 60 }, { x: 110, y: 180 }, { x: 110, y: 300 }],
+    hub: { x: 440, y: 110 },
+    server: { x: 770, y: 180 },
+    direct: { x: 440, y: 340 },
+    uplink: { x: 640, y: 110 },
+    wifi: { x: 440, y: 262 },
+    labelDy: 52,
+  },
+  vertical: {
+    viewBox: "0 0 360 590",
+    devices: [{ x: 60, y: 84 }, { x: 180, y: 84 }, { x: 300, y: 84 }],
+    hub: { x: 100, y: 300 },
+    server: { x: 230, y: 490 },
+    direct: { x: 330, y: 300 },
+    uplink: { x: 100, y: 440 },
+    wifi: { x: 272, y: 300 },
+    labelDy: -48,
+  },
+};
+
+export const TOPOLOGY_DEVICES: TopologyNode[] = [
+  { id: "pastille", label: "Pastille", icon: "solar:circle-dot-bold-duotone" },
+  { id: "speaker", label: "Speaker", icon: "solar:smart-speaker-bold-duotone" },
+  { id: "headset", label: "Headset", icon: "solar:headphones-round-sound-bold-duotone" },
+];
+
+export const TOPOLOGY_HUB = { label: "Bulle app", icon: "solar:monitor-smartphone-bold-duotone" };
+
+export const TOPOLOGY_SERVER = { label: "Your server", icon: "solar:server-square-bold-duotone" };
 
 export const TOPOLOGY_MODES: TopologyMode[] = [
   {
     id: "ble",
-    button: "BLE 5.0 Relay (14 mA)",
-    title: "BLE 5.0 Relay (on the go & desktop)",
-    summary:
-      "Pastille streams over BLE 5.0 GATT (B002 audio, B003 control) to the Bulle app. Each frame gets a u16be " +
-      "length prefix and is split into MTU-sized chunks. The app relays it over a WSS tunnel to your Bulle Gateway.",
-    links: ["relay"],
-    telemetry: [
-      { label: "Active transport", value: "BLE 5.0 GATT · 2M PHY" },
-      { label: "Wake latency", value: "< 6 ms link resume" },
-      { label: "Power budget", value: "14 mA · 24h talk (target)" },
-      { label: "Account sync", value: "Relayed by the Bulle app" },
+    button: "Bluetooth",
+    icon: "solar:bluetooth-wave-bold-duotone",
+    summary: "Every device talks to the Bulle app, which relays to your server.",
+    devices: ["pastille", "speaker", "headset"],
+    direct: false,
+    pills: [
+      { icon: "solar:bluetooth-wave-bold-duotone", value: "Bluetooth LE" },
+      { icon: "solar:battery-full-bold-duotone", value: "24 h target" },
+      { icon: "solar:monitor-smartphone-bold-duotone", value: "Via the app" },
     ],
   },
   {
     id: "wifi",
-    button: "Direct Wi-Fi WSS",
-    title: "Direct Wi-Fi WSS (home & office)",
-    summary:
-      "On a known network, Pastille opens a TLS WebSocket (bohs.v1) straight to the Bulle Gateway. " +
-      "It sends one frame per WebSocket message. No phone needed.",
-    links: ["direct"],
-    telemetry: [
-      { label: "Active transport", value: "Wi-Fi WSS · bohs.v1" },
-      { label: "Wake latency", value: "< 50 ms RTC touch wake" },
-      { label: "Power budget", value: "42 mA · 8h talk (target)" },
-      { label: "Account sync", value: "Direct to Bulle Gateway" },
+    button: "Wi-Fi",
+    icon: "solar:wi-fi-router-bold-duotone",
+    summary: "At home, every device connects straight to your server.",
+    devices: ["pastille", "speaker", "headset"],
+    direct: true,
+    pills: [
+      { icon: "solar:wi-fi-router-bold-duotone", value: "Wi-Fi" },
+      { icon: "solar:battery-full-bold-duotone", value: "8 h target" },
+      { icon: "solar:server-square-bold-duotone", value: "No phone needed" },
     ],
   },
   {
     id: "pair",
-    button: "1-Tap BLE Pairing",
-    title: "One-tap BLE pairing & fleet sync",
-    summary:
-      "Tap Pastille (GPIO7). The Bulle app reads B001, Facile Registre mints a bohs_tok_* token, and the app " +
-      "writes the token and Wi-Fi credentials to NVS (B004) over an encrypted, bonded link within 60 s of the tap.",
-    links: ["relay", "provision"],
-    telemetry: [
-      { label: "Active transport", value: "BLE · encrypted & bonded" },
-      { label: "Wake latency", value: "Tap confirms within 60 s" },
-      { label: "Power budget", value: "BLE only during setup" },
-      { label: "Account sync", value: "bohs_tok_* to NVS (B004)" },
+    button: "Pairing",
+    icon: "solar:hand-shake-bold-duotone",
+    summary: "Tap Pastille once. The app hands it a key over an encrypted link.",
+    devices: ["pastille"],
+    direct: false,
+    pills: [
+      { icon: "solar:hand-shake-bold-duotone", value: "One tap" },
+      { icon: "solar:shield-check-bold-duotone", value: "Encrypted" },
+      { icon: "solar:key-bold-duotone", value: "Key saved" },
     ],
   },
 ];

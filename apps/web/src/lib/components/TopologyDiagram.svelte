@@ -1,63 +1,84 @@
 <script lang="ts">
-  import type { TopologyLink, TopologyMode } from "$lib/topology";
+  import SvgIcon from "$lib/components/SvgIcon.svelte";
+  import { LAYOUTS, TOPOLOGY_DEVICES, TOPOLOGY_HUB, TOPOLOGY_SERVER, type TopologyMode, type TopologyNode } from "$lib/topology";
 
-  let { mode }: { mode: TopologyMode } = $props();
+  let { mode, vertical = false }: { mode: TopologyMode; vertical?: boolean } = $props();
 
-  const isOn = (link: TopologyLink) => mode.links.includes(link);
+  const L = $derived(vertical ? LAYOUTS.vertical : LAYOUTS.horizontal);
+  const isActive = (node: TopologyNode) => mode.devices.includes(node.id);
+  const relayOn = (node: TopologyNode) => !mode.direct && isActive(node);
+  const directOn = (node: TopologyNode) => mode.direct && isActive(node);
+  const pairing = $derived(mode.id === "pair");
+  const linkIcon = $derived(pairing ? "solar:key-bold-duotone" : "solar:bluetooth-wave-bold-duotone");
 </script>
 
-<svg
-  viewBox="0 0 880 320"
-  role="img"
-  aria-labelledby="topology-title"
-  class="topology h-auto w-full min-w-[640px]"
-  font-family="var(--font-fc-mono)"
->
-  <title id="topology-title">{mode.title}: {mode.summary}</title>
+<svg viewBox={L.viewBox} role="img" aria-labelledby="topology-title" class="topology mx-auto h-auto w-full" class:max-w-sm={vertical}>
+  <title id="topology-title">{mode.button}: {mode.summary}</title>
 
-  <path d="M180 248 Q300 210 360 150" class="link idle" />
-  <path d="M154 104 L360 104" class="link" class:flow={isOn("relay")} class:idle={!isOn("relay")} />
-  <path d="M520 104 L700 104" class="link" class:flow={isOn("relay")} class:idle={!isOn("relay")} />
-  <path d="M148 140 Q440 330 760 160" class="link" class:flow={isOn("direct")} class:idle={!isOn("direct")} />
-  {#if isOn("provision")}
-    <path d="M700 128 L520 128" class="link flow token" />
-    <path d="M360 128 L152 128" class="link flow token" />
-    <rect x="374" y="176" width="132" height="26" rx="13" fill="var(--color-fc-surface)" />
-    <text x="440" y="193" text-anchor="middle" font-size="12" fill="var(--color-fc-warning)">bohs_tok_* · B004</text>
+  {#each TOPOLOGY_DEVICES as node, i (node.id)}
+    <path
+      d="M{L.devices[i].x} {L.devices[i].y} L{L.hub.x} {L.hub.y}"
+      class="link"
+      class:flow={relayOn(node)}
+      class:token={pairing && relayOn(node)}
+      class:idle={!relayOn(node)}
+    />
+    <path
+      d="M{L.devices[i].x} {L.devices[i].y} Q{L.direct.x} {L.direct.y} {L.server.x} {L.server.y}"
+      class="link"
+      class:flow={directOn(node)}
+      class:hidden={!directOn(node)}
+    />
+  {/each}
+  <path
+    d="M{L.hub.x} {L.hub.y} Q{L.uplink.x} {L.uplink.y} {L.server.x} {L.server.y}"
+    class="link"
+    class:flow={!mode.direct}
+    class:token={pairing}
+    class:idle={mode.direct}
+  />
+
+  {#each TOPOLOGY_DEVICES as node, i (node.id)}
+    {#if relayOn(node)}
+      {@const mid = { x: (L.devices[i].x + L.hub.x) / 2, y: (L.devices[i].y + L.hub.y) / 2 }}
+      <circle cx={mid.x} cy={mid.y} r="17" class="badge" />
+      <SvgIcon
+        name={linkIcon}
+        x={mid.x}
+        y={mid.y}
+        size={20}
+        color={pairing ? "var(--color-fc-warning)" : "var(--color-fc-info)"}
+      />
+    {/if}
+  {/each}
+  {#if mode.direct}
+    <circle cx={L.wifi.x} cy={L.wifi.y} r="19" class="badge" />
+    <SvgIcon name="solar:wi-fi-router-bold-duotone" x={L.wifi.x} y={L.wifi.y} size={22} color="var(--color-fc-info)" />
   {/if}
 
-  {#if isOn("relay")}
-    <text x="257" y="94" text-anchor="middle" font-size="11" fill="var(--color-fc-fg-muted)">PCM 0x01 · MCP 0x02</text>
-    <text x="610" y="94" text-anchor="middle" font-size="11" fill="var(--color-fc-fg-muted)">WSS tunnel</text>
-  {/if}
-  {#if isOn("direct")}
-    <text x="440" y="226" text-anchor="middle" font-size="11" fill="var(--color-fc-fg-muted)">
-      bohs.v1 TLS WebSocket · no phone
-    </text>
-  {/if}
+  {#each TOPOLOGY_DEVICES as node, i (node.id)}
+    {@const at = L.devices[i]}
+    <g class="node" class:dim={!isActive(node)}>
+      {#if isActive(node)}
+        <circle cx={at.x} cy={at.y} r="40" class="halo" />
+      {/if}
+      <circle cx={at.x} cy={at.y} r="34" class="disc" class:primary={node.id === "pastille"} />
+      <SvgIcon name={node.icon} x={at.x} y={at.y} size={34} color="var(--color-fc-accent)" />
+      <text x={at.x} y={at.y + L.labelDy} text-anchor="middle" class="label">{node.label}</text>
+    </g>
+  {/each}
 
-  <circle cx="110" cy="110" r="54" class="halo" fill="none" stroke="var(--color-fc-accent)" />
-  <circle cx="110" cy="110" r="44" fill="var(--color-fc-surface)" stroke="var(--color-fc-accent)" stroke-width="2" />
-  <text x="110" y="106" text-anchor="middle" font-size="14" font-weight="600" fill="var(--color-fc-fg)">Pastille</text>
-  <text x="110" y="124" text-anchor="middle" font-size="10" fill="var(--color-fc-fg-muted)">38 mm · 18 uA</text>
+  <g class="node" class:dim={mode.direct}>
+    <circle cx={L.hub.x} cy={L.hub.y} r="44" class="disc" />
+    <SvgIcon name={TOPOLOGY_HUB.icon} x={L.hub.x} y={L.hub.y} size={40} color="var(--color-fc-accent)" />
+    <text x={L.hub.x} y={L.hub.y + 64} text-anchor="middle" class="label">{TOPOLOGY_HUB.label}</text>
+  </g>
 
-  <rect x="40" y="222" width="140" height="52" rx="12" fill="var(--color-fc-surface)" />
-  <text x="110" y="244" text-anchor="middle" font-size="12" fill="var(--color-fc-fg)">Other BOHS-01</text>
-  <text x="110" y="262" text-anchor="middle" font-size="12" fill="var(--color-fc-fg)">devices</text>
-
-  <rect x="360" y="52" width="160" height="104" rx="14" fill="var(--color-fc-surface)" />
-  <text x="440" y="80" text-anchor="middle" font-size="14" font-weight="600" fill="var(--color-fc-fg)">Bulle app</text>
-  <text x="440" y="98" text-anchor="middle" font-size="10" fill="var(--color-fc-fg-muted)">mobile & desktop</text>
-  <text x="440" y="122" text-anchor="middle" font-size="10" fill="var(--color-fc-info)">B002 audio · B003 MCP</text>
-  <text x="440" y="140" text-anchor="middle" font-size="10" fill="var(--color-fc-info)">B004 provisioning</text>
-
-  <rect x="700" y="52" width="160" height="104" rx="14" fill="var(--color-fc-surface)" />
-  <text x="780" y="80" text-anchor="middle" font-size="14" font-weight="600" fill="var(--color-fc-fg)">
-    Bulle Gateway
-  </text>
-  <text x="780" y="98" text-anchor="middle" font-size="10" fill="var(--color-fc-fg-muted)">+ Facile Registre</text>
-  <text x="780" y="122" text-anchor="middle" font-size="10" fill="var(--color-fc-fg-muted)">STT · LLM · TTS</text>
-  <text x="780" y="140" text-anchor="middle" font-size="10" fill="var(--color-fc-fg-muted)">self-hosted</text>
+  <g class="node">
+    <circle cx={L.server.x} cy={L.server.y} r="48" class="disc" />
+    <SvgIcon name={TOPOLOGY_SERVER.icon} x={L.server.x} y={L.server.y} size={44} color="var(--color-fc-accent)" />
+    <text x={L.server.x} y={L.server.y + 70} text-anchor="middle" class="label">{TOPOLOGY_SERVER.label}</text>
+  </g>
 </svg>
 
 <style>
@@ -65,13 +86,17 @@
     fill: none;
     stroke-width: 2.5;
     stroke-linecap: round;
-    transition: opacity 200ms ease;
+    transition: opacity 300ms ease;
   }
 
   .idle {
     stroke: var(--color-fc-fg-muted);
     stroke-dasharray: 2 8;
-    opacity: 0.35;
+    opacity: 0.3;
+  }
+
+  .hidden {
+    opacity: 0;
   }
 
   .flow {
@@ -82,12 +107,42 @@
 
   .token {
     stroke: var(--color-fc-warning);
+    animation-direction: reverse;
+  }
+
+  .badge {
+    fill: var(--color-fc-surface);
+  }
+
+  .disc {
+    fill: var(--color-fc-surface);
+  }
+
+  .disc.primary {
+    stroke: var(--color-fc-accent);
+    stroke-width: 2;
+  }
+
+  .label {
+    fill: var(--color-fc-fg);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .node {
+    transition: opacity 300ms ease;
+  }
+
+  .dim {
+    opacity: 0.35;
   }
 
   .halo {
+    fill: none;
+    stroke: var(--color-fc-accent);
     stroke-width: 1.5;
-    opacity: 0.4;
-    transform-origin: 110px 110px;
+    transform-box: fill-box;
+    transform-origin: center;
     animation: halo 2.4s ease-out infinite;
   }
 
@@ -103,7 +158,7 @@
       opacity: 0.5;
     }
     100% {
-      transform: scale(1.15);
+      transform: scale(1.2);
       opacity: 0;
     }
   }
@@ -111,7 +166,8 @@
   @media (prefers-reduced-motion: reduce) {
     .link,
     .flow,
-    .halo {
+    .halo,
+    .node {
       animation: none;
       transition: none;
     }
