@@ -9,6 +9,6 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["env.d.ts", "index.tsx", "subcircuits/**/*.tsx", "bodies/**/*.ts"],
+  "include": ["env.d.ts", "index.tsx", "subcircuits/**/*.tsx", "bodies/**/*.ts", "fab/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
