@@ -1,5 +1,43 @@
-currency: EUR
+currency: USD
 print:
   price_per_kg: 25.0
-parts: {}
-prints: {}
+parts:
+  chip-esp32-s3r8:
+    mpn: ESP32-S3R8
+    unit_price: 2.85
+  chip-sph0645lm4h-b:
+    mpn: SPH0645LM4H-B
+    unit_price: 0.95
+  chip-max98357aete:
+    mpn: MAX98357AETE+
+    unit_price: 0.85
+  pin-header-cds-20148:
+    mpn: CDS-20148
+    unit_price: 1.20
+  pin-header-gc9a01-128:
+    mpn: GC9A01-128
+    unit_price: 3.40
+  chip-drv2605ldgsr:
+    mpn: DRV2605LDGSR
+    unit_price: 1.10
+  pin-header-lra-0827:
+    mpn: LRA-0827
+    unit_price: 0.30
+  chip-tp4056:
+    mpn: TP4056
+    unit_price: 0.35
+  chip-tps7a0533pdbvr:
+    mpn: TPS7A0533PDBVR
+    unit_price: 0.35
+  diode-1n5819ws:
+    mpn: 1N5819WS
+    unit_price: 0.08
+  diode-smf5-0a:
+    mpn: SMF5.0A
+    unit_price: 0.10
+  push-button-tl3305af160qg:
+    mpn: TL3305AF160QG
+    unit_price: 0.15
+prints:
+  pastille_case:
+    grams: 8.5

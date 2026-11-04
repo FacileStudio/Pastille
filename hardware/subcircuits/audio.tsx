@@ -43,7 +43,7 @@ export const Audio = () => (
     />
     <chip
       name="U_AMP"
-      footprint="soic8"
+      footprint="qfn16_w3.8_h3.8_p0.5_pw0.25_pl0.8_thermalpad1.23x1.23mm"
       manufacturerPartNumber="MAX98357AETE+"
       pcbX={12.8}
       pcbY={-6.8}
@@ -51,17 +51,33 @@ export const Audio = () => (
       schY={6}
       pinLabels={{
         pin1: "DIN",
-        pin2: "BCLK",
-        pin3: "LRCLK",
+        pin2: "GAIN_SLOT",
+        pin3: "GND1",
         pin4: "SD_MODE",
-        pin5: "GND",
-        pin6: "VIN",
-        pin7: "OUTP",
-        pin8: "OUTN",
+        pin5: "NC1",
+        pin6: "NC2",
+        pin7: "VDD1",
+        pin8: "VDD2",
+        pin9: "OUTP",
+        pin10: "OUTN",
+        pin11: "GND2",
+        pin12: "NC3",
+        pin13: "NC4",
+        pin14: "LRCLK",
+        pin15: "GND3",
+        pin16: "BCLK",
+        pin17: "thermalpad",
       }}
       pinAttributes={{
-        VIN: { requiresPower: true },
-        GND: { requiresGround: true },
+        VDD1: { requiresPower: true },
+        VDD2: { requiresPower: true },
+        GND1: { requiresGround: true },
+        GND2: { requiresGround: true },
+        GND3: { requiresGround: true },
+        NC1: { doNotConnect: true },
+        NC2: { doNotConnect: true },
+        NC3: { doNotConnect: true },
+        NC4: { doNotConnect: true },
       }}
     />
     <resistor
@@ -115,8 +131,12 @@ export const Audio = () => (
     <trace from=".U_MIC > .WS" to="net.MIC_WS" />
     <trace from=".U_MIC > .SCK" to="net.MIC_SCK" />
     <trace from=".U_MIC > .SD" to="net.MIC_SD" />
-    <trace from=".U_AMP > .VIN" to="net.VSYS" />
-    <trace from=".U_AMP > .GND" to="net.GND" />
+    <trace from=".U_AMP > .VDD1" to="net.VSYS" />
+    <trace from=".U_AMP > .VDD2" to="net.VSYS" />
+    <trace from=".U_AMP > .GND1" to="net.GND" />
+    <trace from=".U_AMP > .GND2" to="net.GND" />
+    <trace from=".U_AMP > .GND3" to="net.GND" />
+    <trace from=".U_AMP > .thermalpad" to="net.GND" />
     <trace from=".C_AMP > .pin1" to="net.VSYS" />
     <trace from=".C_AMP > .pin2" to="net.GND" />
     <trace from=".C_AMP_HF > .pin1" to="net.VSYS" />

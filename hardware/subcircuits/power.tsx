@@ -72,7 +72,7 @@ export const Power = () => (
     <chip
       name="U_CHG"
       footprint="soic8"
-      manufacturerPartNumber="BQ24040DSQR"
+      manufacturerPartNumber="TP4056"
       pcbX={-11.0}
       pcbY={-9.5}
       schX={-32}
@@ -95,9 +95,9 @@ export const Power = () => (
     />
     <resistor
       name="R_PROG"
-      resistance="2k"
+      resistance="3.6k"
       footprint="0402"
-      manufacturerPartNumber="RC0402FR-072KL"
+      manufacturerPartNumber="RC0402FR-073K6L"
       pcbX={-6.4}
       pcbY={-9.0}
       schX={-32}

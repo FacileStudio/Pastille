@@ -124,7 +124,7 @@ export default () => (
     <fiducial name="FID2" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={16.5} pcbY={3.0} />
     <fiducial name="FID3" padDiameter="1mm" soldermaskPullback="0.5mm" pcbX={0} pcbY={16.8} />
     <silkscreentext text="PASTILLE BOHS-01" layer="top" fontSize="1mm" pcbX={0} pcbY={10.4} />
-    <silkscreentext text="REV 0.2.2" layer="top" fontSize="0.75mm" pcbX={0} pcbY={8.8} />
+    <silkscreentext text="REV 0.3.0" layer="top" fontSize="0.75mm" pcbX={0} pcbY={8.8} />
 
     <copperpour layer="bottom" connectsTo="net.GND" />
   </board>

@@ -22,10 +22,11 @@ export const Trigger = () => (
     />
     <chip
       name="U_HAP"
-      footprint="soic8"
+      footprint="msop10"
       manufacturerPartNumber="DRV2605LDGSR"
       pcbX={7.9}
       pcbY={-12.2}
+      pcbRotation={90}
       schX={-32}
       schY={-22}
       pinLabels={{
@@ -34,20 +35,23 @@ export const Trigger = () => (
         pin3: "SDA",
         pin4: "IN_TRIG",
         pin5: "EN",
-        pin6: "GND",
+        pin6: "VDD_NC",
         pin7: "OUT_P",
-        pin8: "VDD",
+        pin8: "GND",
+        pin9: "OUT_N",
+        pin10: "VDD",
       }}
       pinAttributes={{
         VDD: { requiresPower: true },
         GND: { requiresGround: true },
+        VDD_NC: { doNotConnect: true },
       }}
     />
     <capacitor
       name="C_HAP"
-      capacitance="100nF"
+      capacitance="1uF"
       footprint="0402"
-      manufacturerPartNumber="GRM155R71C104KA88D"
+      manufacturerPartNumber="GRM155R61A105KE15D"
       pcbX={12.4}
       pcbY={-11.8}
       schX={-24}
@@ -111,6 +115,6 @@ export const Trigger = () => (
     <trace from=".R_SCL > .pin1" to="net.I2C_SCL" />
     <trace from=".R_SCL > .pin2" to="net.VDD3V3" />
     <trace from=".U_HAP > .OUT_P" to=".J_HAP > .pin1" />
-    <trace from=".J_HAP > .pin2" to="net.GND" />
+    <trace from=".U_HAP > .OUT_N" to=".J_HAP > .pin2" />
   </>
 );
