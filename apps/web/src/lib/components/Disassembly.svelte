@@ -141,9 +141,8 @@
         style:margin-bottom={i === LAST ? "0" : "36vh"}
       >
         <Card
-          class="flex w-full flex-col gap-3 p-6 !bg-fc-component transition-all duration-300 {current
-            ? 'shadow-fc-lg scale-[1.01]'
-            : 'shadow-fc-sm'}"
+          class="flex w-full flex-col gap-3 p-6 !bg-fc-component transition-all duration-300
+            shadow-xl shadow-black/50 {current ? 'shadow-2xl shadow-black/70 scale-[1.01]' : ''}"
         >
           <div class="flex items-center gap-3">
             <span

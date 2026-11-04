@@ -29,6 +29,16 @@ export function applyParts(model: ExplodeModel, s: number, tmp: THREE.Vector3) {
     partOffset(name, s, tmp).applyMatrix3(part.basis);
     part.node.position.copy(part.rest).add(tmp);
   }
+  const lensNode = model.parts.get("lens")?.node;
+  if (lensNode) {
+    const lensAlpha = Math.min(1, Math.max(0, s)) * 0.42;
+    lensNode.traverse((c) => {
+      const mesh = c as THREE.Mesh;
+      if (mesh.isMesh && (mesh.material as { opacity?: number })?.opacity !== undefined) {
+        (mesh.material as { opacity: number }).opacity = lensAlpha;
+      }
+    });
+  }
   model.root.updateMatrixWorld(true);
 }
 

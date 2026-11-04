@@ -56,7 +56,7 @@ const PART_STYLES: Record<string, (T: Three) => THREE.Material> = {
     new T.MeshStandardMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0,
       roughness: 0.05,
       metalness: 0.1,
     }),
