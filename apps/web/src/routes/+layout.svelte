@@ -25,17 +25,15 @@
   let scrimEl: HTMLDivElement | null = $state(null);
   let drawerEl: HTMLElement | null = $state(null);
 
-  if (browser) {
-    const saved = localStorage.getItem("pastille-theme");
-    if (saved === "light" || saved === "dark") theme = saved;
-    else document.documentElement.classList.add("dark");
-  }
+  if (browser && document.documentElement.classList.contains("light")) theme = "light";
 
   $effect(() => {
     if (!browser) return;
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.classList.toggle("light", theme === "light");
-    localStorage.setItem("pastille-theme", theme);
+    try {
+      localStorage.setItem("pastille-theme", theme);
+    } catch {}
   });
   $effect(() => moveNavPill(navPill, navEls[activeSection], true));
 
@@ -133,7 +131,7 @@
       <div class="flex items-center gap-2">
         <IconButton
           variant="ghost"
-          class="size-9 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface"
+          class="size-9 pointer-coarse:size-11 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface"
           aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
           onclick={toggleTheme}
         >
@@ -150,7 +148,7 @@
         >
         <IconButton
           variant="ghost"
-          class="size-9 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface md:hidden"
+          class="size-9 pointer-coarse:size-11 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface md:hidden"
           aria-label="Open navigation menu"
           aria-expanded={mobileOpen}
           onclick={openSidebar}
@@ -182,7 +180,7 @@
             </span>
             <IconButton
               variant="ghost"
-              class="size-9 border-0 bg-fc-surface text-fc-fg"
+              class="size-9 pointer-coarse:size-11 border-0 bg-fc-surface text-fc-fg"
               aria-label="Close navigation menu"
               onclick={() => closeSidebar()}
             >
@@ -198,7 +196,7 @@
                   e.preventDefault();
                   closeSidebar(() => selectSection(item.id));
                 }}
-                class="inline-flex h-10 items-center rounded-fc-pill px-4 text-fc-sm font-medium transition-colors
+                class="inline-flex h-11 items-center rounded-fc-pill px-4 text-fc-sm font-medium transition-colors
                   {active ? 'bg-fc-accent text-fc-accent-fg' : 'text-fc-fg-muted hover:bg-fc-surface hover:text-fc-fg'}"
                 >{item.label}</a
               >
