@@ -82,7 +82,7 @@ export const FEATURES: FeatureItem[] = [
   {
     icon: "solar:eye-bold-duotone",
     title: "Round screen",
-    description: "A 1.28 inch, 240x240 display where Bulle's face lives. It redraws at 30 FPS.",
+    description: "A 1.28 inch, 240x240 display that shows Bulle's face.",
     tag: "GC9A01 over SPI",
   },
   {
