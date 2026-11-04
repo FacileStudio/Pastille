@@ -2,6 +2,7 @@
   import { Button, Card, Icon, Section, icons } from "@facile/muse";
   import Disassembly from "$lib/components/Disassembly.svelte";
   import PcbViewer from "$lib/components/PcbViewer.svelte";
+  import PreOrderForm from "$lib/components/PreOrderForm.svelte";
   import SyncTopology from "$lib/components/SyncTopology.svelte";
   import {
     COMPARISON,
@@ -46,9 +47,11 @@
   </div>
 
   <div data-reveal-item class="flex flex-wrap items-center gap-3 pt-1">
+    <Button variant="primary" size="lg" href="#preorder">Pre-order</Button>
     <Button
-      variant="primary"
+      variant="ghost"
       size="lg"
+      class="bg-fc-surface text-fc-fg hover:bg-fc-component"
       href="https://github.com/FacileStudio/Pastille"
       target="_blank"
       rel="noreferrer"
@@ -82,11 +85,9 @@
   </div>
 </section>
 
-<Section
-  id="disassembly"
-  title="What's inside"
-  description="Scroll to take Pastille apart, one layer at a time."
->
+<PreOrderForm />
+
+<Section id="disassembly" title="What's inside" description="Scroll to take Pastille apart, one layer at a time.">
   <Disassembly />
 </Section>
 

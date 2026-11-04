@@ -39,7 +39,9 @@ export interface ProtocolPlane {
   lines: CodeLine[];
 }
 
-export const VERSION = "0.4.0";
+export const VERSION = "0.5.0";
+
+export const PREORDER_PRICE = "$49";
 
 export const RELEASE_TAG = `v${VERSION}`;
 
