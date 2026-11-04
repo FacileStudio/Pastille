@@ -4,23 +4,36 @@ The BOHS-01 wire protocol `bohs.v1` multiplexes real-time audio, Reverse MCP con
 
 ## Pastille v0.4.0 implementation status
 
-The Pastille v0.4.0 firmware implements most of this specification. Hardware testing of the radio, display, touch and haptic drivers is still pending.
+The Pastille v0.4.0 firmware implements this specification on all three transports. None of the radio, audio, display, touch or haptic drivers has run on a board yet; the protocol, framing, provisioning, storage, audio conversion, VAD, jitter buffer, SNTP and TLS chain logic are host-tested.
 
 | Feature | Pastille v0.4.0 |
 | :--- | :--- |
-| Transport A, Wi-Fi WSS: station mode, TLS 1.3, `bohs.v1` WebSocket with the bearer token, reconnect with backoff | Runs on the device when the config has `prefer_ble: false` and a `wifi_ssid` |
+| Transport A, Wi-Fi WSS: station mode, SNTP, TLS 1.3, `bohs.v1` WebSocket with the bearer token, reconnect with backoff | Runs on the device when the config has `prefer_ble: false` and a `wifi_ssid` |
 | Transport B, BLE GATT: advertising, `B001` to `B004`, stream framing, LE Secure Connections with bonding | Runs on the device |
 | Transport C, USB CDC (stream framing, `0x01`, `0x02`, `0x03` rejected with `-32001`) | Runs on the device |
 | `0x03` provisioning on `B004`, the tap window, `prov.state`, config and bond kept in flash | Runs on the device |
 | Reverse MCP: `tools/list`, `charm.display_avatar`, `charm.haptic_pulse`, `charm.get_telemetry` | Runs on the device |
 | `charm.low_battery` and `charm.tap_event` notifications | Runs on the device |
-| Microphone capture and speaker playback | Not implemented. The device validates inbound `0x01` frames and discards them, and sends none. Its capability bits are `0x0C` (display, haptic). |
+| `0x01` audio: microphone capture with VAD, speaker playback through a jitter buffer, full duplex | Runs on the device |
 
 On the device, `charm.get_telemetry` reports `rssi_dbm` and `temp_c` as `null`: the firmware does not read the radio RSSI yet, and esp-hal has no ESP32-S3 temperature sensor driver.
 
-The device verifies the gateway's TLS chain against four pinned roots: ISRG Root X1, ISRG Root X2, GTS Root R4 and GlobalSign Root CA. It checks the host name but not the validity dates, because it has no trusted clock. A gateway behind another CA cannot be reached over Wi-Fi direct.
+### Audio on Pastille
 
-The firmware keeps the config and one BLE bond in a CRC-checked record in the `pastille` flash partition, written alternately to two sectors. Flash encryption is not enabled, so the device token and Wi-Fi PSK are stored in plain text on the chip's flash.
+- The microphone (SPH0645LM4H-B, I2S0) runs at 16 kHz with 32-bit slots, so BCLK is 1.024 MHz, the microphone's minimum. It outputs 18-bit samples left-justified in the slot and changes DATA 66 ns after the rising BCLK edge, the edge the ESP32-S3 samples on, so every bit arrives one clock late. The firmware shifts each slot left by one, keeps the top 16 bits, and removes the microphone's DC offset with a high-pass filter near 13 Hz.
+- The VAD compares each frame's RMS with a fixed threshold and holds speech for 300 ms after the last loud frame. The frame where the hold ends carries the end-of-utterance flag.
+- Upstream frames go to the link the gateway session uses, only in the full-duplex stream state. The device enters that state when a session opens, when downstream audio arrives, or when the user taps during a session. It drops to sleep grace when speech and playback stop; in sleep grace the microphone still feeds the VAD, so speech resumes the stream without losing the first frame. After 30 s of sleep grace the device stops the microphone clock, and the next tap restarts it. Frames the device does not send do not consume sequence numbers.
+- The speaker (MAX98357A, I2S1) plays through a 4-frame (80 ms) jitter buffer that starts after 2 frames. A frame missing when its turn comes plays as silence, and a frame that arrives after its turn is dropped, so playback never stalls. `SD_MODE` goes low, shutting the amplifier down, after 200 ms without audio.
+
+### Time
+
+The device sets its wall clock over SNTP (`pool.ntp.org`) once Wi-Fi is up, and refreshes it every hour. It rejects any answer earlier than 2026-11-01, the v0.4.0 build floor. The WSS task opens no session before the clock is set, so the TLS check always includes the certificate validity dates; without Wi-Fi time there is no Wi-Fi session, which is the fail-closed choice. SNTP is unauthenticated, so the floor is the only bound on a forged time. Over BLE and USB the device has no wall clock unless Wi-Fi gave it one, and notification timestamps then count from boot.
+
+### Trust and storage
+
+The device verifies the gateway's TLS chain against four pinned roots: ISRG Root X1, ISRG Root X2, GTS Root R4 and GlobalSign Root CA, and checks the host name and the validity dates. A gateway behind another CA cannot be reached over Wi-Fi direct.
+
+The firmware keeps the config and one BLE bond in a CRC-checked record in the `pastille` flash partition, written alternately to two sectors. The partition is flagged `encrypted`; the device token and Wi-Fi PSK are only protected once flash encryption is enabled in eFuse, as the README production step describes. Without it they are stored in plain text.
 
 ## Frames
 
@@ -88,6 +101,22 @@ All communication uses binary WebSocket messages. Each message carries exactly o
 
 The device is a GATT server. The Bulle mobile or desktop app is the central. Centrals should request the 2M PHY and an ATT_MTU of 247. Stream framing works at any ATT_MTU, including the default of 23, but PCM16 audio needs about 256 kbit/s in each direction, which needs the 2M PHY and a large MTU in practice.
 
+#### Audio throughput budget
+
+After connecting, Pastille requests the 2M PHY, 251-byte LE data packets (2120 µs) and a connection interval of 7.5 to 15 ms with no peripheral latency. The central decides the final values. The budget for full-duplex audio at ATT_MTU 247:
+
+| Quantity | Value |
+| :--- | :--- |
+| Audio per direction | One 644-byte frame plus its 2-byte prefix every 20 ms: 646 bytes, 258.4 kbit/s |
+| Packets per frame | 3 notifications or writes: 244 + 244 + 158 bytes of ATT payload |
+| One full data packet on the 2M PHY | 2 B preamble, 4 B access address, 2 B header, 251 B payload (4 B L2CAP, 3 B ATT, 244 B data), 4 B MIC, 3 B CRC: 266 B, 1064 µs |
+| One exchange, a packet each way | 2 x (1064 µs + 150 µs inter-frame space) = 2428 µs |
+| Air time for both directions | 3 exchanges per 20 ms: 7.3 ms, 36 % of the air time |
+| Ceiling at 2M PHY | About 804 kbit/s each way if every connection event is filled, 3.1 times the audio rate |
+| Same budget on the 1M PHY | 2128 µs per packet, 13.7 ms per 20 ms, 68 % of the air time, with little room for retransmissions |
+
+So full-duplex PCM16 fits on paper with the 2M PHY, a large MTU and a central that sends several packets per connection event, but not reliably on the 1M PHY. The real rate depends on how many packets the phone allows per event, and nobody has measured it on Pastille yet. On Wi-Fi direct the device does not use BLE for audio; when the config selects BLE relay, Wi-Fi stays off, so the radio does not share air time between the two.
+
 All UUIDs are full 128-bit UUIDs. They share the suffix `-f4c1-4e00-b001-000000000001`. The labels `B001` to `B004` are short names for this document only. They are not 16-bit Bluetooth SIG UUIDs.
 
 | Label | UUID | Role | Properties | Carries |
@@ -110,7 +139,7 @@ The device advertises the service UUID with 6 bytes of service data:
 | 1 | `caps` | Capability bitfield (see below) |
 | 2-5 | `hw_id` | Hardware ID: the last 4 bytes of the eFuse base MAC. The first 3 bytes are the vendor OUI and repeat across devices. |
 
-Pastille v0.4.0 advertises `[0x00, 0x0C, hw_id[0], hw_id[1], hw_id[2], hw_id[3]]` when unclaimed: display and haptic, no audio yet.
+Pastille advertises `[0x00, 0x0F, hw_id[0], hw_id[1], hw_id[2], hw_id[3]]` when unclaimed.
 
 The advertising packet holds the flags and one Service Data (128-bit UUID) structure: the service UUID followed by these 6 bytes. The device name `Pastille` is in the scan response. The device restarts advertising whenever the state code changes.
 
@@ -492,7 +521,7 @@ Triggered when the user taps or holds the capacitive front surface.
 
 Supported `type` values: `single_tap`, `double_tap`, `long_press`.
 
-Pastille v0.4.0 sends this notification to the transport the gateway session last used, and drops it when no session is open. `timestamp_ms` counts milliseconds since boot, because the device has no wall clock. A press held 800 ms is a `long_press`, and two taps within 350 ms make a `double_tap`.
+Pastille v0.4.0 sends this notification to the transport the gateway session last used, and drops it when no session is open. `timestamp_ms` is Unix time in milliseconds once SNTP has set the clock, and milliseconds since boot before that. A press held 800 ms is a `long_press`, and two taps within 350 ms make a `double_tap`.
 
 ### Low battery alert notification
 
