@@ -23,6 +23,7 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@facile/blob": "github:FacileStudio/blob#v0.1.0",
     "@facile/muse": "github:FacileStudio/muse#v0.10.0",
     "gsap": "^3.13.0",
     "iconify-icon": "^3.0.2",

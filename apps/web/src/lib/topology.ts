@@ -82,7 +82,7 @@ export const TOPOLOGY_MODES: TopologyMode[] = [
     direct: false,
     pills: [
       { icon: "solar:bluetooth-wave-bold-duotone", value: "Bluetooth LE" },
-      { icon: "solar:battery-full-bold-duotone", value: "24 h target" },
+      { icon: "solar:battery-full-bold-duotone", value: "10 h target" },
       { icon: "solar:monitor-smartphone-bold-duotone", value: "Via the app" },
     ],
   },
@@ -95,7 +95,7 @@ export const TOPOLOGY_MODES: TopologyMode[] = [
     direct: true,
     pills: [
       { icon: "solar:wi-fi-router-bold-duotone", value: "Wi-Fi" },
-      { icon: "solar:battery-full-bold-duotone", value: "8 h target" },
+      { icon: "solar:battery-full-bold-duotone", value: "3.5 h target" },
       { icon: "solar:server-square-bold-duotone", value: "No phone needed" },
     ],
   },

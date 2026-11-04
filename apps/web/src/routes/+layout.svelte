@@ -8,11 +8,12 @@
   } from "@facile/muse";
   import { NAV_SECTIONS } from "$lib/data";
   import { GITHUB_ICON, MENU_ICON, PASTILLE_ICONS, PASTILLE_LOGO } from "$lib/icons";
+  import { EXPLODE_ICONS } from "$lib/icons-explode";
   import IntroLoader from "$lib/components/IntroLoader.svelte";
   import { moveNavPill, scrollToSection, watchActiveSection } from "$lib/motion";
 
   let { children }: { children: Snippet } = $props();
-  registerIcons(PASTILLE_ICONS);
+  registerIcons({ ...PASTILLE_ICONS, ...EXPLODE_ICONS });
   provideLocale("en");
 
   let theme = $state<"light" | "dark">("dark");
@@ -121,8 +122,8 @@
             href="#{item.id}"
             aria-current={active ? "location" : undefined}
             onclick={(e) => selectSection(item.id, e)}
-            class="relative z-10 inline-flex h-8 items-center rounded-fc-pill px-3.5 text-fc-xs font-medium
-              transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2
+            class="relative z-10 inline-flex h-8 items-center whitespace-nowrap rounded-fc-pill px-3 text-fc-xs
+              font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2
               focus-visible:outline-fc-ring {active ? 'text-fc-accent-fg' : 'text-fc-fg-muted hover:text-fc-fg'}"
             >{item.label}</a
           >

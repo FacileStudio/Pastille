@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Button, Card, Icon, Section, icons } from "@facile/muse";
+  import Disassembly from "$lib/components/Disassembly.svelte";
   import PcbViewer from "$lib/components/PcbViewer.svelte";
   import SyncTopology from "$lib/components/SyncTopology.svelte";
   import {
@@ -24,21 +25,21 @@
 </script>
 
 <svelte:head>
-  <title>Pastille | Open hardware voice charm (BOHS-01)</title>
+  <title>Pastille | Wear your assistant</title>
   <meta
     name="description"
-    content="Pastille is an open-source 38 mm wearable voice charm and the reference implementation of BOHS-01."
+    content="Pastille is an open hardware charm you wear. Tap it, talk, and your own Bulle assistant answers."
   />
 </svelte:head>
 
 <section use:scrollReveal={{ delay: 0.12, stagger: 0.07 }} class="flex flex-col gap-6 pt-4 md:pt-8">
   <div data-reveal-item class="flex flex-col gap-3 max-w-2xl">
     <h1 class="text-fc-2xl sm:text-fc-3xl font-semibold tracking-tight text-fc-fg">
-      38 mm open hardware voice charm for Bulle.
+      Wear your assistant.
     </h1>
     <p class="text-fc-md sm:text-fc-lg text-fc-fg-muted">
-      Tap to wake in under 50 ms, stream full-duplex 16 kHz voice over BLE 5.0 or Wi-Fi, and render
-      60 FPS companion expressions on a round IPS screen.
+      Pastille is a 42 mm charm with Bulle's face on a round screen. Tap it and talk. Bulle answers out
+      loud from a server you run, and every part of Pastille is open source.
     </p>
   </div>
 
@@ -51,18 +52,18 @@
       rel="noreferrer"
       icon={GITHUB_ICON}
     >
-      Explore repository
+      View on GitHub
     </Button>
     <Button
       variant="ghost"
       size="lg"
       class="bg-fc-surface text-fc-fg hover:bg-fc-component"
-      href="https://github.com/FacileStudio/Pastille/releases/tag/v0.3.0"
+      href="https://github.com/FacileStudio/Pastille/releases/tag/v0.4.0"
       target="_blank"
       rel="noreferrer"
       icon={icons.download}
     >
-      Enclosure CAD (v0.3.0)
+      Build files (v0.4.0)
     </Button>
   </div>
 
@@ -79,11 +80,19 @@
   </div>
 </section>
 
+<Section
+  id="disassembly"
+  title="What's inside"
+  description="Scroll to take Pastille apart, one layer at a time."
+>
+  <Disassembly />
+</Section>
+
 <div use:scrollReveal={{ y: 20 }}>
   <Section
     id="viewer"
-    title="3D board & enclosure"
-    description="Compiled from hardware/index.tsx with Fusible."
+    title="The board in 3D"
+    description="Drag to turn it. Fusible builds this model from the circuit source, so it matches the real board."
   >
     <PcbViewer />
   </Section>
@@ -102,8 +111,8 @@
 <div use:scrollReveal={{ stagger: 0.05 }}>
   <Section
     id="architecture"
-    title="Hardware architecture"
-    description="Six subsystems on a 4-layer 38 mm ENIG board."
+    title="What it's made of"
+    description="Six blocks on one 38 mm, 4-layer board."
   >
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {#each FEATURES as item (item.title)}
@@ -129,8 +138,8 @@
 <div use:scrollReveal={{ stagger: 0.07 }}>
   <Section
     id="protocol"
-    title="Wire protocol"
-    description="One bohs.v1 stream over BLE or Wi-Fi WSS multiplexes PCM16 audio, Reverse MCP, and pairing frames."
+    title="How it talks"
+    description="Voice, tool calls and pairing share one bohs.v1 stream, over Bluetooth or Wi-Fi."
   >
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {#each PROTOCOL_PLANES as plane (plane.opcode)}
@@ -165,8 +174,8 @@
 <div use:scrollReveal={{ stagger: 0.05 }}>
   <Section
     id="comparison"
-    title="Comparison"
-    description="Pastille vs commercial AI pins and pendants."
+    title="How it compares"
+    description="Pastille next to two AI gadgets you can buy today."
   >
     <div class="grid grid-cols-1 gap-2.5">
       <div class="hidden md:grid md:grid-cols-4 gap-4 px-5 py-2 text-fc-xs font-mono uppercase text-fc-fg-muted">
@@ -194,8 +203,8 @@
 <div use:scrollReveal={{ stagger: 0.07 }} class="pb-12">
   <Section
     id="quickstart"
-    title="Quickstart"
-    description="Compile the circuit, run DRC checks, and test or flash the Embassy firmware."
+    title="Build your own"
+    description="Check the circuit, export the case and board files, then test and flash the firmware."
   >
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {#each QUICKSTART_STEPS as step (step.badge)}

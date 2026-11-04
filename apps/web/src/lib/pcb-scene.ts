@@ -10,7 +10,7 @@ export interface SceneControl {
 /**
  * Configures three-point studio lighting on a Three.js scene.
  */
-function addLights(THREE: typeof import("three"), scene: import("three").Scene) {
+export function addLights(THREE: typeof import("three"), scene: import("three").Scene) {
   scene.add(new THREE.HemisphereLight(0xffffff, 0x181818, 1.6));
   const key = new THREE.DirectionalLight(0xffffff, 2.5);
   key.position.set(70, 130, 90);
@@ -26,7 +26,7 @@ function addLights(THREE: typeof import("three"), scene: import("three").Scene) 
 /**
  * Releases geometry, material, and texture allocations for a Three.js object tree.
  */
-function disposeObject(root: import("three").Object3D) {
+export function disposeObject(root: import("three").Object3D) {
   root.traverse((obj: unknown) => {
     const mesh = obj as {
       isMesh?: boolean;
