@@ -1,0 +1,23 @@
+name: pastille
+
+boards:
+  main:
+    entry: hardware/index.tsx
+    out_dir: dist
+    mcu: esp32-s3
+
+firmware:
+  app:
+    board: main
+    path: apps/firmware
+    framework: embassy
+    pins_rs: apps/firmware/src/pins.rs
+
+bodies:
+  pastille_case:
+    generate: enclosure
+    board: main
+    format: all
+    out_dir: bodies
+    height: 12.0
+    wall_thickness: 2.0

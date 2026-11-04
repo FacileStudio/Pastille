@@ -8,7 +8,7 @@ mod protocol;
 
 use audio::{AudioFrame, I2sPipeline};
 use avatar::{AvatarEmotion, AvatarRenderer, AvatarState};
-use pins::{AUDIO_PINS, BOARD_PINS, DISPLAY_PINS, POWER_PINS};
+use pins::BOARD_PINS;
 use protocol::{BohsFrame, ProtocolDispatcher, FLAG_VOICE_ACTIVITY};
 
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
@@ -120,10 +120,7 @@ fn main() -> ! {
 #[cfg(not(target_arch = "xtensa"))]
 fn main() {
     println!("Pastille Embassy firmware initialized.");
-    println!(
-        "PINS: Board={:?}, Power={:?}, Audio={:?}, Display={:?}",
-        BOARD_PINS, POWER_PINS, AUDIO_PINS, DISPLAY_PINS
-    );
+    println!("PINS: Board={:?}", BOARD_PINS);
 }
 
 #[cfg(test)]
@@ -132,12 +129,12 @@ mod tests {
 
     #[test]
     fn test_system_wiring() {
-        assert_eq!(BOARD_PINS.led, 0);
-        assert_eq!(BOARD_PINS.touch_wake, 7);
-        assert_eq!(AUDIO_PINS.mic_sck, 4);
-        assert_eq!(AUDIO_PINS.spk_din, 17);
-        assert_eq!(DISPLAY_PINS.sclk, 12);
-        assert_eq!(DISPLAY_PINS.mosi, 13);
+        assert_eq!(BOARD_PINS.general.r_boot_pin1, 0);
+        assert_eq!(BOARD_PINS.general.touch_wake, 7);
+        assert_eq!(BOARD_PINS.general.mic_sck, 4);
+        assert_eq!(BOARD_PINS.general.spk_din, 17);
+        assert_eq!(BOARD_PINS.general.lcd_sclk, 12);
+        assert_eq!(BOARD_PINS.general.lcd_mosi, 13);
     }
 
     #[test]

@@ -1,0 +1,19 @@
+{
+  "name": "pastille-hardware",
+  "version": "0.1.0",
+  "description": "Pastille hardware design",
+  "main": "index.tsx",
+  "scripts": {
+    "dev": "tsci dev",
+    "build": "tsci build",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tscircuit": "latest",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@tscircuit/core": "^0.0.2267",
+    "@types/react": "^19.3.0"
+  }
+}
