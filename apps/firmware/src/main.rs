@@ -37,10 +37,17 @@ mod tests_store;
 #[cfg(test)]
 mod tests_touch;
 #[cfg(test)]
+mod tests_trust;
+#[cfg(test)]
 mod tests_wire;
+#[cfg(test)]
+mod tests_ws;
 mod tools;
 mod touch;
 mod trig;
+mod trust;
+mod ws;
+mod ws_frame;
 
 #[cfg(target_arch = "xtensa")]
 extern crate alloc;

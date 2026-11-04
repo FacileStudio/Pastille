@@ -5,20 +5,29 @@ mod display;
 mod flash;
 mod haptic;
 mod net;
+mod rng;
 mod sensors;
+mod tls;
 pub(crate) mod touch;
 mod usb;
+mod wifi;
+mod wss;
+mod wss_io;
 
 use crate::link::CONFIG_WATCH;
 use embassy_executor::Spawner;
+use embassy_net::{Stack, StackResources};
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
 use esp_hal::gpio::AnyPin;
 use esp_hal::peripherals::{ADC1, GPIO1, I2C0, SPI2, USB_DEVICE};
+use esp_hal::rng::Rng;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::usb::usb_serial_jtag::UsbSerialJtag;
 use esp_radio::ble::controller::BleConnector;
+use esp_radio::wifi::{ControllerConfig, Interface, WifiController};
 use net::network_task;
+use static_cell::StaticCell;
 
 esp_bootloader_esp_idf::esp_app_desc!();
 
@@ -26,6 +35,7 @@ esp_bootloader_esp_idf::esp_app_desc!();
 const HEAP_BYTES: usize = 64 * 1024;
 /// Extra heap in the RAM the bootloader hands back after boot.
 const RECLAIMED_HEAP_BYTES: usize = 64 * 1024;
+const NET_SOCKETS: usize = 3;
 
 /// Takes the GPIO that `pins.rs` assigns to a net.
 ///
@@ -49,6 +59,19 @@ fn ble_address() -> [u8; 6] {
     address.copy_from_slice(esp_hal::efuse::base_mac_address().as_bytes());
     address[5] |= 0xC0;
     address
+}
+
+/// Starts Wi-Fi and the network stack; `None` when the radio does not come up.
+fn start_wifi(spawner: &Spawner, wifi: esp_hal::peripherals::WIFI<'static>) -> Option<Stack<'static>> {
+    static RESOURCES: StaticCell<StackResources<NET_SOCKETS>> = StaticCell::new();
+    let controller = WifiController::new(wifi, ControllerConfig::default()).ok()?;
+    let rng = Rng::new();
+    let seed = u64::from(rng.random()) << 32 | u64::from(rng.random());
+    let config = embassy_net::Config::dhcpv4(Default::default());
+    let (stack, runner) = embassy_net::new(Interface::station(), config, RESOURCES.init(StackResources::new()), seed);
+    spawner.spawn(wifi::wifi_task(controller).ok()?);
+    spawner.spawn(wifi::net_runner_task(runner).ok()?);
+    Some(stack)
 }
 
 fn spawn_sensors(spawner: &Spawner, usb: USB_DEVICE<'static>, adc1: ADC1<'static>, batt_sense: GPIO1<'static>) {
@@ -90,4 +113,7 @@ async fn main(spawner: Spawner) {
     }
     spawn_sensors(&spawner, p.USB_DEVICE, p.ADC1, p.GPIO1);
     spawn_outputs(&spawner, p.I2C0, p.SPI2);
+    if let Some(stack) = start_wifi(&spawner, p.WIFI) {
+        spawner.spawn(wss::wss_task(stack).unwrap());
+    }
 }
