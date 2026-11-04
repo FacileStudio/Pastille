@@ -135,10 +135,10 @@ export const COMPARISON_SOURCES: SourceLink[] = [
   { label: "Omi product page", href: "https://www.omi.me/pages/omi-product" },
   { label: "Omi CV1 specs", href: "https://docs.omi.me/doc/hardware/OmiConsumer" },
   { label: "Omi Cloud", href: "https://docs.omi.me/doc/get_started/open-source-and-omi-cloud" },
-  { label: "XDA, Rabbit R1 review", href: "https://www.xda-developers.com/rabbit-r1-review/" },
-  { label: "The Shortcut, Rabbit R1 review", href: "https://www.theshortcut.com/p/rabbit-r1-review-ai" },
+  { label: "XDA's Rabbit R1 review", href: "https://www.xda-developers.com/rabbit-r1-review/" },
+  { label: "The Shortcut's Rabbit R1 review", href: "https://www.theshortcut.com/p/rabbit-r1-review-ai" },
   {
-    label: "Rabbit, built on AOSP",
+    label: "Rabbit's note on AOSP",
     href: "https://www.rabbit.tech/blog/making-r1-more-accessible-to-the-developer-community",
   },
 ];

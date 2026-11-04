@@ -27,7 +27,7 @@
   class="topology mx-auto h-auto w-full"
   class:max-w-sm={vertical}
 >
-  <title {id}>{mode.button}: {mode.summary} {EXAMPLE_NOTE}</title>
+  <title {id}>{`${mode.button}: ${mode.summary} ${EXAMPLE_NOTE}`}</title>
 
   {#each TOPOLOGY_DEVICES as node, i (node.id)}
     <path
