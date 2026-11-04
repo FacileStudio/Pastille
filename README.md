@@ -6,9 +6,9 @@
 
 Pastille is an open-source wearable AI charm and the reference hardware implementation of the Bulle Open Hardware Standard (BOHS-01).
 
-It is a 38 mm disc that clips to clothing or hangs as a pendant. Pastille captures your voice with a digital microphone and streams bidirectional audio to your private Bulle gateway. It talks over BLE 5.0 through the Bulle app when your phone or laptop is near, and over Wi-Fi straight to the gateway when it is not. It shows animated companion expressions on a round LCD and gives haptic feedback.
+It is a 42 mm disc, 14 mm thick, built around a 38 mm board. It clips to clothing or hangs as a pendant. Pastille captures your voice with a digital microphone and streams bidirectional audio to your private Bulle gateway. It talks over BLE 5.0 through the Bulle app when your phone or laptop is near, and over Wi-Fi straight to the gateway when it is not. It shows animated companion expressions on a round LCD and gives haptic feedback.
 
-Pastille targets a BOM under $25, a case that stays cool against your skin, a wake from deep sleep in under 50 ms, and over two weeks of standby on a single charge. These are design targets, not measurements.
+Pastille targets a BOM under $25 (about $21.80 at 1,000 units), a case that stays cool against your skin, a wake from deep sleep in under 50 ms, and about 80 days of deep sleep on one charge of its 120 mAh cell. These are design estimates, not measurements.
 
 Live landing page and interactive 3D board viewer: https://pastille.facile.studio
 
@@ -30,7 +30,7 @@ Live landing page and interactive 3D board viewer: https://pastille.facile.studi
 
 Pastille implements the complete BOHS-01 specification suite:
 
-- [BOHS-01 Architecture Specification](docs/spec/BOHS-01-ARCH.md): System architecture, 38 mm physical geometry, thermal envelope under 40°C, $23.85 BOM, TP4056 charging, transport selection, BLE pairing, and the 6-state power state machine.
+- [BOHS-01 Architecture Specification](docs/spec/BOHS-01-ARCH.md): System architecture, 38 mm physical geometry, thermal envelope under 40°C, $21.80 BOM, TP4056 charging, the current budget, transport selection, BLE pairing, and the 6-state power state machine.
 - [BOHS-01 Wire Protocol Specification](docs/spec/BOHS-01-WIRE.md): The `bohs.v1` frame format over Wi-Fi WSS, BLE 5.0 GATT, and USB-C CDC, PCM16 16 kHz audio (opcode `0x01`), Reverse MCP edge tools (opcode `0x02`), and BLE provisioning (opcode `0x03`).
 - [BOHS-01 Gateway Integration Guide](docs/spec/BOHS-01-GATEWAY.md): Bulle device claim and revocation, `bohs_tok_` device tokens, direct and app-relay sessions, Whisper.cpp ingestion, Piper TTS egress, and LLM edge tool calling.
 
@@ -50,11 +50,11 @@ Standalone AI hardware often fails because designers build miniature smartphones
 
 | Characteristic | Pastille (BOHS-01) | Muse Charm | OMI (Friend) | Rabbit R1 |
 | :--- | :--- | :--- | :--- | :--- |
-| Form factor | 38 mm circular disc | Screenless brooch | 40 mm circular pendant | Handheld rectangular slab |
-| Target BOM cost | < $25 ($23.85) | ~ $18 | ~ $45 | ~ $199 retail |
+| Form factor | 42 mm disc, 14 mm thick | Screenless brooch | 40 mm circular pendant | Handheld rectangular slab |
+| Target BOM cost | < $25 ($21.80) | ~ $18 | ~ $45 | ~ $199 retail |
 | Display | 1.28-inch round IPS LCD (240x240) | None | None | 2.88-inch touchscreen |
-| Battery life (standby) | > 14 days (18 uA deep sleep, target) | > 20 days | ~ 4 days | ~ 12 hours |
-| Battery life (streaming) | > 24 h on BLE relay, > 8 h on Wi-Fi direct (targets) | > 12 hours | ~ 6 hours | ~ 4 hours |
+| Battery life (standby) | About 82 days (55 uA deep sleep, estimate) | > 20 days | ~ 4 days | ~ 12 hours |
+| Battery life (streaming) | About 1.3 h on BLE relay, 0.9 h on Wi-Fi direct (estimates) | > 12 hours | ~ 6 hours | ~ 4 hours |
 | System architecture | Sensor / Actuator peripheral | Sensor peripheral | BLE audio streamer | Full Android OS (MediaTek MT6765) |
 | Onboard operating system | None (Bare-metal Rust / Embassy) | None | None | Full Android AOSP fork |
 | Boot / Wake latency | < 50 ms to wake, < 800 ms to audio | < 100 ms | Variable BLE pairing | > 45 seconds cold boot |
@@ -67,10 +67,10 @@ Standalone AI hardware often fails because designers build miniature smartphones
 
 Devices like the Rabbit R1 and Humane Ai Pin placed a high-power mobile processor running Android inside a small enclosure. This creates structural flaws:
 
-1. High quiescent power drain: Android kernels and background daemons consume tens of milliamperes even in standby. Pastille draws 18 microamperes in deep sleep.
+1. High quiescent power drain: Android kernels and background daemons consume tens of milliamperes even in standby. Pastille draws about 55 microamperes in deep sleep, display and board included.
 2. Thermal throttling: Running a full operating system generates excess heat. Skin-contact electronics must stay below 40°C. Heavy processors quickly reach thermal limits and throttle performance.
 3. Slow wake latency: Booting an operating system takes between 30 and 60 seconds. Pastille uses direct RTC wake interrupts that run application code in under 50 milliseconds.
-4. Unnecessary bill of materials: Application processors, multirail PMICs, high-speed LPDDR4 memory, and eMMC flash storage drive BOM costs past $80 before assembly. Pastille uses a single ESP32-S3 microcontroller costing under $3.
+4. Unnecessary bill of materials: Application processors, multirail PMICs, high-speed LPDDR4 memory, and eMMC flash storage drive BOM costs past $80 before assembly. Pastille uses a single ESP32-S3 module costing about $3.
 
 Pastille treats the wearable as a low-latency remote sensor and display. Heavy speech recognition, language models, and tool integrations run on your home server, office workstation, or private cloud instance.
 
@@ -80,7 +80,7 @@ Pastille defines its printed circuit board programmatically using Fusible and ts
 
 ### Prerequisites
 
-Install `bun`, `fusible`, and project dependencies:
+Install `bun`, Fusible 0.20.9 or later (`fusible --version`), and the project dependencies:
 
 ```bash
 cd hardware
@@ -103,17 +103,45 @@ fusible dev
 
 ### Exporting manufacturing and CAD artifacts
 
-Build the enclosure bodies (`bodies/{front_bezel,lens,back_shell}.{step,stl}` and the reference parts), check that they fit, and export Gerbers, KiCad project files, STEP models and schematics:
+Build the board kit and the enclosure bodies (`bodies/{front_bezel,lens,back_shell}.{step,stl}` and the reference parts), check that they fit, and export Gerbers, KiCad project files, STEP models and schematics:
 
 ```bash
+fusible body kit main
 fusible body
 fusible assembly -f all
 fusible export --preset all
+bun hardware/fab/fab.ts
 ```
 
-`fusible body` runs `hardware/bodies/build.ts`, which reads `bodies/kit/main/kit.json` (from `fusible body kit main`). `fusible assembly` fails if any part collides. It writes `dist/assembly.glb` and `dist/assembly.step`. To refresh the landing page model, run `bun hardware/bodies/slim.ts dist/assembly.glb apps/web/static/models/pastille_assembly.glb`.
+`fusible body` runs `hardware/bodies/build.ts`, which reads `bodies/kit/main/kit.json`. `fusible assembly` fails if any part collides. It writes `dist/assembly.glb` and `dist/assembly.step`.
+
+`hardware/fab/fab.ts` finishes the fab files. Fusible 0.20.9 drops copper pours from its Gerbers, so the script writes the bottom ground pour from `dist/fab/circuit.json` into `B_Cu.gbr` as a G36 region and fails if it is missing. It also sets the drill files to 4 layers and writes `dist/fab/bom.csv` and `dist/fab/cpl.csv`.
+
+To refresh the landing page models:
+
+```bash
+fusible export -f glb -o apps/web/static/models/pastille.glb
+bun hardware/bodies/upright.ts apps/web/static/models/pastille.glb apps/web/static/models/pastille.glb
+bun hardware/bodies/slim.ts dist/assembly.glb apps/web/static/models/pastille_assembly.glb
+```
+
+`upright.ts` turns the board half a turn about Y. Fusible writes the board with board +Y toward the front camera, so the silkscreen reads upside down in the viewer without it.
+
+### Files for a board house
+
+Send these files from a release, or from `dist/fab/` after the steps above:
+
+| File | Use |
+| :--- | :--- |
+| `gerbers.zip` | Copper, mask, paste, silkscreen, outline and drill files for a 4-layer, 1.6 mm board, black mask, white silkscreen. The bottom layer carries the ground pour. |
+| `bom.csv` | JLCPCB assembly BOM with LCSC part numbers. |
+| `cpl.csv` | JLCPCB pick-and-place file, top side only. Check the rotations in the board house preview before you order. |
+
+`J_SPK`, `J_HAP` and the test pads are bare pads, so they are not in the BOM or the CPL. The speaker, LRA, LCD panel and battery are bought separately (see `bom.yml`). `kicad.zip` holds the same board as a KiCad project, pour included, for anyone who wants to plot their own Gerbers.
 
 The output files land in `dist/fab/`, `dist/cad/`, `dist/docs/`, and `bodies/`. See the enclosure section of [BOHS-01-ARCH.md](docs/spec/BOHS-01-ARCH.md) for the stack, the battery choice and the print guide.
+
+The v0.4.0 case is an engineering prototype: it fits the 3D models, but no test print has checked it against the real panel and cell yet.
 
 ## Firmware guide
 
@@ -159,11 +187,13 @@ mise run build-firmware
 
 `build-firmware` also writes `target/pastille-firmware.bin`, a 4 MB image with the partition table from `apps/firmware/partitions.csv`. The `pastille` data partition holds the config and the BLE bond.
 
-Connect Pastille with a USB-C cable, hold `SW_BOOT`, and flash. The task opens the serial monitor afterwards:
+Connect Pastille with a USB-C cable and flash. `espflash` resets the ESP32-S3 into download mode over its native USB port, so no button is needed. The task opens the serial monitor afterwards:
 
 ```bash
 mise run flash
 ```
+
+If the firmware no longer answers on USB, open the bezel, hold tweezers across the `TP_BOOT` and `TP_GND` pads while you plug in the cable, and flash again. That forces the ROM download mode.
 
 Without mise, run `source ~/export-esp.sh` and then `cargo +esp build --release --target xtensa-esp32s3-none-elf` from `apps/firmware`.
 
