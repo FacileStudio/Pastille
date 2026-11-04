@@ -158,8 +158,10 @@ Pastille firmware runs bare-metal on the ESP32-S3 in Rust, on `esp-hal` 1.2 with
 - Haptic pulses on the DRV2605L.
 - Capacitive touch on the front pad through the ESP32-S3 touch sensor registers, calibrated at boot: taps authorize pairing and send `charm.tap_event`.
 - Battery and charger sampling every 10 s, published to `charm.get_telemetry`, `B001` and `charm.low_battery`.
+- Full-duplex audio: the SPH0645 microphone on I2S0 with DMA, VAD with a 300 ms hangover and upstream `0x01` frames during a session; the MAX98357A on I2S1 with DMA, an 80 ms jitter buffer, and `SD_MODE` shutting the amplifier down when idle.
+- SNTP wall time over Wi-Fi; TLS checks certificate dates, and no Wi-Fi session opens before the clock is set.
 
-Not in v0.4.0: microphone and speaker audio, and the RSSI and temperature telemetry fields. None of the drivers has run on a board yet; host tests cover the protocol, framing, provisioning, storage records, touch thresholds, WebSocket handshake and the TLS chain check. The implementation status in [BOHS-01-WIRE.md](docs/spec/BOHS-01-WIRE.md) has the details.
+Not in v0.4.0: the RSSI and temperature telemetry fields. None of the drivers has run on a board yet; host tests cover the protocol, framing, provisioning, storage records, touch thresholds, microphone sample conversion, VAD, jitter buffer, SNTP parsing, WebSocket handshake and the TLS chain check. The implementation status in [BOHS-01-WIRE.md](docs/spec/BOHS-01-WIRE.md) has the details, including the BLE audio throughput budget.
 
 ### Host unit tests
 
@@ -196,6 +198,56 @@ mise run flash
 If the firmware no longer answers on USB, open the bezel, hold tweezers across the `TP_BOOT` and `TP_GND` pads while you plug in the cable, and flash again. That forces the ROM download mode.
 
 Without mise, run `source ~/export-esp.sh` and then `cargo +esp build --release --target xtensa-esp32s3-none-elf` from `apps/firmware`.
+
+### Production: flash encryption
+
+The `pastille` partition holds the device token and the Wi-Fi PSK. They are only protected once flash encryption is on. This step burns eFuses, which cannot be undone, and it has not been run on a Pastille yet: try it on a sacrificial unit first. It uses `esptool`, `espefuse` and `espsecure` from esptool v4.8 or later (`pip install esptool`), next to `espflash`.
+
+1. Generate a key for the unit and keep it in your secrets store. Losing it means the unit can only be reflashed through the encrypted OTA path, which v0.4.0 does not have.
+
+   ```bash
+   espsecure.py generate_flash_encryption_key pastille-fe.bin
+   ```
+
+2. Build the image and split it at the partition offsets in `apps/firmware/partitions.csv`:
+
+   ```bash
+   mise run build-firmware
+   cd apps/firmware
+   espflash save-image --chip esp32s3 --flash-size 4mb --partition-table partitions.csv --merge \
+     target/xtensa-esp32s3-none-elf/release/pastille-firmware target/merged.bin
+   dd if=target/merged.bin of=target/bootloader.bin bs=4096 count=8
+   dd if=target/merged.bin of=target/partitions.bin bs=4096 skip=8 count=1
+   dd if=target/merged.bin of=target/app.bin bs=4096 skip=32
+   ```
+
+3. Encrypt each part for its flash address:
+
+   ```bash
+   for part in bootloader:0x0 partitions:0x8000 app:0x20000; do
+     espsecure.py encrypt_flash_data --aes_xts --keyfile pastille-fe.bin \
+       --address "${part#*:}" --output "target/${part%%:*}-enc.bin" "target/${part%%:*}.bin"
+   done
+   ```
+
+4. Burn the key, write the encrypted parts, erase the settings partition, then turn encryption on:
+
+   ```bash
+   espefuse.py --chip esp32s3 burn_key BLOCK_KEY0 pastille-fe.bin XTS_AES_128_KEY
+   esptool.py --chip esp32s3 write_flash 0x0 target/bootloader-enc.bin 0x8000 target/partitions-enc.bin \
+     0x20000 target/app-enc.bin
+   esptool.py --chip esp32s3 erase_region 0x10000 0x2000
+   espefuse.py --chip esp32s3 burn_efuse SPI_BOOT_CRYPT_CNT 0x1
+   ```
+
+5. For release units, stop plaintext reads and writes over the download port. Keep the USB Serial/JTAG peripheral itself enabled, because Pastille uses it as its USB CDC transport:
+
+   ```bash
+   espefuse.py --chip esp32s3 burn_efuse DIS_DOWNLOAD_MANUAL_ENCRYPT 1
+   espefuse.py --chip esp32s3 burn_efuse DIS_USB_JTAG 1
+   ```
+
+After step 4, `espefuse.py --chip esp32s3 summary` shows `SPI_BOOT_CRYPT_CNT` as enabled. The `nvs` and `phy_init` partitions stay in plain text, because they are not flagged `encrypted` and hold no secrets.
 
 ## Landing page (`apps/web`)
 
