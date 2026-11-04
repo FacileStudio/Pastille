@@ -1,8 +1,10 @@
 use crate::audio::AudioFrame;
 use crate::avatar::AvatarRenderer;
 use crate::ble::{BleProvisioner, ProvisionConfig, ProvisionState, TransportKind};
+use crate::clock::wall_ms;
 use crate::events::TapType;
 use crate::link::{outbound, Inbound, AUDIO_RX_CHANNEL, AVATAR_SIGNAL, HAPTIC_SIGNAL};
+use crate::mic::{Vad, VAD_HANGOVER_FRAMES};
 use crate::power::PowerManager;
 use crate::protocol::{BohsFrame, ProtocolDispatcher};
 use crate::MAX_PACKET_BYTES;
@@ -17,6 +19,9 @@ pub struct Node {
     pub gateway_link: Option<TransportKind>,
     pub(crate) seq: u16,
     pub(crate) was_active: bool,
+    pub(crate) vad: Vad,
+    /// Microphone frames left during which recent downstream audio keeps the session streaming.
+    pub(crate) playback_hold: u8,
 }
 
 impl Node {
@@ -30,7 +35,8 @@ impl Node {
         power.on_wake_trigger();
         power.on_hardware_ready(prov.transport);
         let (dispatcher, avatar) = (ProtocolDispatcher::new(), AvatarRenderer::new());
-        Self { dispatcher, avatar, prov, power, gateway_link: None, seq: 0, was_active: false }
+        let vad = Vad::default();
+        Self { dispatcher, avatar, prov, power, gateway_link: None, seq: 0, was_active: false, vad, playback_hold: 0 }
     }
 
     /// Applies one event, then publishes every side effect of a provisioning state change.
@@ -64,16 +70,18 @@ impl Node {
     pub fn handle_inbound(&mut self, link: TransportKind, packet: &[u8]) {
         let mut out = [0u8; MAX_PACKET_BYTES];
         let written = match self.dispatcher.decode_packet(packet) {
-            Ok(BohsFrame::Audio { payload, .. }) => {
-                self.gateway_link = Some(link);
+            Ok(BohsFrame::Audio { seq, payload, .. }) => {
+                self.link_up(link);
                 let mut frame = AudioFrame::new();
                 if frame.copy_from_bytes(payload).is_ok() {
-                    let _ = AUDIO_RX_CHANNEL.try_send(frame);
+                    self.playback_hold = VAD_HANGOVER_FRAMES;
+                    self.power.on_session_open();
+                    let _ = AUDIO_RX_CHANNEL.try_send((seq, frame));
                 }
                 None
             }
             Ok(BohsFrame::Control { json }) => {
-                self.gateway_link = Some(link);
+                self.link_up(link);
                 self.dispatch_control(json, &mut out)
             }
             Ok(BohsFrame::Provision { .. }) if link == TransportKind::WifiDirect => None,
@@ -107,15 +115,20 @@ impl Node {
     }
 
     fn on_tap(&mut self, kind: TapType, uptime_ms: u64) {
-        self.power.on_wake_trigger();
+        if self.gateway_link.is_some() {
+            self.power.on_session_open();
+        } else {
+            self.power.on_wake_trigger();
+        }
         self.prov.on_physical_tap();
-        self.send_event(|out| ProtocolDispatcher::encode_tap_event(kind, uptime_ms, out));
+        let timestamp = wall_ms(uptime_ms).unwrap_or(uptime_ms);
+        self.send_event(|out| ProtocolDispatcher::encode_tap_event(kind, timestamp, out));
     }
 
     fn link_up(&mut self, link: TransportKind) {
-        self.gateway_link = Some(link);
-        if link == TransportKind::WifiDirect {
-            self.power.on_ws_connected();
+        if self.gateway_link != Some(link) {
+            self.gateway_link = Some(link);
+            self.power.on_session_open();
         }
     }
 

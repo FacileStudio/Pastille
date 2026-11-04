@@ -3,12 +3,14 @@ use crate::ble::{ProvisionConfig, ProvisionState, TransportKind};
 use crate::events::encode_prov_state;
 use crate::haptic::{HapticPattern, HapticPulse};
 use crate::link::{
-    device_info, outbound, set_device_info, DeviceInfo, Overlay, StoreRequest, HAPTIC_SIGNAL, OVERLAY_SIGNAL,
-    STORE_CHANNEL, CONFIG_WATCH,
+    device_info, outbound, set_device_info, DeviceInfo, Overlay, StoreRequest, CAPTURE_ENABLED, CONFIG_WATCH,
+    HAPTIC_SIGNAL, OVERLAY_SIGNAL, STORE_CHANNEL,
 };
 use crate::node::Node;
+use crate::power::PowerState;
 use crate::protocol::{ProtocolDispatcher, ProtocolError, FLAG_END_OF_UTTERANCE, FLAG_VOICE_ACTIVITY};
 use crate::MAX_PACKET_BYTES;
+use core::sync::atomic::Ordering;
 
 /// The double pulse `prov.identify` plays so the user finds the charm.
 const IDENTIFY_PULSE: HapticPulse = HapticPulse { pattern: HapticPattern::DoubleTap, duration_ms: 60, intensity: 80 };
@@ -29,6 +31,7 @@ impl Node {
         let state = self.prov.state;
         let transport = self.gateway_link.unwrap_or(self.prov.transport);
         set_device_info(DeviceInfo { state, transport, ..device_info() });
+        self.publish_capture();
         if state == before {
             return;
         }
@@ -55,23 +58,38 @@ impl Node {
         }
     }
 
-    /// Encodes a captured microphone frame and queues it on the gateway link.
+    /// Encodes a captured microphone frame and queues it on the gateway link while the device
+    /// streams; in sleep grace the frame only feeds the VAD, so speech resumes the stream. Frames
+    /// that are not sent give their sequence number back, so the upstream sequence has no gaps.
     pub fn send_audio(&mut self, frame: &AudioFrame) {
-        let Some(link) = self.gateway_link else {
-            return;
-        };
+        let before = self.power.state;
         let mut out = [0u8; MAX_PACKET_BYTES];
-        if let Some(len) = self.encode_audio(frame, &mut out) {
-            let _ = outbound(link).try_send((out, len));
+        let encoded = self.encode_audio(frame, &mut out);
+        let streaming = before == PowerState::StreamFullDuplex || self.power.state == PowerState::StreamFullDuplex;
+        match (self.gateway_link, encoded, streaming) {
+            (Some(link), Some(len), true) => {
+                let _ = outbound(link).try_send((out, len));
+            }
+            (_, Some(_), _) => self.seq = self.seq.wrapping_sub(1),
+            _ => {}
         }
+        self.publish_capture();
+    }
+
+    /// Tells the microphone task whether to run.
+    pub fn publish_capture(&self) {
+        let enabled = self.gateway_link.is_some() && self.power.state != PowerState::DeepSleep;
+        CAPTURE_ENABLED.store(enabled, Ordering::Relaxed);
     }
 
     /// Encodes one captured frame as a `0x01` frame with VAD and end-of-utterance flags.
     pub fn encode_audio(&mut self, frame: &AudioFrame, out: &mut [u8]) -> Option<usize> {
-        let is_active = frame.is_voice_active(DEFAULT_VAD_THRESHOLD);
+        let is_active = self.vad.update(frame, DEFAULT_VAD_THRESHOLD);
         let eou = if self.was_active && !is_active { FLAG_END_OF_UTTERANCE } else { 0 };
         self.was_active = is_active;
-        self.power.on_audio_activity(is_active, FRAME_DURATION_MS);
+        let playing = self.playback_hold > 0;
+        self.playback_hold = self.playback_hold.saturating_sub(1);
+        self.power.on_audio_activity(is_active || playing, FRAME_DURATION_MS);
         let flags = if is_active { FLAG_VOICE_ACTIVITY } else { 0 } | eou;
         let mut payload = [0u8; BYTES_PER_FRAME];
         frame.write_le_bytes(&mut payload).ok()?;

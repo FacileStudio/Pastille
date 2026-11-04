@@ -65,7 +65,7 @@ fn test_power_state_machine() {
     assert_eq!(pm.state, PowerState::BootWake);
     pm.on_hardware_ready(TransportKind::WifiDirect);
     assert_eq!(pm.state, PowerState::WifiFastAssociate);
-    pm.on_ws_connected();
+    pm.on_session_open();
     assert_eq!(pm.state, PowerState::StreamFullDuplex);
 
     pm.on_audio_activity(false, 1000);

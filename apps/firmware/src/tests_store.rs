@@ -65,7 +65,7 @@ fn test_newest_slot_wins_across_wraparound() {
 fn test_b001_info_record() {
     let info = DeviceInfo { state: ProvisionState::Authorized, transport: TransportKind::UsbSerial, battery_pct: 64 };
     let [major, minor, patch] = firmware_version();
-    assert_eq!(info_record(&info), [0x01, 0x02, 0x0C, 64, major, minor, patch, 0x02]);
+    assert_eq!(info_record(&info), [0x01, 0x02, 0x0F, 64, major, minor, patch, 0x02]);
     let version = format!("{major}.{minor}.{patch}");
     assert_eq!(version, env!("CARGO_PKG_VERSION"));
 }

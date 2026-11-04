@@ -1,11 +1,13 @@
 //! On-device entry point: brings up the clocks, heap and scheduler, then spawns every task.
 
+mod audio;
 mod ble;
 mod display;
 mod flash;
 mod haptic;
 mod net;
 mod rng;
+mod sntp;
 mod sensors;
 mod tls;
 pub(crate) mod touch;
@@ -20,7 +22,7 @@ use embassy_net::{Stack, StackResources};
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
 use esp_hal::gpio::AnyPin;
-use esp_hal::peripherals::{ADC1, GPIO1, I2C0, SPI2, USB_DEVICE};
+use esp_hal::peripherals::{ADC1, DMA_CH0, DMA_CH1, GPIO1, I2C0, I2S0, I2S1, SPI2, USB_DEVICE};
 use esp_hal::rng::Rng;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::usb::usb_serial_jtag::UsbSerialJtag;
@@ -35,7 +37,7 @@ esp_bootloader_esp_idf::esp_app_desc!();
 const HEAP_BYTES: usize = 64 * 1024;
 /// Extra heap in the RAM the bootloader hands back after boot.
 const RECLAIMED_HEAP_BYTES: usize = 64 * 1024;
-const NET_SOCKETS: usize = 3;
+const NET_SOCKETS: usize = 4;
 
 /// Takes the GPIO that `pins.rs` assigns to a net.
 ///
@@ -91,6 +93,21 @@ fn spawn_outputs(spawner: &Spawner, i2c0: I2C0<'static>, spi2: SPI2<'static>) {
     }
 }
 
+fn spawn_audio(
+    spawner: &Spawner,
+    i2s0: I2S0<'static>,
+    i2s1: I2S1<'static>,
+    dma0: DMA_CH0<'static>,
+    dma1: DMA_CH1<'static>,
+) {
+    if let Some(rx) = audio::microphone(i2s0, dma0) {
+        spawner.spawn(audio::mic_task(rx).unwrap());
+    }
+    if let Some((tx, shutdown)) = audio::speaker(i2s1, dma1) {
+        spawner.spawn(audio::speaker_task(tx, shutdown).unwrap());
+    }
+}
+
 #[esp_hal::main]
 async fn main(spawner: Spawner) {
     let p = esp_hal::init(esp_hal::Config::default().with_cpu_clock(CpuClock::max()));
@@ -113,7 +130,9 @@ async fn main(spawner: Spawner) {
     }
     spawn_sensors(&spawner, p.USB_DEVICE, p.ADC1, p.GPIO1);
     spawn_outputs(&spawner, p.I2C0, p.SPI2);
+    spawn_audio(&spawner, p.I2S0, p.I2S1, p.DMA_CH0, p.DMA_CH1);
     if let Some(stack) = start_wifi(&spawner, p.WIFI) {
+        spawner.spawn(sntp::sntp_task(stack).unwrap());
         spawner.spawn(wss::wss_task(stack).unwrap());
     }
 }

@@ -5,6 +5,7 @@ use crate::events::TapType;
 use crate::haptic::HapticPulse;
 use crate::Packet;
 use core::cell::Cell;
+use core::sync::atomic::AtomicBool;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::blocking_mutex::Mutex as BlockingMutex;
 use embassy_sync::channel::Channel;
@@ -64,8 +65,10 @@ pub struct DeviceInfo {
 }
 
 pub static INBOUND_CHANNEL: Channel<Mutex, Inbound, 8> = Channel::new();
-/// Downstream frames waiting for the speaker; the I2S playback driver is not in v0.4.0.
-pub static AUDIO_RX_CHANNEL: Channel<Mutex, AudioFrame, 4> = Channel::new();
+/// Downstream frames and their sequence numbers, waiting for the speaker's jitter buffer.
+pub static AUDIO_RX_CHANNEL: Channel<Mutex, (u16, AudioFrame), 8> = Channel::new();
+/// Whether the microphone should run: a gateway session exists and the device is not asleep.
+pub static CAPTURE_ENABLED: AtomicBool = AtomicBool::new(false);
 pub static OUTBOUND_USB: Outbound = Channel::new();
 pub static OUTBOUND_BLE: Outbound = Channel::new();
 pub static OUTBOUND_WSS: Outbound = Channel::new();

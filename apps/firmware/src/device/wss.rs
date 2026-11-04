@@ -5,6 +5,7 @@ use super::tls::GatewayProvider;
 use super::wifi::{wants_wifi, MAX_BACKOFF, MIN_BACKOFF};
 use super::wss_io::{read_loop, write_loop, Duplex};
 use crate::ble::{ProvisionConfig, TransportKind};
+use crate::clock::{uptime_ms, wall_ms};
 use crate::link::{Inbound, CONFIG_WATCH, INBOUND_CHANNEL, OUTBOUND_WSS};
 use crate::ws::{base64, check_response, write_handshake, GatewayUrl, WsError};
 use embassy_futures::select::select;
@@ -86,7 +87,8 @@ async fn session(stack: Stack<'static>, cfg: &ProvisionConfig, bufs: &mut Buffer
     Ok(())
 }
 
-/// Runs gateway sessions whenever the config selects Wi-Fi direct and the network is up.
+/// Runs gateway sessions whenever the config selects Wi-Fi direct, the network is up and SNTP
+/// has set the clock: without wall time the certificate dates cannot be checked, so no session opens.
 #[embassy_executor::task]
 pub async fn wss_task(stack: Stack<'static>) {
     let Some(mut configs) = CONFIG_WATCH.receiver() else { return };
@@ -104,6 +106,9 @@ pub async fn wss_task(stack: Stack<'static>) {
             continue;
         }
         stack.wait_config_up().await;
+        while wall_ms(uptime_ms()).is_none() {
+            Timer::after(Duration::from_secs(1)).await;
+        }
         let started = Instant::now();
         let _ = session(stack, &cfg, &mut bufs).await;
         INBOUND_CHANNEL.send(Inbound::LinkDown(TransportKind::WifiDirect)).await;

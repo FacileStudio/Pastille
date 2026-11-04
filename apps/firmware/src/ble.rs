@@ -18,10 +18,12 @@ pub mod gatt {
 }
 
 pub const AUTH_WINDOW_MS: u32 = 60_000;
+pub const CAP_MIC: u8 = 0x01;
+pub const CAP_SPK: u8 = 0x02;
 pub const CAP_LCD: u8 = 0x04;
 pub const CAP_HAP: u8 = 0x08;
-/// Capabilities this firmware can run: the display and the haptic motor. Audio is not in v0.4.0.
-pub const DEVICE_CAPS: u8 = CAP_LCD | CAP_HAP;
+/// Capabilities this firmware runs: microphone, speaker, display and haptic motor.
+pub const DEVICE_CAPS: u8 = CAP_MIC | CAP_SPK | CAP_LCD | CAP_HAP;
 pub const DEVICE_TOKEN_PREFIX: &str = "bohs_tok_";
 pub const DEVICE_TOKEN_LEN: usize = 41;
 

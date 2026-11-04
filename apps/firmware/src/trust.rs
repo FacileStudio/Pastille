@@ -1,10 +1,11 @@
 //! TLS 1.3 trust for the gateway connection: the server chain must end at one of four pinned
-//! root CAs and name the gateway host. Certificate validity dates are not checked, because the
-//! device has no trusted clock.
+//! root CAs, name the gateway host, and be valid at the current wall time. The WSS task only
+//! opens a session once SNTP has set the clock, so the dates are always checked on the device.
 
 use embedded_tls::pki::CertVerifier;
 use embedded_tls::{Aes128GcmSha256, Certificate, CertificateEntryRef, CertificateRef, CertificateVerifyRef};
-use embedded_tls::{NoClock, TlsCipherSuite, TlsError, TlsVerifier};
+use crate::clock::WallClock;
+use embedded_tls::{TlsCipherSuite, TlsError, TlsVerifier};
 
 /// Root CAs the gateway chain may end at: Let's Encrypt and Google Trust Services, with the
 /// GlobalSign root that cross-signs GTS Root R4.
@@ -19,7 +20,7 @@ const CERT_BYTES: usize = 4096;
 
 /// The one TLS 1.3 cipher suite the device offers.
 pub type Suite = Aes128GcmSha256;
-type Verifier = CertVerifier<'static, Suite, NoClock, CERT_BYTES>;
+type Verifier = CertVerifier<'static, Suite, WallClock, CERT_BYTES>;
 
 /// Tries each pinned root in turn and keeps the verifier that accepted the chain.
 pub struct AnchorVerifier {

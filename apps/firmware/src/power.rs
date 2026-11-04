@@ -58,11 +58,10 @@ impl PowerManager {
         }
     }
 
-    pub fn on_ws_connected(&mut self) {
-        if self.state == PowerState::WifiFastAssociate {
-            self.silence_ms = 0;
-            self.state = PowerState::StreamFullDuplex;
-        }
+    /// A gateway session is open or the user asked to talk: stream from any state.
+    pub fn on_session_open(&mut self) {
+        self.silence_ms = 0;
+        self.state = PowerState::StreamFullDuplex;
     }
 
     pub fn on_audio_activity(&mut self, active: bool, elapsed_ms: u32) -> PowerState {

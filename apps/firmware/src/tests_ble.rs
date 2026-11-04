@@ -33,7 +33,7 @@ fn secure_link(prov: &mut BleProvisioner, handle: u16) {
 #[test]
 fn test_provisioner_rejects_unencrypted_links() {
     let mut prov = BleProvisioner::new(HW_ID);
-    assert_eq!(service_data(prov.state, prov.hardware_id), [0x00, 0x0C, 0x4F, 0x2A, 0x91, 0xC0]);
+    assert_eq!(service_data(prov.state, prov.hardware_id), [0x00, 0x0F, 0x4F, 0x2A, 0x91, 0xC0]);
     assert!(prov_call(&mut prov, IDENTIFY).contains(UNAUTHORIZED));
     prov.on_connected(1);
     assert!(prov_call(&mut prov, IDENTIFY).contains(UNAUTHORIZED));

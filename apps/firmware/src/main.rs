@@ -5,13 +5,16 @@
 mod audio;
 mod avatar;
 mod battery;
+mod clock;
 mod ble;
 mod ble_link;
 #[cfg(target_arch = "xtensa")]
 mod device;
 mod events;
 mod haptic;
+mod jitter;
 mod link;
+mod mic;
 mod node;
 mod node_effects;
 mod overlay;
@@ -20,10 +23,13 @@ mod power;
 mod protocol;
 mod prov;
 mod rpc;
+mod sntp;
 mod store;
 mod stream;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod tests_audio;
 #[cfg(test)]
 mod tests_ble;
 #[cfg(test)]
@@ -32,6 +38,8 @@ mod tests_link;
 mod tests_node;
 #[cfg(test)]
 mod tests_rpc;
+#[cfg(test)]
+mod tests_sntp;
 #[cfg(test)]
 mod tests_store;
 #[cfg(test)]

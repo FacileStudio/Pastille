@@ -4,6 +4,7 @@ use crate::ble::{ProvisionState, TransportKind};
 use crate::link::{outbound, AUDIO_RX_CHANNEL, AVATAR_SIGNAL, HAPTIC_SIGNAL};
 use crate::node::Node;
 use crate::protocol::{ProtocolDispatcher, FLAG_END_OF_UTTERANCE, FLAG_VOICE_ACTIVITY, OPCODE_CONTROL, OPCODE_PROVISION};
+use crate::mic::VAD_HANGOVER_FRAMES;
 use crate::MAX_PACKET_BYTES;
 
 pub(crate) fn frame(opcode: u8, json: &str) -> Vec<u8> {
@@ -14,7 +15,7 @@ pub(crate) fn frame(opcode: u8, json: &str) -> Vec<u8> {
 
 pub(crate) fn next_reply(link: TransportKind) -> Option<String> {
     let (pkt, len) = outbound(link).try_receive().ok()?;
-    Some(String::from_utf8(pkt[..len].to_vec()).unwrap())
+    Some(String::from_utf8_lossy(&pkt[..len]).into_owned())
 }
 
 fn tool_call(id: u32, name: &str, arguments: &str) -> Vec<u8> {
@@ -69,6 +70,7 @@ fn test_inbound_routing_and_outbound_queue() {
     check_provision_routing(&mut node);
     crate::tests_node::check_ble_pairing_flow();
     crate::tests_node::check_gateway_events();
+    crate::tests_node::check_audio_streaming();
 }
 
 #[test]
@@ -80,7 +82,13 @@ fn test_audio_uplink_flags_and_sequence() {
     assert_eq!(node.encode_audio(&loud, &mut out), Some(644));
     assert_eq!(&out[..4], &[0x01, FLAG_VOICE_ACTIVITY, 0, 0]);
     assert_eq!(&out[4..6], &2000i16.to_le_bytes());
-    assert_eq!(node.encode_audio(&AudioFrame::new(), &mut out), Some(644));
-    assert_eq!(&out[..4], &[0x01, FLAG_END_OF_UTTERANCE, 0, 1]);
+    for seq in 1..VAD_HANGOVER_FRAMES {
+        node.encode_audio(&AudioFrame::new(), &mut out);
+        assert_eq!(&out[..4], &[0x01, FLAG_VOICE_ACTIVITY, 0, seq], "hangover frame {seq}");
+    }
+    node.encode_audio(&AudioFrame::new(), &mut out);
+    assert_eq!(&out[..4], &[0x01, FLAG_END_OF_UTTERANCE, 0, VAD_HANGOVER_FRAMES]);
+    node.encode_audio(&AudioFrame::new(), &mut out);
+    assert_eq!(out[1], 0);
     assert_eq!(node.encode_audio(&loud, &mut [0u8; 100]), None);
 }

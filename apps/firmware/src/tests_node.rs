@@ -1,12 +1,17 @@
+use crate::audio::AudioFrame;
 use crate::ble::{ProvisionState, TransportKind};
 use crate::events::TapType;
 use crate::haptic::HapticPattern;
 use crate::link::CONFIG_WATCH;
 use crate::link::{device_info, Inbound, Overlay, StoreRequest, HAPTIC_SIGNAL, OVERLAY_SIGNAL, STORE_CHANNEL};
+use crate::link::{outbound, CAPTURE_ENABLED};
+use crate::mic::VAD_HANGOVER_FRAMES;
 use crate::node::Node;
+use crate::power::PowerState;
 use crate::protocol::{OPCODE_CONTROL, OPCODE_PROVISION};
 use crate::tests_link::{frame, next_reply};
 use crate::{Packet, MAX_PACKET_BYTES};
+use core::sync::atomic::Ordering;
 
 const TOKEN: &str = "bohs_tok_0123456789abcdef0123456789abcdef";
 
@@ -86,7 +91,7 @@ pub(crate) fn check_gateway_events() {
     assert!(next_reply(TransportKind::UsbSerial).unwrap().contains(r#""id":1"#));
     node.handle(Inbound::Tap(TapType::LongPress, 42));
     let tap = next_reply(TransportKind::UsbSerial).unwrap();
-    assert!(tap.ends_with(r#""params":{"type":"long_press","timestamp_ms":42}}"#));
+    assert!(tap.contains(r#""params":{"type":"long_press","timestamp_ms":"#));
     node.handle(Inbound::LowBattery(4, 3330));
     assert!(next_reply(TransportKind::UsbSerial).unwrap().contains(r#""battery_pct":4"#));
     node.handle(Inbound::LinkDown(TransportKind::UsbSerial));
@@ -97,4 +102,36 @@ pub(crate) fn check_gateway_events() {
     node.handle(Inbound::LinkDown(TransportKind::WifiDirect));
     node.handle(Inbound::Tap(TapType::SingleTap, 50));
     assert_eq!(next_reply(TransportKind::UsbSerial), None);
+}
+
+/// Streams microphone frames only during a session, stops after speech ends, and resumes on a tap.
+pub(crate) fn check_audio_streaming() {
+    let mut node = Node::new([0; 4], None);
+    let (mut loud, quiet) = (AudioFrame::new(), AudioFrame::new());
+    loud.samples.fill(2000);
+    node.send_audio(&loud);
+    assert!(!CAPTURE_ENABLED.load(Ordering::Relaxed));
+    let list = packet(OPCODE_CONTROL, r#"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#);
+    node.handle(Inbound::Frame(TransportKind::UsbSerial, list));
+    assert!(next_reply(TransportKind::UsbSerial).is_some());
+    assert!(CAPTURE_ENABLED.load(Ordering::Relaxed));
+    node.send_audio(&loud);
+    let (first, len) = outbound(TransportKind::UsbSerial).try_receive().unwrap();
+    assert_eq!((len, &first[..4]), (644, &[0x01, 0x02, 0, 0][..]));
+    for _ in 0..VAD_HANGOVER_FRAMES {
+        node.send_audio(&quiet);
+        assert!(next_reply(TransportKind::UsbSerial).is_some());
+    }
+    assert_eq!(node.power.state, PowerState::SleepGrace);
+    node.send_audio(&quiet);
+    assert_eq!(next_reply(TransportKind::UsbSerial), None);
+    for _ in 0..1_500 {
+        node.send_audio(&quiet);
+    }
+    assert_eq!(node.power.state, PowerState::DeepSleep);
+    assert!(!CAPTURE_ENABLED.load(Ordering::Relaxed));
+    node.handle(Inbound::Tap(TapType::SingleTap, 9));
+    assert!(next_reply(TransportKind::UsbSerial).unwrap().contains("single_tap"));
+    assert_eq!(node.power.state, PowerState::StreamFullDuplex);
+    assert!(CAPTURE_ENABLED.load(Ordering::Relaxed));
 }
