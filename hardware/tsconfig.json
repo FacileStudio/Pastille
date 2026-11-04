@@ -9,5 +9,6 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["env.d.ts", "index.tsx", "subcircuits/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }

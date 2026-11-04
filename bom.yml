@@ -1,0 +1,5 @@
+currency: EUR
+print:
+  price_per_kg: 25.0
+parts: {}
+prints: {}

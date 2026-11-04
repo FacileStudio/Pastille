@@ -1,10 +1,30 @@
 # Pastille
 
+<p align="center">
+  <img src="assets/logo.svg" alt="Pastille Logo" width="72" height="72" />
+</p>
+
 Pastille is an open-source wearable AI charm and the reference hardware implementation of the Bulle Open Hardware Standard (BOHS-01).
 
 It is a 38 mm disc that clips to clothing or hangs as a pendant. Pastille captures your voice with digital microphones, streams bidirectional audio over WebSocket to your private Bulle gateway, displays animated companion expressions on a round LCD, and provides tactile haptic feedback.
 
 Pastille costs under $25 to assemble, stays cool against your skin, wakes from deep sleep in under 50 ms, and lasts over two weeks on a single charge.
+
+Live landing page and interactive 3D board viewer: https://pastille.facile.studio
+
+## PCB and 3D hardware previews
+
+### 3D PCB render
+
+![Pastille 3D PCB Preview](assets/pcb-3d.png)
+
+### 2D PCB layout
+
+![Pastille 2D PCB Layout](assets/pcb-2d.png)
+
+### Electronic schematic
+
+![Pastille Schematic](assets/schematic.png)
 
 ## Specifications and standard
 
@@ -21,12 +41,12 @@ Standalone AI hardware often fails because designers build miniature smartphones
 | Characteristic | Pastille (BOHS-01) | Muse Charm | OMI (Friend) | Rabbit R1 |
 | :--- | :--- | :--- | :--- | :--- |
 | Form factor | 38 mm circular disc | Screenless brooch | 40 mm circular pendant | Handheld rectangular slab |
-| Target BOM cost | < $25 | ~ $18 | ~ $45 | ~ $199 retail |
+| Target BOM cost | < $25 ($23.85) | ~ $18 | ~ $45 | ~ $199 retail |
 | Display | 1.28-inch round IPS LCD (240x240) | None | None | 2.88-inch touchscreen |
 | Battery life (standby) | > 14 days (18 uA deep sleep) | > 20 days | ~ 4 days | ~ 12 hours |
 | Battery life (streaming) | > 8 hours active talk | > 12 hours | ~ 6 hours | ~ 4 hours |
 | System architecture | Sensor / Actuator peripheral | Sensor peripheral | BLE audio streamer | Full Android OS (MediaTek MT6765) |
-| Onboard operating system | None (Bare-metal Rust / FreeRTOS) | None | None | Full Android AOSP fork |
+| Onboard operating system | None (Bare-metal Rust / Embassy) | None | None | Full Android AOSP fork |
 | Boot / Wake latency | < 50 ms to wake, < 800 ms to audio | < 100 ms | Variable BLE pairing | > 45 seconds cold boot |
 | Server protocol | WebSocket (`bohs.v1`) + Reverse MCP | WebSocket | BLE to smartphone app | Proprietary cloud bridge |
 | Self-hostable | Yes (Local Bulle gateway) | Yes | Partial | No (Proprietary cloud only) |
@@ -50,40 +70,52 @@ Pastille defines its printed circuit board programmatically using Fusible and ts
 
 ### Prerequisites
 
-Install `bun` and project dependencies:
+Install `bun`, `fusible`, and project dependencies:
 
 ```bash
 cd hardware
 bun install
 ```
 
-### Interactive development
+### Interactive development and DRC verification
 
-Launch the Fusible live preview server:
-
-```bash
-cd hardware
-bun run dev
-```
-
-Open `http://localhost:3020` in your browser to inspect the interactive 2D schematic, 3D PCB layout, and autorouted copper traces in real time.
-
-### Exporting manufacturing artifacts
-
-Export production-ready Gerber files, drill files, bill of materials tables, and pick-and-place files for PCB fabrication:
+Validate the electrical rules, strapping pins, decoupling capacitors, and generate typed Rust firmware pin bindings:
 
 ```bash
-cd hardware
-bun run build
+fusible check
 ```
 
-The output files land in `hardware/dist/` ready for standard turnkey assembly houses.
+Launch the Fusible Studio live preview server:
 
-## Firmware flashing guide
+```bash
+fusible dev
+```
 
-Pastille firmware runs on the ESP32-S3 using Rust (`esp-idf-hal`).
+### Exporting manufacturing and CAD artifacts
 
-### Prerequisites
+Generate the 3D snap-fit enclosure (`bodies/pastille_case.{step,stl,glb,brep}`) and export production-ready Gerbers, KiCad project files, STEP models, and vector schematics:
+
+```bash
+fusible body
+fusible export --preset all
+```
+
+The output files land in `dist/fab/`, `dist/cad/`, `dist/docs/`, and `bodies/`.
+
+## Firmware guide
+
+Pastille firmware runs bare-metal on the ESP32-S3 using Rust (`embassy-executor`, `esp-hal`, and `esp-wifi`) with pin bindings generated directly by Fusible (`apps/firmware/src/pins.rs`).
+
+### Host unit tests
+
+Run the host test suite covering the BOHS-01 wire protocol, Reverse MCP tool validation, I2S DMA audio VAD pipeline, 5-stage power state machine, and integer trigonometric avatar renderer:
+
+```bash
+cd apps/firmware
+cargo test
+```
+
+### Flashing onto ESP32-S3
 
 Install the ESP32 Rust toolchain and flashing utility:
 
@@ -93,31 +125,38 @@ espup install
 cargo install cargo-espflash
 ```
 
-### Configuration
-
-Set your Wi-Fi credentials and Bulle gateway endpoint in your environment or via Casier:
+Connect Pastille to your computer with a USB-C cable, hold `SW_BOOT`, and flash:
 
 ```bash
-export PASTILLE_WIFI_SSID="YourNetworkName"
-export PASTILLE_WIFI_PASS="YourNetworkPassword"
-export PASTILLE_GATEWAY_URL="wss://gateway.bulle.local/api/hardware/ws"
-export PASTILLE_DEVICE_TOKEN="bohs_tok_e814a729c15d4872"
-```
-
-### Build and flash
-
-Connect Pastille to your computer with a USB-C cable, hold the boot button, and flash:
-
-```bash
+cd apps/firmware
 cargo espflash flash --release --monitor
 ```
 
-The command compiles the firmware, writes it to the ESP32-S3 flash partition, and opens the serial monitor. You will see the RTC boot sequence, Wi-Fi fast association, and the established `bohs.v1` WebSocket session.
+## Landing page (`apps/web`)
+
+Pastille includes a SvelteKit 5 landing page styled with `@facile/muse` and featuring an interactive Three.js 3D PCB and enclosure viewer:
+
+```bash
+cd apps/web
+bun install
+bun run dev
+```
 
 ## Repository layout
 
-```
+```text
 Pastille/
+├── assets/
+│   ├── logo.svg
+│   ├── pcb-2d.png
+│   ├── pcb-3d.png
+│   └── schematic.png
+├── bodies/
+│   └── pastille_case.{step,stl,glb,brep}
+├── dist/
+│   ├── cad/
+│   ├── docs/
+│   └── fab/
 ├── docs/
 │   └── spec/
 │       ├── BOHS-01-ARCH.md
@@ -125,10 +164,15 @@ Pastille/
 │       └── BOHS-01-GATEWAY.md
 ├── hardware/
 │   ├── index.tsx
+│   ├── subcircuits/
 │   ├── package.json
 │   └── tsconfig.json
 ├── apps/
-│   └── firmware/
+│   ├── firmware/
+│   └── web/
+├── Dockerfile
+├── docker-compose.yml
+├── filet.yml
 ├── fusible.yml
 └── README.md
 ```

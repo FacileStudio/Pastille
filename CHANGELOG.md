@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-04
+
+### Added
+- **DRV2605L Haptic Subsystem**: Added `U_HAP` (`DRV2605LDGSR` VSSOP-10), `C_HAP` (100nF), `C_HAP_REG` (1uF REG bypass), 4.7k I2C pull-up resistors (`R_SDA`, `R_SCL` on `GPIO8`/`GPIO9`), and LRA motor terminal header (`J_HAP`).
+- **Schottky Power-Path Load Sharing & USB ESD Protection**: Added `D_TVS` (`SMF5.0A` VBUS TVS diode), `R_USB_DM`/`R_USB_DP` (22-ohm USB D+/D- series termination to `GPIO19`/`GPIO20`), dual `B5819W` Schottky power-path diodes (`D_SYS`, `D_PATH`) isolating `VSYS` from `VBAT` so USB powers system load without preventing TP4056 charge termination, battery ADC divider (`R_BATT_TOP` 100k, `R_BATT_BOT` 100k, `C_BATT_SENSE` 100nF on `GPIO1`), and `CHRG` status pull-up (`R_CHG_PU` 10k on `GPIO2`).
+- **Hardware Reset, Boot Button & DFM Features**: Replaced invalid `qfp32` footprint with `qfn32_w6_h6_p0.5` (`ESP32-S3R8`), added `CHIP_PU` power-on reset RC delay network (`R_PU` 10k, `C_PU` 1uF), tactile `SW_BOOT` switch (`TL3305AF160QG` on `GPIO0`), 100k `SD_MODE` pull-down (`R_AMP_SD`) on `MAX98357A`, 510-ohm series ESD/noise damping resistor (`R_TOUCH`) on `TOUCH_WAKE` (`GPIO7`), M2 mounting holes (`2.2mm`), three optical SMT fiducials (`FID1`-`FID3`), and silkscreen revision markings.
+- **5-Stage Power State Machine & Full BOHS-01 Protocol**: Implemented `PowerManager` (`DeepSleep`, `BootWake`, `WifiFastAssociate`, `StreamFullDuplex`, `SleepGrace` with 30s timeout and battery voltage telemetry), end-of-utterance (`FLAG_END_OF_UTTERANCE`) detection, `charm.snapshot` capability error (`-32601`), `charm.tap_event` and `charm.low_battery` JSON-RPC 2.0 notifications, and strict parameter validation.
+- **SvelteKit 5 Landing Page (`apps/web`)**: Built borderless `@facile/muse` landing page with `solar:circle-dot-bold-duotone` identity, concentric GSAP entrance loader, scroll-reveal animations, and interactive Three.js 3D PCB and enclosure viewer.
+- **PCB & Schematic Previews**: Added high-resolution 2D PCB, 3D PCB, schematic previews, and SVG mark in `assets/`.
+
+### Fixed
+- **Xtensa Firmware Entrypoint**: Fixed non-compiling `xtensa` `main()` that referenced undefined `make_static!`, bound `gpio3` instead of `TOUCH_WAKE` (`GPIO7`), and unconditionally entered deep sleep before starting the Embassy executor.
+- **Audio Capture Gain & Integer Math**: Applied `mic_gain` scaling in `AudioPipeline::capture_frame` and replaced manual Newton-Raphson loop with standard library `u64::isqrt`.
+- **Enclosure Height**: Reduced enclosure height in `fusible.yml` from `12.0 mm` to `11.5 mm` to comply with `BOHS-01-ARCH.md` Section 2.1.
+
 ## [0.1.0] - 2026-11-04
 
 ### Added

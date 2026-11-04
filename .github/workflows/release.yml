@@ -32,3 +32,12 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          files: |
+            bodies/pastille_case.step
+            bodies/pastille_case.stl
+            bodies/pastille_case.glb
+            bodies/pastille_case.brep
+            apps/web/static/models/pastille.glb
+            assets/pcb-2d.png
+            assets/pcb-3d.png
+            assets/schematic.png

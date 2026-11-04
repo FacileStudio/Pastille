@@ -1,0 +1,28 @@
+ignore:
+  - .git
+  - .tscircuit
+  - target
+  - apps/firmware/target
+  - apps/firmware/src/pins.rs
+  - node_modules
+  - hardware/node_modules
+  - apps/web/node_modules
+  - apps/web/build
+  - apps/web/.svelte-kit
+  - dist
+  - hardware/dist
+  - bodies
+
+extensions: [.rs, .ts, .tsx, .svelte]
+
+limits:
+  fileLines: 250
+  funcsPerFile: 8
+  funcLines: 30
+  lineLength: 120
+  params: 5
+  returns: 3
+  nesting: 4
+  complexity: 10
+
+disabled: [lsp.unavailable]

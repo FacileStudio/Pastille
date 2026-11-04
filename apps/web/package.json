@@ -1,0 +1,31 @@
+{
+  "name": "pastille-web",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 5185",
+    "build": "vite build",
+    "preview": "vite preview --port 5185",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "bunx --bun svelte-kit sync && bunx --bun svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.53.4",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/three": "^0.186.0",
+    "svelte": "^5.53.6",
+    "svelte-check": "^4.4.2",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@facile/muse": "github:FacileStudio/muse#v0.10.0",
+    "gsap": "^3.13.0",
+    "iconify-icon": "^3.0.2",
+    "three": "^0.186.1"
+  }
+}

@@ -8,6 +8,14 @@
 
 /// Hardware GPIO pin constants extracted from the circuit netlist.
 pub mod gpio {
+    /// Pin 1 (hardware net `BATT_SENSE`).
+    pub const BATT_SENSE: u8 = 1;
+    /// Pin 0 (hardware net `BOOT_BTN`).
+    pub const BOOT_BTN: u8 = 0;
+    /// Pin 9 (hardware net `I2C_SCL`).
+    pub const I2C_SCL: u8 = 9;
+    /// Pin 8 (hardware net `I2C_SDA`).
+    pub const I2C_SDA: u8 = 8;
     /// Pin 21 (hardware net `LCD_BL`).
     pub const LCD_BL: u8 = 21;
     /// Pin 10 (hardware net `LCD_CS`).
@@ -26,8 +34,8 @@ pub mod gpio {
     pub const MIC_SD: u8 = 6;
     /// Pin 5 (hardware net `MIC_WS`).
     pub const MIC_WS: u8 = 5;
-    /// Pin 0 (hardware net `.U_ESP32_S3 > .GPIO0 to .R_BOOT > .pin1`).
-    pub const R_BOOT_PIN1: u8 = 0;
+    /// Pin 2 (hardware net `POWER_CHG_STAT`).
+    pub const POWER_CHG_STAT: u8 = 2;
     /// Pin 15 (hardware net `SPK_BCLK`).
     pub const SPK_BCLK: u8 = 15;
     /// Pin 17 (hardware net `SPK_DIN`).
@@ -38,11 +46,18 @@ pub mod gpio {
     pub const SPK_SD_MODE: u8 = 18;
     /// Pin 7 (hardware net `TOUCH_WAKE`).
     pub const TOUCH_WAKE: u8 = 7;
+    /// Pin 19 (hardware net `USB_DM`) [USB_DM: AF0].
+    pub const USB_DM: u8 = 19;
+    /// Pin 20 (hardware net `USB_DP`) [USB_DP: AF0].
+    pub const USB_DP: u8 = 20;
 }
 
 /// Peripheral pin mapping for `General`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GeneralPins {
+    pub boot_btn: u8,
+    pub i2c_scl: u8,
+    pub i2c_sda: u8,
     pub lcd_bl: u8,
     pub lcd_cs: u8,
     pub lcd_dc: u8,
@@ -52,16 +67,20 @@ pub struct GeneralPins {
     pub mic_sck: u8,
     pub mic_sd: u8,
     pub mic_ws: u8,
-    pub r_boot_pin1: u8,
     pub spk_bclk: u8,
     pub spk_din: u8,
     pub spk_lrclk: u8,
     pub spk_sd_mode: u8,
     pub touch_wake: u8,
+    pub usb_dm: u8,
+    pub usb_dp: u8,
 }
 
 /// Default `General` hardware configuration.
 pub const GENERAL_PINS: GeneralPins = GeneralPins {
+    boot_btn: gpio::BOOT_BTN,
+    i2c_scl: gpio::I2C_SCL,
+    i2c_sda: gpio::I2C_SDA,
     lcd_bl: gpio::LCD_BL,
     lcd_cs: gpio::LCD_CS,
     lcd_dc: gpio::LCD_DC,
@@ -71,21 +90,37 @@ pub const GENERAL_PINS: GeneralPins = GeneralPins {
     mic_sck: gpio::MIC_SCK,
     mic_sd: gpio::MIC_SD,
     mic_ws: gpio::MIC_WS,
-    r_boot_pin1: gpio::R_BOOT_PIN1,
     spk_bclk: gpio::SPK_BCLK,
     spk_din: gpio::SPK_DIN,
     spk_lrclk: gpio::SPK_LRCLK,
     spk_sd_mode: gpio::SPK_SD_MODE,
     touch_wake: gpio::TOUCH_WAKE,
+    usb_dm: gpio::USB_DM,
+    usb_dp: gpio::USB_DP,
+};
+
+/// Peripheral pin mapping for `Power`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PowerPins {
+    pub batt_sense: u8,
+    pub chg_stat: u8,
+}
+
+/// Default `Power` hardware configuration.
+pub const POWER_PINS: PowerPins = PowerPins {
+    batt_sense: gpio::BATT_SENSE,
+    chg_stat: gpio::POWER_CHG_STAT,
 };
 
 /// Complete board pin assignment container.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BoardPins {
     pub general: GeneralPins,
+    pub power: PowerPins,
 }
 
 /// Verified hardware board pin assignments.
 pub const BOARD_PINS: BoardPins = BoardPins {
     general: GENERAL_PINS,
+    power: POWER_PINS,
 };

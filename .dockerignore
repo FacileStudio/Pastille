@@ -1,0 +1,14 @@
+.git
+.github
+.tscircuit
+node_modules
+hardware/node_modules
+apps/web/node_modules
+apps/web/build
+apps/web/.svelte-kit
+apps/firmware
+hardware
+dist
+bodies
+assets
+docs

@@ -2,5 +2,7 @@ node_modules/
 dist/
 .tscircuit/
 target/
+.svelte-kit/
+apps/web/build/
 *.kicad_prl
 *.bak

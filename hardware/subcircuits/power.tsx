@@ -1,37 +1,82 @@
 export const Power = () => (
   <>
-    <connector
-      name="J_USB"
-      standard="usb_c"
+    <diode
+      name="D_TVS"
+      footprint="sod123"
+      manufacturerPartNumber="SMF5.0A"
       pcbX={0}
-      pcbY={-15}
+      pcbY={-7.2}
+      schX={-44}
+      schY={18}
     />
     <resistor
       name="R_CC1"
       resistance="5.1k"
       footprint="0402"
-      pcbX={-3}
+      manufacturerPartNumber="RC0402FR-075K1L"
+      pcbX={-2.5}
       pcbY={-9.5}
+      schX={-50}
+      schY={10}
     />
     <resistor
       name="R_CC2"
       resistance="5.1k"
       footprint="0402"
-      pcbX={3}
+      manufacturerPartNumber="RC0402FR-075K1L"
+      pcbX={2.5}
       pcbY={-9.5}
+      schX={-44}
+      schY={10}
+    />
+    <resistor
+      name="R_USB_DM"
+      resistance="22"
+      footprint="0402"
+      manufacturerPartNumber="RC0402FR-0722RL"
+      pcbX={-4.8}
+      pcbY={-9.5}
+      schX={-50}
+      schY={4}
+    />
+    <resistor
+      name="R_USB_DP"
+      resistance="22"
+      footprint="0402"
+      manufacturerPartNumber="RC0402FR-0722RL"
+      pcbX={4.8}
+      pcbY={-9.5}
+      schX={-44}
+      schY={4}
     />
     <capacitor
       name="C_VBUS"
       capacitance="10uF"
       footprint="0603"
+      manufacturerPartNumber="GRM188R61A106KE69D"
       pcbX={0}
       pcbY={-9.5}
+      schX={-38}
+      schY={18}
+    />
+    <capacitor
+      name="C_VBUS_HF"
+      capacitance="100nF"
+      footprint="0402"
+      manufacturerPartNumber="GRM155R71C104KA88D"
+      pcbX={-7.0}
+      pcbY={-9.5}
+      schX={-38}
+      schY={12}
     />
     <chip
       name="U_CHG"
       footprint="soic8"
-      pcbX={-11}
-      pcbY={-7}
+      manufacturerPartNumber="BQ24040DSQR"
+      pcbX={-11.5}
+      pcbY={-6.0}
+      schX={-32}
+      schY={18}
       pinLabels={{
         pin1: "TEMP",
         pin2: "PROG",
@@ -45,34 +90,125 @@ export const Power = () => (
       pinAttributes={{
         VCC: { requiresPower: true },
         GND: { requiresGround: true },
+        STDBY: { doNotConnect: true },
       }}
     />
     <resistor
       name="R_PROG"
       resistance="2k"
       footprint="0402"
-      pcbX={-15}
-      pcbY={-7}
+      manufacturerPartNumber="RC0402FR-072KL"
+      pcbX={-11.5}
+      pcbY={-10.0}
+      schX={-32}
+      schY={10}
+    />
+    <resistor
+      name="R_CHG_PU"
+      resistance="10k"
+      footprint="0402"
+      manufacturerPartNumber="RC0402FR-0710KL"
+      pcbX={-9.2}
+      pcbY={-10.0}
+      schX={-32}
+      schY={4}
     />
     <capacitor
       name="C_BAT"
       capacitance="10uF"
       footprint="0603"
-      pcbX={-11}
-      pcbY={-3}
+      manufacturerPartNumber="GRM188R61A106KE69D"
+      pcbX={-11.5}
+      pcbY={-2.0}
+      schX={-26}
+      schY={18}
     />
     <connector
       name="J_BAT"
       standard="jst_ph"
       pinCount={2}
-      pcbX={-15}
-      pcbY={-3}
+      manufacturerPartNumber="S2B-PH-K-S"
+      pcbX={-13.5}
+      pcbY={2.0}
+      schX={-26}
+      schY={10}
+    />
+    <resistor
+      name="R_BATT_TOP"
+      resistance="100k"
+      footprint="0402"
+      manufacturerPartNumber="RC0402FR-07100KL"
+      pcbX={-8.0}
+      pcbY={0.5}
+      schX={-26}
+      schY={4}
+    />
+    <resistor
+      name="R_BATT_BOT"
+      resistance="100k"
+      footprint="0402"
+      manufacturerPartNumber="RC0402FR-07100KL"
+      pcbX={-8.0}
+      pcbY={2.0}
+      schX={-26}
+      schY={-2}
+    />
+    <capacitor
+      name="C_BATT_SENSE"
+      capacitance="100nF"
+      footprint="0402"
+      manufacturerPartNumber="GRM155R71C104KA88D"
+      pcbX={-8.0}
+      pcbY={3.5}
+      schX={-20}
+      schY={-2}
+    />
+    <diode
+      name="D_SYS"
+      footprint="sod123"
+      manufacturerPartNumber="1N5819WS"
+      pcbX={-5.8}
+      pcbY={-6.5}
+      schX={-20}
+      schY={18}
+    />
+    <diode
+      name="D_PATH"
+      footprint="sod123"
+      manufacturerPartNumber="1N5819WS"
+      pcbX={-5.8}
+      pcbY={-4.2}
+      schX={-20}
+      schY={12}
+    />
+    <capacitor
+      name="C_SYS"
+      capacitance="4.7uF"
+      footprint="0603"
+      manufacturerPartNumber="GRM188R61A475KE15D"
+      pcbX={-5.8}
+      pcbY={-2.0}
+      schX={-20}
+      schY={6}
+    />
+    <capacitor
+      name="C_SYS_HF"
+      capacitance="100nF"
+      footprint="0402"
+      manufacturerPartNumber="GRM155R71C104KA88D"
+      pcbX={-5.8}
+      pcbY={-0.3}
+      schX={-14}
+      schY={6}
     />
     <chip
       name="U_LDO"
       footprint="sot23_5"
-      pcbX={-6}
-      pcbY={-6}
+      manufacturerPartNumber="TPS7A0533PDBVR"
+      pcbX={0}
+      pcbY={-4.5}
+      schX={-14}
+      schY={18}
       pinLabels={{
         pin1: "VIN",
         pin2: "GND",
@@ -83,48 +219,28 @@ export const Power = () => (
       pinAttributes={{
         VIN: { requiresPower: true },
         GND: { requiresGround: true },
+        NC: { doNotConnect: true },
       }}
-    />
-    <capacitor
-      name="C_LDO_IN"
-      capacitance="4.7uF"
-      footprint="0603"
-      pcbX={-6}
-      pcbY={-9.5}
     />
     <capacitor
       name="C_LDO_OUT"
       capacitance="10uF"
-      footprint="0805"
-      pcbX={-2}
-      pcbY={-6}
+      footprint="0603"
+      manufacturerPartNumber="GRM188R61A106KE69D"
+      pcbX={3.2}
+      pcbY={-4.2}
+      schX={-14}
+      schY={12}
     />
-    <trace from=".J_USB > .VBUS" to="net.VBUS" />
-    <trace from=".J_USB > .GND" to="net.GND" />
-    <trace from=".J_USB > .CC1" to=".R_CC1 > .pin1" />
-    <trace from=".R_CC1 > .pin2" to="net.GND" />
-    <trace from=".J_USB > .CC2" to=".R_CC2 > .pin1" />
-    <trace from=".R_CC2 > .pin2" to="net.GND" />
-    <trace from=".C_VBUS > .pin1" to="net.VBUS" />
-    <trace from=".C_VBUS > .pin2" to="net.GND" />
-    <trace from=".U_CHG > .VCC" to="net.VBUS" />
-    <trace from=".U_CHG > .CE" to="net.VBUS" />
-    <trace from=".U_CHG > .GND" to="net.GND" />
-    <trace from=".U_CHG > .TEMP" to="net.GND" />
-    <trace from=".U_CHG > .PROG" to=".R_PROG > .pin1" />
-    <trace from=".R_PROG > .pin2" to="net.GND" />
-    <trace from=".U_CHG > .BAT" to="net.VBAT" />
-    <trace from=".C_BAT > .pin1" to="net.VBAT" />
-    <trace from=".C_BAT > .pin2" to="net.GND" />
-    <trace from=".J_BAT > .pin1" to="net.VBAT" />
-    <trace from=".J_BAT > .pin2" to="net.GND" />
-    <trace from=".U_LDO > .VIN" to="net.VBAT" />
-    <trace from=".U_LDO > .EN" to="net.VBAT" />
-    <trace from=".U_LDO > .GND" to="net.GND" />
-    <trace from=".C_LDO_IN > .pin1" to="net.VBAT" />
-    <trace from=".C_LDO_IN > .pin2" to="net.GND" />
-    <trace from=".U_LDO > .VOUT" to="net.VDD3V3" />
-    <trace from=".C_LDO_OUT > .pin1" to="net.VDD3V3" />
-    <trace from=".C_LDO_OUT > .pin2" to="net.GND" />
+    <capacitor
+      name="C_LDO_OUT_HF"
+      capacitance="100nF"
+      footprint="0402"
+      manufacturerPartNumber="GRM155R71C104KA88D"
+      pcbX={3.2}
+      pcbY={-6.0}
+      schX={-14}
+      schY={0}
+    />
   </>
 );

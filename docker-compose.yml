@@ -1,0 +1,10 @@
+services:
+  pastille:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "journal.app=pastille"
+    expose:
+      - "80"
+    restart: unless-stopped
