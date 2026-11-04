@@ -32,6 +32,29 @@ jobs:
         working-directory: apps/firmware
         run: cargo clippy --all-targets -- -D warnings
 
+  hardware-files:
+    name: Hardware Release Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Hardware Dependencies
+        working-directory: hardware
+        run: bun install --frozen-lockfile
+
+      - name: Verify Release Files And Gerbers
+        run: bun hardware/fab/verify.ts
+
+      - name: Rebuild Bodies From The Committed Kit
+        run: bun hardware/bodies/build.ts
+
+      - name: Fail On Stale Bodies
+        run: git diff --exit-code -- bodies
+
   hardware-and-web:
     name: Hardware & Web Checks
     runs-on: ubuntu-latest

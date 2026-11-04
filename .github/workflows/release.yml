@@ -25,6 +25,16 @@ jobs:
         working-directory: apps/firmware
         run: cargo test
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Hardware Dependencies
+        working-directory: hardware
+        run: bun install --frozen-lockfile
+
+      - name: Verify Release Files
+        run: bun hardware/fab/verify.ts
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -41,9 +51,12 @@ jobs:
             bodies/back_shell.step
             bodies/back_shell.stl
             dist/fab/gerbers.zip
+            dist/fab/bom.csv
+            dist/fab/cpl.csv
             dist/cad/board.step
             dist/cad/kicad.zip
             apps/web/static/models/pastille.glb
+            apps/web/static/models/pastille_assembly.glb
             assets/pcb-2d.png
             assets/pcb-3d.png
             assets/schematic.png
