@@ -20,13 +20,67 @@ This division keeps the physical peripheral cheap, cool, reliable, and instantly
 
 ### Form factor and geometry
 
-A BOHS-01 device uses a circular disc geometry with a maximum outer diameter of 38.0 mm and a maximum thickness of 11.5 mm including enclosure walls.
+A BOHS-01 device uses a circular disc geometry. The board is at most 38.0 mm across. The enclosure is at most 42.5 mm across and 14.0 mm thick, walls included.
 
 This form factor enables versatile wearable attachments:
 
 - Magnetic pendant on a neck chain or cord
 - Spring-clip brooch for lapels and shirt pockets
 - Wristband adapter cradle
+
+### Enclosure and stack
+
+The reference enclosure has three printed parts and four bought parts. `hardware/bodies/build.ts` builds all of them from the board kit (`bodies/kit/main/kit.json`), so the case follows the board when parts move. `fusible assembly` checks that every part fits.
+
+Heights are in mm, measured from the board's mid-plane.
+
+| Part | Body | From | To | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| Front bezel | `front_bezel` | 0.80 | 8.69 | Window of 32.4 mm over the active area. Two screw bosses on the board holes. |
+| Lens | `lens` | 7.29 | 8.09 | Clear disc, 35.0 x 0.8 mm. The bezel lip holds it from the front. |
+| LCD | `lcd` | 5.69 | 7.19 | GC9A01 1.28" panel (ZJY128R-IG01): 35.6 mm frame, 32.4 mm active area, 1.5 mm thick, FPC ledge toward J_LCD. |
+| Board | `main` | -0.80 | 0.80 | 38 mm, 4 layers. |
+| Battery | `battery` | -6.80 | -2.80 | 402020 cell. 0.5 mm swell room on every face. It stays 2 mm below the board, clear of the through-hole pin tails. |
+| Speaker | `speaker` | -7.00 | -4.50 | Face down over a grille of 24 holes, 1 mm each. |
+| LRA | `lra` | -7.30 | -4.60 | 0827 coin motor, glued to the floor. |
+| Back shell | `back_shell` | -8.30 | 1.80 | Cup with pockets, mic port, USB-C opening, lead channel and lanyard lug. |
+
+The outer diameter is 42.4 mm. The v0.4 reference case is 17.0 mm thick, which is over the 14.0 mm limit. The next board revision brings it back under.
+
+The board has a flat edge at y = -18.557 mm. The USB-C receptacle front face sits on that flat, so a plug seats fully and its overmold clears the board. The case opening leaves 0.3 mm around the overmold.
+
+#### Next revision
+
+Three board changes bring the same case script under 14 mm:
+
+1. Replace `J_BAT` (JST PH, 4.75 mm above the board) with a surface-mount connector no taller than the USB-C receptacle, or with two solder pads. The LCD then drops by 2.7 mm.
+2. Replace the through-hole headers `J_SPK` and `J_HAP` and the through-hole button `SW_BOOT` with surface-mount parts. Their pin tails force a 2 mm gap under the board. Without them, the floor moves up by 1.5 mm.
+3. Replace `J_LCD` (8-pin 2.54 mm header) with a 12-pin 0.5 mm FPC connector. The GC9A01 panel has a 12-pin FPC, and no off-the-shelf module lines up with the current header.
+
+With all three, the case is 12.8 mm thick with the 402020 cell. A 502020 cell (5 mm, about 200 mAh) would also fit at 13.8 mm.
+
+#### Battery choice
+
+The battery sits under the board, beside the speaker, the LRA, the mic port and the two screw bosses.
+
+| Cell | Size (mm) | Capacity | Fits | Why |
+| :--- | :--- | :--- | :--- | :--- |
+| 502035 | 35 x 20 x 5 | 350 mAh | No | With swell room it needs a 41.7 mm circle. The cavity is 40 mm. |
+| 402030 | 30 x 20 x 4 | 300 mAh | No | It fits the circle, but not around the mic port and the two screw bosses, even without the speaker. |
+| 402020 | 20 x 20 x 4 | 150 mAh | Yes | The largest common cell that leaves room for the speaker and the LRA. |
+
+The 20 x 14 mm CDS-20148 speaker left room for a 16 x 16 mm cell at most. The 15 x 11 mm CMS-151125-18S-X8 speaker frees enough room for the 402020 cell.
+
+#### Printing and assembly
+
+1. Print `bodies/front_bezel.stl` face down and `bodies/back_shell.stl` floor down, in PLA or PETG, 0.12 mm layers. Cut or print `bodies/lens.stl` in clear acrylic or resin.
+2. Stick a mesh sticker of 3.0 mm into the recess around the mic port, on the outside of the shell. Put a 0.2 mm gasket ring on top of the mic tube.
+3. Glue the LRA into its ring, put the speaker face down on its seat, and drop the battery into its pocket. Run the battery leads up the channel at the J_BAT side.
+4. Lay the board on the shell bosses, components up, with J_USB in the USB-C opening.
+5. Glue the lens into the bezel recess, then stick the LCD panel behind it.
+6. Close the bezel over the shell lip and drive two M2 x 10 mm self-tapping screws from the back.
+
+The case fits the models, not yet the real parts. The LCD and battery sizes come from drawings, so one test print is needed before anyone calls the case final.
 
 ### Thermal constraints
 
@@ -47,40 +101,40 @@ The total hardware bill of materials (BOM) target is under $25.00 USD at a produ
 | Microcontroller | Dual-core Xtensa 32-bit LX7 MCU with Wi-Fi and BLE 5.0 | ESP32-S3R8 (QFN, 8 MB in-package PSRAM) | $2.85 |
 | Audio Input | I2S digital MEMS microphone with 64 dB SNR | Knowles SPH0645LM4H-B / INMP441 | $0.95 |
 | Audio Output | Mono 3.2W Class-D I2S audio amplifier | Maxim MAX98357AETE+ | $0.85 |
-| Speaker Transducer | Miniature dynamic speaker 8 Ohm 1W (20mm diameter) | CUI Devices CDS-20148 | $1.20 |
+| Speaker Transducer | Micro speaker 8 Ohm 1W, 15 x 11 x 2.5 mm | Same Sky CMS-151125-18S-X8 | $1.60 |
 | Display | 1.28-inch round IPS TFT LCD (240x240 SPI) | GC9A01 driver | $3.40 |
 | Actuator | LRA / ERM miniature vibration motor with driver | TI DRV2605LDGSR + 0827 motor | $1.40 |
-| Power Management | Single-cell Li-ion linear charger, 333 mA, Schottky load sharing | TP4056 (SOP-8) + 2x 1N5819WS | $0.65 |
+| Power Management | Single-cell Li-ion linear charger, 146 mA, Schottky load sharing | TP4056 (SOP-8) + 2x 1N5819WS | $0.65 |
 | Voltage Regulation | Ultra-low quiescent current LDO 3.3V 500mA | TI TPS7A0533PDBVR | $0.35 |
-| Battery Cell | Rechargeable Lithium Polymer cell 3.7V 350mAh | 502035 pouch cell | $2.10 |
+| Battery Cell | Rechargeable Lithium Polymer cell 3.7V 150mAh | 402020 pouch cell (20 x 20 x 4 mm) | $1.80 |
 | PCB | 4-layer FR4 high-density interconnect round board | 38mm circular board | $1.80 |
-| Enclosure | Injection molded or SLA resin enclosure with front lens | Two-piece snap case | $2.50 |
+| Enclosure | Printed front bezel and back shell, clear lens | Two M2 screws, 0.4 mm clearance lip | $2.50 |
 | Passives and Connectors | USB-C receptacle, ESD diodes, resistors, capacitors | Standard SMT passives | $1.60 |
 | Assembly and Testing | Surface mount assembly and automated flashing | Turnkey PCBA | $4.20 |
-| **Total** | | | **$23.85** |
+| **Total** | | | **$23.95** |
 
 ### Charging and power path
 
 The reference hardware charges its cell with a TP4056 linear charger in a SOP-8 package.
 
-- `R_PROG` is 3.6 kOhm. The TP4056 sets charge current as 1200 / R_PROG, so the cell charges at about 333 mA.
-- 333 mA is about 0.95C for the 350 mAh cell.
+- `R_PROG` is 8.2 kOhm. The TP4056 sets charge current as 1200 / R_PROG, so the cell charges at about 146 mA.
+- 146 mA is about 0.97C for the 150 mAh cell. A full charge takes about 1.5 hours.
 - Two 1N5819WS Schottky diodes share the load. `D_SYS` runs from `VBUS` to `VSYS`. `D_PATH` runs from `VBAT` to `VSYS`. When USB-C is present, `VBUS` feeds `VSYS` and the charger fills the cell. When USB-C is absent, the battery feeds `VSYS`.
 - A TPS7A0533 LDO produces the 3.3 V rail from `VSYS`.
 
 ### Battery life specifications
 
-The reference hardware runs on a single-cell 350 mAh lithium polymer battery (1.295 Wh nominal energy).
+The reference hardware runs on a single-cell 150 mAh lithium polymer battery (0.555 Wh nominal energy).
 
 Every figure in this table is a design target. None of them is a measurement yet.
 
 | Operating mode | Average current draw (target) | Duration (target) |
 | :--- | :--- | :--- |
-| Deep sleep | 18 uA | > 18 days (> 430 hours) |
-| Active voice streaming, BLE 5.0 2M PHY relay | 14 mA | > 24.0 hours |
-| Active voice streaming, Wi-Fi WSS direct | 42 mA | > 8.3 hours |
-| Burst tool interaction | 68 mA (display, haptics, speaker active) | > 5.1 hours |
-| Mixed daily usage profile | 2 hours active stream on Wi-Fi, 22 hours deep sleep | 3.8 days between charges |
+| Deep sleep | 18 uA | > 7.7 days (> 185 hours) |
+| Active voice streaming, BLE 5.0 2M PHY relay | 14 mA | > 10.3 hours |
+| Active voice streaming, Wi-Fi WSS direct | 42 mA | > 3.5 hours |
+| Burst tool interaction | 68 mA (display, haptics, speaker active) | > 2.2 hours |
+| Mixed daily usage profile | 2 hours active stream on Wi-Fi, 22 hours deep sleep | 1.6 days between charges |
 
 ## Transports
 

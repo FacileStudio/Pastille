@@ -103,14 +103,17 @@ fusible dev
 
 ### Exporting manufacturing and CAD artifacts
 
-Generate the 3D snap-fit enclosure (`bodies/pastille_case.{step,stl,glb,brep}`) and export production-ready Gerbers, KiCad project files, STEP models, and vector schematics:
+Build the enclosure bodies (`bodies/{front_bezel,lens,back_shell}.{step,stl}` and the reference parts), check that they fit, and export Gerbers, KiCad project files, STEP models and schematics:
 
 ```bash
 fusible body
+fusible assembly -f all
 fusible export --preset all
 ```
 
-The output files land in `dist/fab/`, `dist/cad/`, `dist/docs/`, and `bodies/`.
+`fusible body` runs `hardware/bodies/build.ts`, which reads `bodies/kit/main/kit.json` (from `fusible body kit main`). `fusible assembly` fails if any part collides. It writes `dist/assembly.glb` and `dist/assembly.step`. To refresh the landing page model, run `bun hardware/bodies/slim.ts dist/assembly.glb apps/web/static/models/pastille_assembly.glb`.
+
+The output files land in `dist/fab/`, `dist/cad/`, `dist/docs/`, and `bodies/`. See the enclosure section of [BOHS-01-ARCH.md](docs/spec/BOHS-01-ARCH.md) for the stack, the battery choice and the print guide.
 
 ## Firmware guide
 
@@ -162,7 +165,8 @@ Pastille/
 │   ├── pcb-3d.png
 │   └── schematic.png
 ├── bodies/
-│   └── pastille_case.{step,stl,glb,brep}
+│   ├── kit/main/kit.json
+│   └── {front_bezel,lens,back_shell,lcd,battery,speaker,lra}.{step,stl}
 ├── dist/
 │   ├── cad/
 │   ├── docs/
@@ -175,6 +179,7 @@ Pastille/
 ├── hardware/
 │   ├── index.tsx
 │   ├── subcircuits/
+│   ├── bodies/
 │   ├── package.json
 │   └── tsconfig.json
 ├── apps/
