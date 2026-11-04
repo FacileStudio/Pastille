@@ -11,7 +11,7 @@ export const lensRadius = (): number => PART.lcd.glass / 2 - 0.3;
 const skirtTop = (s: Stack): number => s.z.joint + FIT.lipHeight + FIT.lipClear;
 
 const boss = (s: Stack, at: Vec2): Shape[] => {
-  const top = s.z.lcd0 - 0.2;
+  const top = s.z.lcd0 - FIT.lcdGap;
   const dir = Math.hypot(...at);
   const out: Vec2 = [(at[0] / dir) * (s.radius.pocket + 0.5), (at[1] / dir) * (s.radius.pocket + 0.5)];
   return [cyl(at, FIT.boss.bezel / 2, s.z.joint, top), slot(at, out, 1, skirtTop(s), top)];

@@ -39,7 +39,7 @@ export const openingsOf = (kit: Kit, half: number): Opening[] =>
 
 export const topClearance = (kit: Kit, half: number): number => {
   const tops = (kit.keep_out ?? []).filter((b) => b.layer === "top").map((b) => b.z1);
-  return tops.length ? Math.max(...tops) : half + PART.usbHeight;
+  return Math.max(...tops, half + PART.usbHeight);
 };
 
 export const plugAxis = (half: number): number => half + PART.usbShell / 2;

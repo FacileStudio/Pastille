@@ -13,7 +13,7 @@ export const panelOutline = (grow: number, z0: number, z1: number): Shape => {
 /** The LCD reference body: the panel and its backlight frame, sitting just above the tallest board part. */
 export const lcd = (s: Stack): Shape => panelOutline(0, s.z.lcd0, s.z.lcd0 + PART.lcd.thick);
 
-/** The 402020 cell: swell room on every face, and clear of the through-hole pin tails under the board. */
+/** The 402020 cell: swell room on every face, and clear of the USB-C shell tails under the board. */
 export const battery = (s: Stack): Shape => {
   const { w, h, t, at } = PART.cell;
   return box(at, w, h, s.z.cellTop - t, s.z.cellTop);
@@ -26,5 +26,5 @@ export const speaker = (s: Stack): Shape => {
   return box(at, w, h, z0, z0 + t);
 };
 
-/** The 0827 coin LRA, glued flat on the floor. */
+/** The 8 x 3.2 mm coin LRA (Vybronics VG0832012), glued flat on the floor. */
 export const lra = (s: Stack): Shape => cyl(PART.lra.at, PART.lra.d / 2, s.z.floor, s.z.floor + PART.lra.t);
