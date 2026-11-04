@@ -79,7 +79,7 @@ export const STEPS: ExplodeStep[] = [
     description:
       "An SPH0645LM4H-B MEMS mic sends your voice to the ESP32-S3 over I2S. " +
       "A MAX98357A amplifier takes I2S audio back out and drives a 15 x 11 mm speaker.",
-    offsets: { speaker: [0, 44, -18] },
+    offsets: { speaker: [0, -44, -18] },
     rotation: THREE_QUARTER,
   },
   {
