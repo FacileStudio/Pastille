@@ -117,17 +117,21 @@ The output files land in `dist/fab/`, `dist/cad/`, `dist/docs/`, and `bodies/`. 
 
 ## Firmware guide
 
-Pastille firmware runs bare-metal on the ESP32-S3 in Rust, on `esp-hal` 1.2 with the `esp-rtos` Embassy executor. Fusible generates the pin bindings in `apps/firmware/src/pins.rs`, and the device code takes every GPIO from there.
+Pastille firmware runs bare-metal on the ESP32-S3 in Rust, on `esp-hal` 1.2 with the `esp-rtos` Embassy executor and `esp-radio` for Wi-Fi and BLE. Fusible generates the pin bindings in `apps/firmware/src/pins.rs`, and the device code takes every GPIO from there.
 
 ### What runs on the device in v0.4.0
 
-- USB CDC transport on the USB Serial/JTAG port, with `u16be` stream framing. The Bulle app relays it to the gateway.
-- Reverse MCP over `0x02`: `tools/list`, `charm.display_avatar`, `charm.haptic_pulse`, `charm.get_telemetry`. Every request gets a result or a JSON-RPC error.
-- The avatar on the GC9A01 round LCD (`mipidsi`, 10 frames per second).
-- Haptic pulses on the DRV2605L in open-loop real-time playback.
-- Battery and charger sampling every 10 s, published to `charm.get_telemetry` and as `charm.low_battery` alerts.
+- BLE peripheral (trouble-host on esp-radio): the BOHS-01 service with `B001` to `B004`, advertising with the service data, LE Secure Connections pairing with numeric comparison confirmed by a tap, and one bond kept in flash.
+- BLE provisioning: `prov.identify`, the 60 s tap window bound to the connection, `prov.status`, `prov.configure`, `prov.state` notifications. The config is saved to the `pastille` flash partition and loaded at boot.
+- Wi-Fi direct: station mode, DHCP, DNS, TLS 1.3 with pinned root CAs, and the `bohs.v1` WebSocket with the device token, reconnected with backoff. It runs when the config has `prefer_ble: false` and a Wi-Fi network.
+- USB CDC transport on the USB Serial/JTAG port, with `u16be` stream framing.
+- Reverse MCP over `0x02` on every transport: `tools/list`, `charm.display_avatar`, `charm.haptic_pulse`, `charm.get_telemetry`. Every request gets a result or a JSON-RPC error.
+- The avatar, the pairing ring and the comparison code on the GC9A01 round LCD.
+- Haptic pulses on the DRV2605L.
+- Capacitive touch on the front pad through the ESP32-S3 touch sensor registers, calibrated at boot: taps authorize pairing and send `charm.tap_event`.
+- Battery and charger sampling every 10 s, published to `charm.get_telemetry`, `B001` and `charm.low_battery`.
 
-Not in v0.4.0: Wi-Fi WSS, the BLE GATT server and BLE provisioning, NVS storage, tap events, and microphone and speaker audio. The provisioning state machine is in the code and host-tested, but no BLE stack drives it yet. The implementation status in [BOHS-01-WIRE.md](docs/spec/BOHS-01-WIRE.md) has the full list. The display, haptic and battery drivers compile but have not run on a board yet.
+Not in v0.4.0: microphone and speaker audio, and the RSSI and temperature telemetry fields. None of the drivers has run on a board yet; host tests cover the protocol, framing, provisioning, storage records, touch thresholds, WebSocket handshake and the TLS chain check. The implementation status in [BOHS-01-WIRE.md](docs/spec/BOHS-01-WIRE.md) has the details.
 
 ### Host unit tests
 
@@ -152,6 +156,8 @@ cargo install espflash --locked
 ```bash
 mise run build-firmware
 ```
+
+`build-firmware` also writes `target/pastille-firmware.bin`, a 4 MB image with the partition table from `apps/firmware/partitions.csv`. The `pastille` data partition holds the config and the BLE bond.
 
 Connect Pastille with a USB-C cable, hold `SW_BOOT`, and flash. The task opens the serial monitor afterwards:
 
