@@ -153,8 +153,8 @@
         <Card
           class="flex w-full flex-col gap-3 p-6 !bg-fc-component transition-all duration-300
             {current
-            ? 'shadow-[0_-18px_32px_-8px_rgb(0_0_0/0.7)] scale-[1.01]'
-            : 'shadow-[0_-10px_20px_-6px_rgb(0_0_0/0.5)]'}"
+            ? 'shadow-[var(--step-card-shadow-active)] scale-[1.01]'
+            : 'shadow-[var(--step-card-shadow)]'}"
         >
           <div class="flex items-center gap-3">
             <span
@@ -178,3 +178,15 @@
     {/each}
   </ol>
 </div>
+
+<style>
+  :global(html) {
+    --step-card-shadow: 0 -1px 2px -1px rgb(0 0 0 / 0.05), 0 -4px 10px -7px rgb(0 0 0 / 0.1);
+    --step-card-shadow-active: 0 -1px 2px -1px rgb(0 0 0 / 0.07), 0 -7px 18px -9px rgb(0 0 0 / 0.16);
+  }
+
+  :global(html.dark) {
+    --step-card-shadow: 0 -1px 2px -1px rgb(0 0 0 / 0.35), 0 -6px 14px -9px rgb(0 0 0 / 0.4);
+    --step-card-shadow-active: 0 -1px 2px -1px rgb(0 0 0 / 0.45), 0 -9px 22px -10px rgb(0 0 0 / 0.5);
+  }
+</style>
