@@ -46,6 +46,15 @@
   }
 
   /**
+   * Sinks upcoming steps into a pile under the active card, so they rise into place when reached.
+   */
+  function pile(index: number): string {
+    if (reduced || index <= active) return "none";
+    const depth = index - active;
+    return `translateY(${depth * 14}px) scale(${1 - depth * 0.02})`;
+  }
+
+  /**
    * Highlights the step whose block crosses the viewport centre.
    */
   function onActive(index: number) {
@@ -138,11 +147,14 @@
         class="sticky transition-all duration-300 ease-out"
         style:top="calc(var(--sticky-top) + {i} * var(--step-offset))"
         style:z-index={i + 1}
+        style:transform={pile(i)}
         style:margin-bottom={i === LAST ? "0" : "36vh"}
       >
         <Card
           class="flex w-full flex-col gap-3 p-6 !bg-fc-component transition-all duration-300
-            shadow-xl shadow-black/50 {current ? 'shadow-2xl shadow-black/70 scale-[1.01]' : ''}"
+            {current
+            ? 'shadow-[0_-18px_32px_-8px_rgb(0_0_0/0.7)] scale-[1.01]'
+            : 'shadow-[0_-10px_20px_-6px_rgb(0_0_0/0.5)]'}"
         >
           <div class="flex items-center gap-3">
             <span

@@ -85,8 +85,6 @@
   </div>
 </section>
 
-<PreOrderForm />
-
 <Section id="disassembly" title="What's inside" description="Scroll to take Pastille apart, one layer at a time.">
   <Disassembly />
 </Section>
@@ -248,3 +246,5 @@
     </div>
   </Section>
 </div>
+
+<PreOrderForm />

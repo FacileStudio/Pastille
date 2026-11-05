@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-11-05
+
+### Changed
+- Pre-order form redesigned as a two-column block with the price, and moved to the bottom of the landing page.
+- Stacked disassembly cards cast their shadow upward and sink into a pile under the active card.
+- `@facile/blob` bumped from v0.1.0 to v0.2.1.
+
 ## [0.5.0] - 2026-11-05
 
 ### Added
