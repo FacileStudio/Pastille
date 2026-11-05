@@ -12,6 +12,7 @@
         "three": "^0.186.1",
       },
       "devDependencies": {
+        "@iconify-json/solar": "1.2.13",
         "@sveltejs/adapter-static": "^3.0.10",
         "@sveltejs/kit": "^2.53.4",
         "@sveltejs/vite-plugin-svelte": "^6.2.4",
@@ -83,6 +84,8 @@
     "@facile/blob": ["@facile/blob@github:FacileStudio/blob#0e54ffe", { "peerDependencies": { "svelte": "^5.29.0" } }, "FacileStudio-blob-0e54ffe", "sha512-7olabx9Sk/ZV+BMJ/YVYpqMFemEXJ7qspN2ardOZN9/aSx3lHtLP3v5X+PS2y/SJ9lgJE3rHgvDamxNtL7C5SA=="],
 
     "@facile/muse": ["@facile/muse@github:FacileStudio/muse#0f769e5", { "dependencies": { "gsap": "^3.13.0", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "svelte": "^5.0.0", "tailwindcss": "^4.0.0" } }, "FacileStudio-muse-0f769e5", "sha512-sUMgcYvaHAKr1SiW9IhhuxdRUyNGiZ83sLyPMOKVTNkTe6DWiZBGgF6yqkWZpV7IDNbR/gTUu1WGlmZL98XwxQ=="],
+
+    "@iconify-json/solar": ["@iconify-json/solar@1.2.13", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-/ZWb6xRib6pzxD/qTkKWYhuzSU2yu0bY+EN0spgtz1NM3d5f4eYueQZpL3PfCdsg5uVfm4Ldtt3cAyQL+YI8/Q=="],
 
     "@iconify/types": ["@iconify/types@2.0.0", "", {}, "sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg=="],
 
