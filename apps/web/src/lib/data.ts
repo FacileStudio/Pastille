@@ -39,20 +39,18 @@ export interface ProtocolPlane {
   lines: CodeLine[];
 }
 
-export const VERSION = "0.5.2";
-
-export const PREORDER_PRICE = "$49";
+export const VERSION = "0.6.0";
 
 export const RELEASE_TAG = `v${VERSION}`;
 
 export const NAV_SECTIONS = [
-  { id: "disassembly", label: "Inside", icon: "solar:layers-linear" },
-  { id: "viewer", label: "Board", icon: "solar:cpu-linear" },
-  { id: "connectivity", label: "Connectivity", icon: "solar:bluetooth-linear" },
-  { id: "architecture", label: "Hardware", icon: "solar:widget-linear" },
-  { id: "protocol", label: "Protocol", icon: "solar:code-linear" },
-  { id: "comparison", label: "Comparison", icon: "solar:chart-2-linear" },
-  { id: "quickstart", label: "Build", icon: "solar:box-linear" },
+  { id: "disassembly", label: "Inside", icon: "solar:layers-bold-duotone" },
+  { id: "viewer", label: "Board", icon: "solar:cpu-bold-duotone" },
+  { id: "connectivity", label: "Connectivity", icon: "solar:bluetooth-wave-bold-duotone" },
+  { id: "architecture", label: "Hardware", icon: "solar:widget-bold-duotone" },
+  { id: "protocol", label: "Protocol", icon: "solar:code-square-bold-duotone" },
+  { id: "comparison", label: "Comparison", icon: "solar:chart-2-bold-duotone" },
+  { id: "quickstart", label: "Build", icon: "solar:box-bold-duotone" },
 ] as const;
 
 export const BATTERY = {
@@ -60,6 +58,19 @@ export const BATTERY = {
   capacity: "120 mAh",
   chargeCurrent: "about 67 mA",
 };
+
+export const PREORDER = {
+  unitPrice: 49,
+  currency: "USD",
+  maxQuantity: 20,
+  shipDate: "March 2027",
+  contact: "contact@facile.studio",
+  includes: [
+    { icon: "solar:box-bold-duotone", label: "One assembled Pastille per unit" },
+    { icon: "solar:battery-charge-bold-duotone", label: `${BATTERY.capacity} cell, charged over USB-C` },
+    { icon: "solar:code-square-bold-duotone", label: "Open hardware and firmware files" },
+  ],
+} as const;
 
 export const HERO_METRICS: Metric[] = [
   { label: "Size", value: "42 mm", detail: "14 mm thick, with a lanyard loop" },
@@ -176,13 +187,8 @@ export const PROTOCOL_PLANES: ProtocolPlane[] = [
       [s('  "method"', "key"), s(": ", "muted"), s('"tools/call"', "str"), s(",", "muted")],
       [s('  "params"', "key"), s(": {", "muted")],
       [s('    "name"', "key"), s(": ", "muted"), s('"charm.display_avatar"', "str"), s(",", "muted")],
-      [
-        s('    "arguments"', "key"),
-        s(": { ", "muted"),
-        s('"state"', "key"),
-        s(': "thinking"', "str"),
-        s(" }", "muted"),
-      ],
+      [s('    "arguments"', "key"), s(": { ", "muted"), s('"state"', "key"), s(': "thinking"', "str"),
+        s(" }", "muted")],
       [s("  }", "muted")],
       [s("}", "muted")],
     ],

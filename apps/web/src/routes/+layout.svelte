@@ -4,16 +4,16 @@
   import { browser } from "$app/environment";
   import { gsap } from "gsap";
   import {
-    Button, Icon, IconButton, Page, icons, prefersReducedMotion, provideLocale, registerIcons,
+    Button, Icon, IconButton, Page, prefersReducedMotion, provideLocale, registerIcons,
   } from "@facile/muse";
   import { NAV_SECTIONS } from "$lib/data";
-  import { GITHUB_ICON, MENU_ICON, PASTILLE_ICONS, PASTILLE_LOGO } from "$lib/icons";
-  import { EXPLODE_ICONS } from "$lib/icons-explode";
+  import { CLOSE_ICON, GITHUB_ICON, ICONS, MENU_ICON, MOON_ICON, PASTILLE_LOGO } from "$lib/icons";
+  import { RELEASES_ICON, SPEC_ICON, SUN_ICON } from "$lib/icons";
   import IntroLoader from "$lib/components/IntroLoader.svelte";
   import { moveNavPill, scrollToSection, watchActiveSection } from "$lib/motion";
 
   let { children }: { children: Snippet } = $props();
-  registerIcons({ ...PASTILLE_ICONS, ...EXPLODE_ICONS });
+  registerIcons(ICONS);
   provideLocale("en");
 
   let theme = $state<"light" | "dark">("dark");
@@ -44,7 +44,6 @@
     activeSection = id;
     scrollToSection(id, event);
   }
-
   function openSidebar() {
     mobileOpen = true;
     requestAnimationFrame(() => {
@@ -82,9 +81,9 @@
   });
 
   const FOOTER_LINKS = [
-    { label: "BOHS-01 Spec", href: "https://github.com/FacileStudio/Pastille/tree/main/docs/spec" },
-    { label: "Releases", href: "https://github.com/FacileStudio/Pastille/releases" },
-    { label: "GitHub", href: "https://github.com/FacileStudio/Pastille" },
+    { label: "BOHS-01 Spec", icon: SPEC_ICON, href: "https://github.com/FacileStudio/Pastille/tree/main/docs/spec" },
+    { label: "Releases", icon: RELEASES_ICON, href: "https://github.com/FacileStudio/Pastille/releases" },
+    { label: "GitHub", icon: GITHUB_ICON, href: "https://github.com/FacileStudio/Pastille" },
   ];
 </script>
 <IntroLoader />
@@ -135,7 +134,7 @@
           aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
           onclick={toggleTheme}
         >
-          <Icon icon={theme === "dark" ? icons.sun : icons.moon} size={16} />
+          <Icon icon={theme === "dark" ? SUN_ICON : MOON_ICON} size={16} />
         </IconButton>
         <Button
           variant="primary"
@@ -185,7 +184,7 @@
               aria-label="Close navigation menu"
               onclick={() => closeSidebar()}
             >
-              <Icon icon={icons.close} size={16} />
+              <Icon icon={CLOSE_ICON} size={16} />
             </IconButton>
           </div>
           <nav aria-label="Mobile" class="flex flex-col gap-1.5">
@@ -242,7 +241,8 @@
       <div class="flex flex-wrap items-center gap-4">
         <span class="font-mono">CERN-OHL-S v2 · Apache 2.0</span>
         {#each FOOTER_LINKS as link (link.label)}
-          <a href={link.href} target="_blank" rel="noreferrer" class="hover:text-fc-fg">{link.label}</a>
+          <a href={link.href} target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 hover:text-fc-fg"
+            ><Icon icon={link.icon} size={14} />{link.label}</a>
         {/each}
       </div>
     </div>

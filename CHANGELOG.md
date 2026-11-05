@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-11-05
+
+### Added
+- Pre-order form split into a summary card and a grouped form with a live order recap (quantity, total, ship date, amount due) and a three-step "what happens next" strip.
+- Generated Solar icon registry built from `@iconify-json/solar`; `bun run check` fails when a `solar:` name used in `src/` is missing from the set.
+- Footer links now carry Solar icons.
+
+### Changed
+- Top bar nav, theme toggle and mobile drawer use Solar bold duotone glyphs. Board, Connectivity and Build rendered no icon before because their names were never registered; every icon now renders inline instead of falling back to the iconify network loader.
+- Pre-order validation shows inline errors with `aria-invalid` and `aria-describedby`, and the success panel offers a copy button and the plain address when no mail client opens.
+
+### Removed
+- Hand-pasted icon modules `icons-solar.ts`, `icons-explode.ts` and `topology-icons.ts`, replaced by the generated registry.
+
 ## [0.5.2] - 2026-11-05
 
 ### Changed

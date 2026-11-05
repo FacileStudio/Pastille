@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TOPOLOGY_ICONS } from "$lib/topology-icons";
+  import { ICONS } from "$lib/icons";
 
   let { name, x, y, size = 24, color = "currentColor" }: {
     name: string;
@@ -9,7 +9,7 @@
     color?: string;
   } = $props();
 
-  const body = $derived(TOPOLOGY_ICONS[name]?.body ?? "");
+  const body = $derived(ICONS[name]?.body ?? "");
 </script>
 
 <g transform="translate({x - size / 2} {y - size / 2}) scale({size / 24})" style:color aria-hidden="true">

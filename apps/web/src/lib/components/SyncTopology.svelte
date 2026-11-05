@@ -1,13 +1,10 @@
 <script lang="ts">
-  import { Button, Card, Icon, prefersReducedMotion, registerIcons } from "@facile/muse";
+  import { Button, Card, Icon, prefersReducedMotion } from "@facile/muse";
   import TopologyDiagram from "$lib/components/TopologyDiagram.svelte";
-  import { TOPOLOGY_ICONS } from "$lib/topology-icons";
   import { EXAMPLE_NOTE, TOPOLOGY_MODES, type TopologyModeId } from "$lib/topology";
 
   const CYCLE_MS = 5000;
   const TOUCH = "pointer-coarse:h-11";
-
-  registerIcons(TOPOLOGY_ICONS);
 
   let activeId = $state<TopologyModeId>("ble");
   let pinned = $state(false);
