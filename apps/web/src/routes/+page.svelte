@@ -15,7 +15,7 @@
     type TokenTone,
   } from "$lib/data";
   import { GITHUB_ICON } from "$lib/icons";
-  import { scrollReveal } from "$lib/motion";
+  import { scrollReveal, scrollToSection } from "$lib/motion";
 
   const TONE_CLASS: Record<TokenTone, string> = {
     fg: "text-fc-fg",
@@ -38,16 +38,17 @@
 <section use:scrollReveal={{ delay: 0.12, stagger: 0.07 }} class="flex flex-col gap-6 pt-4 md:pt-8">
   <div data-reveal-item class="flex flex-col gap-3 max-w-2xl">
     <h1 class="text-fc-2xl sm:text-fc-3xl font-semibold tracking-tight text-fc-fg">
-      Wear your assistant.
+      Open hardware. Sovereign AI.
     </h1>
     <p class="text-fc-md sm:text-fc-lg text-fc-fg-muted">
-      Pastille is a 42 mm charm with Bulle's face on a round screen. Tap it and talk. Bulle answers out
-      loud from a server you run, and every part of Pastille is open source.
+      Pastille brings Bulle into the physical world. It's a 42mm charm with a round screen that you tap to
+      talk. She answers out loud, runs on your own hardware, and is 100% open-source.
     </p>
   </div>
 
   <div data-reveal-item class="flex flex-wrap items-center gap-3 pt-1">
-    <Button variant="primary" size="lg" href="#preorder">Pre-order</Button>
+    <Button variant="primary" size="lg" href="#preorder" icon="solar:cart-large-2-linear"
+      onclick={(e) => scrollToSection("preorder", e)}>Pre-order</Button>
     <Button
       variant="ghost"
       size="lg"
@@ -246,5 +247,4 @@
     </div>
   </Section>
 </div>
-
 <PreOrderForm />

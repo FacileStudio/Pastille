@@ -87,9 +87,7 @@
     { label: "GitHub", href: "https://github.com/FacileStudio/Pastille" },
   ];
 </script>
-
 <IntroLoader />
-
 <div class="flex min-h-dvh w-full flex-col bg-fc-page text-fc-fg">
   <div class="sticky top-0 z-30 flex w-full justify-center pointer-events-none px-3 sm:px-6">
     <header
@@ -121,11 +119,12 @@
             href="#{item.id}"
             aria-current={active ? "location" : undefined}
             onclick={(e) => selectSection(item.id, e)}
-            class="relative z-10 inline-flex h-8 items-center whitespace-nowrap rounded-fc-pill px-3 text-fc-xs
+            class="relative z-10 inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-fc-pill px-3 text-fc-xs
               font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2
               focus-visible:outline-fc-ring {active ? 'text-fc-accent-fg' : 'text-fc-fg-muted hover:text-fc-fg'}"
-            >{item.label}</a
           >
+            <Icon icon={item.icon} size={14} /><span>{item.label}</span>
+          </a>
         {/each}
       </nav>
 
@@ -192,16 +191,18 @@
           <nav aria-label="Mobile" class="flex flex-col gap-1.5">
             {#each NAV_SECTIONS as item (item.id)}
               {@const active = activeSection === item.id}
-              <a
-                href="#{item.id}"
+              <a href="#{item.id}"
                 onclick={(e) => {
                   e.preventDefault();
                   closeSidebar(() => selectSection(item.id));
                 }}
-                class="inline-flex h-11 items-center rounded-fc-pill px-4 text-fc-sm font-medium transition-colors
-                  {active ? 'bg-fc-accent text-fc-accent-fg' : 'text-fc-fg-muted hover:bg-fc-surface hover:text-fc-fg'}"
-                >{item.label}</a
+                class="inline-flex h-11 items-center gap-2.5 rounded-fc-pill px-4 text-fc-sm font-medium
+                  transition-colors {active
+                  ? 'bg-fc-accent text-fc-accent-fg'
+                  : 'text-fc-fg-muted hover:bg-fc-surface hover:text-fc-fg'}"
               >
+                <Icon icon={item.icon} size={18} /><span>{item.label}</span>
+              </a>
             {/each}
           </nav>
         </div>
@@ -222,7 +223,7 @@
 
   <footer class="mx-auto w-full max-w-fc-xl px-4 pb-10 pt-8 sm:px-6 md:px-10">
     <div
-      class="flex flex-col items-center justify-between gap-4 rounded-fc-lg bg-fc-component px-6 py-5
+      class="flex flex-col items-center justify-between gap-4 rounded-fc-pill bg-fc-component px-8 py-4
         text-fc-xs text-fc-fg-muted sm:flex-row"
     >
       <div class="flex flex-wrap items-center gap-2.5">

@@ -46,13 +46,13 @@ export const PREORDER_PRICE = "$49";
 export const RELEASE_TAG = `v${VERSION}`;
 
 export const NAV_SECTIONS = [
-  { id: "disassembly", label: "Inside" },
-  { id: "viewer", label: "Board" },
-  { id: "connectivity", label: "Connectivity" },
-  { id: "architecture", label: "Hardware" },
-  { id: "protocol", label: "Protocol" },
-  { id: "comparison", label: "Comparison" },
-  { id: "quickstart", label: "Build" },
+  { id: "disassembly", label: "Inside", icon: "solar:layers-linear" },
+  { id: "viewer", label: "Board", icon: "solar:cpu-linear" },
+  { id: "connectivity", label: "Connectivity", icon: "solar:bluetooth-linear" },
+  { id: "architecture", label: "Hardware", icon: "solar:widget-linear" },
+  { id: "protocol", label: "Protocol", icon: "solar:code-linear" },
+  { id: "comparison", label: "Comparison", icon: "solar:chart-2-linear" },
+  { id: "quickstart", label: "Build", icon: "solar:box-linear" },
 ] as const;
 
 export const BATTERY = {
