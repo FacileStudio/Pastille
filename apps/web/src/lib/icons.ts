@@ -1,10 +1,12 @@
 import type { IconData } from "@facile/muse";
+import { SOLAR_ICONS } from "./icons-solar";
 
 export const PASTILLE_LOGO = "solar:circle-dot-bold-duotone";
 export const GITHUB_ICON = "mdi:github";
 export const MENU_ICON = "solar:hamburger-menu-linear";
 
 export const PASTILLE_ICONS: Record<string, IconData> = {
+  ...SOLAR_ICONS,
   "mdi:github": {
     width: 24,
     height: 24,
