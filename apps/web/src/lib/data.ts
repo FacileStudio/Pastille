@@ -116,7 +116,7 @@ export const COMPARISON: ComparisonRow[] = [
   { metric: "Display", pastille: '1.28" 240x240 round IPS', omi: "No screen", rabbit: '2.88" touchscreen' },
   {
     metric: "Battery",
-    pastille: "About 1.3 h of talk, 3.5 days at 20 min a day (estimate)",
+    pastille: "About 1.3 h of talk (estimate)",
     omi: "10 to 14 hours",
     rabbit: "Under a day of moderate use",
   },
@@ -198,7 +198,7 @@ export interface QuickstartStep {
 
 export const QUICKSTART_STEPS: QuickstartStep[] = [
   {
-    badge: "01 · Hardware",
+    badge: "Hardware",
     title: "Build the hardware files",
     summary: "Check the circuit, then export the printable case, the Gerbers and the KiCad project.",
     lines: [
@@ -225,7 +225,7 @@ export const QUICKSTART_STEPS: QuickstartStep[] = [
     ],
   },
   {
-    badge: "02 · Firmware",
+    badge: "Firmware",
     title: "Test and flash the firmware",
     summary: "Run the tests on your computer, then flash Pastille over USB-C.",
     lines: [
