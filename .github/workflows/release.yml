@@ -18,6 +18,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Match The Tag To Every Version Copy
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          web="$(jq -r .version apps/web/package.json)"
+          hardware="$(jq -r .version hardware/package.json)"
+          cargo="$(grep -m1 '^version = ' apps/firmware/Cargo.toml | cut -d '"' -f2)"
+          lock="$(grep -A1 '^name = "pastille-firmware"$' apps/firmware/Cargo.lock | sed -n 's/^version = "\(.*\)"$/\1/p')"
+          status=0
+          for pair in "apps/web/package.json=$web" "hardware/package.json=$hardware" \
+            "apps/firmware/Cargo.toml=$cargo" "apps/firmware/Cargo.lock=$lock"; do
+            if [ "${pair#*=}" != "$tag" ]; then
+              echo "::error::${pair%%=*} is '${pair#*=}' but the tag is $tag"
+              status=1
+            fi
+          done
+          exit "$status"
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -25,10 +42,12 @@ jobs:
         working-directory: apps/firmware
         env:
           RUSTUP_TOOLCHAIN: stable
-        run: cargo test
+        run: cargo test --locked
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
 
       - name: Install Hardware Dependencies
         working-directory: hardware
@@ -36,6 +55,12 @@ jobs:
 
       - name: Verify Release Files
         run: bun hardware/fab/verify.ts
+
+      - name: Rebuild Bodies From The Committed Kit
+        run: bun hardware/bodies/build.ts
+
+      - name: Fail On Stale Bodies
+        run: git diff --exit-code -- bodies && test -z "$(git status --porcelain -- bodies)"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
