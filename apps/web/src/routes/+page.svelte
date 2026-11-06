@@ -41,13 +41,13 @@
       Open hardware. Sovereign AI.
     </h1>
     <p class="text-fc-md sm:text-fc-lg text-fc-fg-muted">
-      Pastille brings Bulle into the physical world. It's a 42mm charm with a round screen that you tap to
-      talk. She answers out loud, runs on your own hardware, and is 100% open-source.
+      Pastille brings Bulle into the physical world. It's a 42 mm charm with a round screen that you tap to
+      talk. Bulle answers out loud from a server you run. The hardware and firmware are open source.
     </p>
   </div>
 
   <div data-reveal-item class="flex flex-wrap items-center gap-3 pt-1">
-    <Button variant="primary" size="lg" href="#preorder" icon="solar:cart-large-2-linear"
+    <Button variant="primary" size="lg" href="#preorder" icon="solar:cart-large-2-bold-duotone"
       onclick={(e) => scrollToSection("preorder", e)}>Pre-order</Button>
     <Button
       variant="ghost"
