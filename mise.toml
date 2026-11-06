@@ -1,5 +1,5 @@
 [tools]
-bun = "1.4"
+bun = "1.4.2"
 rust = { version = "1.98", components = "clippy" }
 
 [tasks.install]
@@ -22,7 +22,7 @@ run = "bun run build"
 [tasks.check-firmware]
 description = "Run firmware host tests and clippy"
 dir = "apps/firmware"
-run = ["cargo test", "cargo clippy --all-targets -- -D warnings"]
+run = ["cargo test --locked", "cargo clippy --locked --all-targets -- -D warnings"]
 
 [tasks.build-firmware]
 description = "Build the ESP32-S3 firmware and its 4 MB flash image (needs espup's esp toolchain)"

@@ -28,13 +28,13 @@ jobs:
         working-directory: apps/firmware
         env:
           RUSTUP_TOOLCHAIN: stable
-        run: cargo test
+        run: cargo test --locked
 
       - name: Run Clippy
         working-directory: apps/firmware
         env:
           RUSTUP_TOOLCHAIN: stable
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --locked --all-targets -- -D warnings
 
   hardware-files:
     name: Hardware Release Files
@@ -45,6 +45,11 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Match The Mise Bun Version
+        run: grep -qx "bun = \"$(bun --version)\"" mise.toml
 
       - name: Install Hardware Dependencies
         working-directory: hardware
@@ -57,7 +62,7 @@ jobs:
         run: bun hardware/bodies/build.ts
 
       - name: Fail On Stale Bodies
-        run: git diff -I "CARTESIAN_POINT" --exit-code -- bodies/*.step
+        run: git diff --exit-code -- bodies && test -z "$(git status --porcelain -- bodies)"
 
   hardware-and-web:
     name: Hardware & Web Checks
@@ -69,7 +74,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.4.2
 
       - name: Install Hardware Dependencies
         working-directory: hardware
