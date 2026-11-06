@@ -1,5 +1,5 @@
 import { createViewport, demandLoop, stepTransition, type Transition } from "$lib/pcb-viewport";
-import { enrichBoard } from "$lib/pcb-components";
+import { disposeMaterial, enrichBoard } from "$lib/pcb-components";
 
 export type Preset = "iso" | "top" | "side";
 
@@ -46,16 +46,7 @@ export function disposeObject(root: import("three").Object3D) {
     };
     if (!mesh.isMesh) return;
     mesh.geometry?.dispose();
-    const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-    for (const mat of list) {
-      if (!mat || typeof mat !== "object") continue;
-      for (const val of Object.values(mat as Record<string, unknown>)) {
-        const tex = val as { isTexture?: boolean; dispose?: () => void };
-        if (tex?.isTexture && tex.dispose) tex.dispose();
-      }
-      const disposable = mat as { dispose?: () => void };
-      disposable.dispose?.();
-    }
+    (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(disposeMaterial);
   });
 }
 
