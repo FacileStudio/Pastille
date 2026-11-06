@@ -27,7 +27,7 @@
     {
       icon: "solar:wallet-money-bold-duotone",
       title: "Payment details come later",
-      body: PREORDER.paymentNote,
+      body: "We send them by email.",
     },
   ];
 

@@ -18,7 +18,7 @@
     { label: "Name", value: order.name.trim() },
     { label: "Email", value: order.email.trim() },
     { label: "Quantity", value: String(order.quantity) },
-    { label: "Total before shipping", value: formatPrice(order.quantity * PREORDER.unitPrice) },
+    { label: "Total", value: `${formatPrice(order.quantity * PREORDER.unitPrice)} before shipping` },
   ]);
 
   onMount(() => heading?.focus());
