@@ -1,3 +1,5 @@
+import { version } from "../../package.json";
+
 export type TokenTone = "fg" | "muted" | "key" | "str" | "num" | "kw";
 
 export interface CodeSpan {
@@ -39,7 +41,7 @@ export interface ProtocolPlane {
   lines: CodeLine[];
 }
 
-export const VERSION = "0.6.0";
+export const VERSION: string = version;
 
 export const RELEASE_TAG = `v${VERSION}`;
 
