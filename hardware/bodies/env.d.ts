@@ -7,6 +7,8 @@ declare var Bun: {
     size: number;
   };
   write(path: string, data: string | Uint8Array): Promise<number>;
+  Glob: new (pattern: string) => { scanSync(options: { cwd: string }): Iterable<string> };
+  spawnSync(cmd: string[], options: { cwd: string }): { exitCode: number; stdout: Uint8Array };
 };
 
 interface ImportMeta {

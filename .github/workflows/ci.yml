@@ -62,7 +62,10 @@ jobs:
         run: bun hardware/bodies/build.ts
 
       - name: Fail On Stale Bodies
-        run: git diff --exit-code -- bodies && test -z "$(git status --porcelain -- bodies)"
+        run: |
+          git diff --exit-code -- bodies ':(exclude)bodies/*.stl'
+          test -z "$(git status --porcelain -- bodies ':(exclude)bodies/*.stl')"
+          bun hardware/bodies/stale.ts
 
   hardware-and-web:
     name: Hardware & Web Checks
