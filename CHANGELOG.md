@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.2] - 2026-11-06
+## [0.6.3] - 2026-11-06
+
+v0.6.2 was tagged but never published: its new strict bodies check failed on CI because STL tessellation differs between machines. v0.6.3 ships everything below plus that fix.
 
 ### Added
 - Pre-order entry in the top bar and the mobile drawer.
@@ -23,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - The header no longer overflows the page between 768 and 900 px.
 - The CI bodies check catches geometry changes again and covers STL files. Before this, it ignored every `CARTESIAN_POINT` line.
+- The bodies check compares STL files by geometry (volume, area and bounding box within 0.1 percent) and keeps STEP files byte-strict, so CI passes on any machine and still fails on a real shape change.
 - Board model overlay parts sit where the circuit puts them, and the ESP32-S3-MINI-1 uses its real 20.5 x 15.4 x 2.4 mm size.
 - The disassembly falls back to the assembly model if the board model fails to load, and frees the parts it replaces.
 - Under reduced motion the step cards no longer animate.
