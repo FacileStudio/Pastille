@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-11-06
+
+### Added
+- Pre-order entry in the top bar and the mobile drawer.
+- The release job fails unless the tag matches every version copy: both `package.json` files, `Cargo.toml` and `Cargo.lock`.
+- `bun run check` runs the explode math and pre-order checks, and fails on any unregistered icon name.
+
+### Changed
+- Pre-order copy now tells one reservation story. You pay nothing now, we email to confirm, and payment details and shipping cost come later by email. Price and ship date come from one constant, labelled as the pre-order price and the estimated ship date.
+- The page reads its version from `apps/web/package.json`, so it can no longer show a stale release.
+- The header collapses into the drawer below 1024 px and shows nav icons from 1280 px. Header buttons are 44 px again.
+- STEP and STL writers round every float, replacing a hand patch of one literal. Bun is pinned to 1.4.2 in mise and CI, and cargo runs with `--locked`.
+
+### Fixed
+- The header no longer overflows the page between 768 and 900 px.
+- The CI bodies check catches geometry changes again and covers STL files. Before this, it ignored every `CARTESIAN_POINT` line.
+- Board model overlay parts sit where the circuit puts them, and the ESP32-S3-MINI-1 uses its real 20.5 x 15.4 x 2.4 mm size.
+- The disassembly falls back to the assembly model if the board model fails to load, and frees the parts it replaces.
+- Under reduced motion the step cards no longer animate.
+
+### Removed
+- Unused `ScreenBlob.svelte` and the per-frame screen projection.
+- Pre-order promises nothing in the repo backs: "final quote", "lead time", "payment link" and "Tracked worldwide".
+
 ## [0.6.1] - 2026-11-05
 
 ### Fixed
@@ -60,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Moved hardware design to the ESP32-S3-MINI-1-N4R2 module, 600 mA regulator, 12-pin LCD flex connector, and SMD-only components.
-- Adjusted battery specifications to a protected 120 mAh cell (~1.3 hours continuous talk time, ~3.5 days standby).
+- Adjusted battery specifications to a protected 120 mAh cell (about 1.3 hours of continuous talk, about 3.5 days at 20 minutes of talk a day, about 80 days asleep).
 - Resolved all PCB placement errors; board autorouting now completes with clean copper spans.
 - Web viewer now lazy-loads models on demand and serves GLB assets with gzip compression.
 
