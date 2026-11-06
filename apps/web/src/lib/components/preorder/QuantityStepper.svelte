@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Field, Icon, IconButton, Input } from "@facile/muse";
-  import { PREORDER } from "$lib/data";
-  import { clampQuantity, formatPrice } from "./order";
+  import { PREORDER, clampQuantity } from "./order";
 
   interface Props {
     value: number;
@@ -12,8 +11,6 @@
   let { value = $bindable(), error, onblur }: Props = $props();
 
   const STEP = "rounded-fc-md bg-fc-surface text-fc-fg aria-disabled:opacity-50 [&_svg]:size-5.5";
-
-  const total = $derived(Number.isInteger(value) ? formatPrice(clampQuantity(value) * PREORDER.unitPrice) : "");
 
   /**
    * Moves the quantity by one step, staying inside the allowed range.
@@ -58,9 +55,6 @@
       >
         <Icon icon="solar:add-square-bold-duotone" size={22} />
       </IconButton>
-      <p class="ml-auto text-right text-fc-sm text-fc-fg-muted" aria-live="polite">
-        Total <span class="font-mono font-semibold text-fc-fg">{total}</span>
-      </p>
     </div>
   {/snippet}
 </Field>

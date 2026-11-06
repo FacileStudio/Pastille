@@ -1,9 +1,8 @@
 <script lang="ts">
   import { Button, Card, Icon } from "@facile/muse";
   import { onMount } from "svelte";
-  import { PREORDER } from "$lib/data";
   import { copyText } from "./clipboard";
-  import { formatPrice, orderMailto, orderText, type Order } from "./order";
+  import { PREORDER, formatPrice, orderMailto, orderText, type Order } from "./order";
 
   interface Props {
     order: Order;
@@ -19,8 +18,7 @@
     { label: "Name", value: order.name.trim() },
     { label: "Email", value: order.email.trim() },
     { label: "Quantity", value: String(order.quantity) },
-    { label: "Total", value: formatPrice(order.quantity * PREORDER.unitPrice) },
-    { label: "Ships", value: PREORDER.shipDate },
+    { label: "Total before shipping", value: formatPrice(order.quantity * PREORDER.unitPrice) },
   ]);
 
   onMount(() => heading?.focus());
@@ -43,10 +41,11 @@
     </span>
     <div class="flex flex-col gap-1">
       <h3 bind:this={heading} tabindex="-1" class="text-fc-md font-semibold text-fc-fg focus:outline-none">
-        Your order email is ready
+        Your reservation email is ready
       </h3>
       <p class="text-fc-sm leading-relaxed text-fc-fg-muted">
-        Your mail app should open with the order filled in. Send it, and we reply by email to confirm.
+        Your mail app should open with your details filled in. Send it, and we reply by email to confirm your
+        reservation.
       </p>
     </div>
   </div>

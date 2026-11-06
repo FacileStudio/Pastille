@@ -1,34 +1,33 @@
 <script lang="ts">
   import { Button, Card, Divider, Field, Icon, Input, Section, Textarea } from "@facile/muse";
   import { tick } from "svelte";
-  import { PREORDER } from "$lib/data";
   import OrderSuccess from "./preorder/OrderSuccess.svelte";
   import OrderSummary from "./preorder/OrderSummary.svelte";
   import QuantityStepper from "./preorder/QuantityStepper.svelte";
   import {
-    ORDER_FIELDS, clampQuantity, formatPrice, orderMailto, validateOrder,
+    ORDER_FIELDS, PREORDER, clampQuantity, formatPrice, orderMailto, validateOrder,
     type Order, type OrderField,
   } from "./preorder/order";
 
-  const DESCRIPTION = `Reserve a pre-built Pastille. It ships in ${PREORDER.shipDate}.`;
+  const DESCRIPTION = "Reserve a pre-built Pastille by email.";
   const FIELD = "border-0 bg-fc-surface";
   const GROUP_LABEL = "text-fc-xs font-mono uppercase text-fc-fg-muted";
 
   const STEPS = [
     {
       icon: "solar:letter-bold-duotone",
-      title: "You send the order",
-      body: "The button opens your mail app with the details already filled in.",
+      title: "You send the reservation",
+      body: "The button opens your mail app with your details filled in.",
     },
     {
       icon: "solar:chat-round-check-bold-duotone",
       title: "We confirm by email",
-      body: "You get a reply with the final quote, the lead time and a payment link.",
+      body: "We reply to confirm your reservation.",
     },
     {
-      icon: "solar:delivery-bold-duotone",
-      title: `It ships ${PREORDER.shipDate}`,
-      body: "Tracked worldwide. Nothing is charged before we confirm your unit.",
+      icon: "solar:wallet-money-bold-duotone",
+      title: "Payment details come later",
+      body: PREORDER.paymentNote,
     },
   ];
 
@@ -123,12 +122,9 @@
           <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5 rounded-fc-md bg-fc-surface p-4 text-fc-sm">
             <dt class="text-fc-fg-muted">Quantity</dt>
             <dd class="text-right font-mono text-fc-fg">{units} × {formatPrice(PREORDER.unitPrice)}</dd>
-            <dt class="text-fc-fg-muted">Total</dt>
+            <dt class="text-fc-fg-muted">Total before shipping</dt>
             <dd class="text-right font-mono font-semibold text-fc-fg">{total}</dd>
-            <dt class="text-fc-fg-muted">Ships</dt>
-            <dd class="text-right text-fc-fg">{PREORDER.shipDate}</dd>
-            <dt class="text-fc-fg-muted">Due today</dt>
-            <dd class="text-right font-medium text-fc-success">$0</dd>
+            <dd class="col-span-2 text-fc-xs text-fc-fg-muted">{PREORDER.paymentNote}</dd>
           </dl>
 
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -141,7 +137,7 @@
             >
               Send pre-order
             </Button>
-            <p class="text-fc-xs text-fc-fg-muted">Opens your mail app. Nothing is charged.</p>
+            <p class="text-fc-xs text-fc-fg-muted">Opens your mail app. {PREORDER.privacyNote}</p>
           </div>
         </form>
       </Card>

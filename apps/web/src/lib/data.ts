@@ -61,19 +61,6 @@ export const BATTERY = {
   chargeCurrent: "about 67 mA",
 };
 
-export const PREORDER = {
-  unitPrice: 49,
-  currency: "USD",
-  maxQuantity: 20,
-  shipDate: "March 2027",
-  contact: "contact@facile.studio",
-  includes: [
-    { icon: "solar:box-bold-duotone", label: "One assembled Pastille per unit" },
-    { icon: "solar:battery-charge-bold-duotone", label: `${BATTERY.capacity} cell, charged over USB-C` },
-    { icon: "solar:code-square-bold-duotone", label: "Open hardware and firmware files" },
-  ],
-} as const;
-
 export const HERO_METRICS: Metric[] = [
   { label: "Size", value: "42 mm", detail: "14 mm thick, with a lanyard loop" },
   { label: "Daily use", value: "3.5 days", detail: "With 20 min of talk a day (estimate)" },

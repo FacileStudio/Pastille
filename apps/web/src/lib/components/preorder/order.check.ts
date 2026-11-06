@@ -1,5 +1,4 @@
-import { PREORDER } from "$lib/data";
-import { clampQuantity, orderMailto, orderText, validateOrder } from "./order";
+import { PREORDER, clampQuantity, orderMailto, orderText, validateOrder } from "./order";
 
 /**
  * Throws when `ok` is false, naming the failed expectation.
@@ -18,7 +17,7 @@ expect(validateOrder({ ...valid, quantity: PREORDER.maxQuantity + 1 }).quantity 
 expect(validateOrder({ ...valid, quantity: 1.5 }).quantity !== undefined, "fractions are rejected");
 expect(clampQuantity(99) === PREORDER.maxQuantity && clampQuantity(-3) === 1, "the stepper clamps");
 expect(clampQuantity(Number.NaN) === 1, "an empty quantity falls back to one");
-expect(orderText(valid).includes(`Total: $${2 * PREORDER.unitPrice}`), "the total is in the summary");
+expect(orderText(valid).includes(`Total before shipping: $${2 * PREORDER.unitPrice}`), "the total is in the summary");
 expect(orderMailto(valid).startsWith(`mailto:${PREORDER.contact}?subject=`), "the link targets the contact");
 
 console.log("preorder: ok");
