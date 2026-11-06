@@ -16,7 +16,6 @@ export interface ExplodeStep {
   icons: string[];
   title: string;
   description: string;
-  motionNote?: string;
   offsets: Partial<Record<PartName, Vec3>>;
   rotation: { pitch: number; yaw: number };
 }
@@ -28,10 +27,6 @@ export const ASSEMBLY_SOURCES: ModelSource[] = [
   { url: `/models/pastille.glb?v=${VERSION}`, name: "main", rotation: [Math.PI / 2, 0, 0] },
 ];
 
-export const LCD_WINDOW_RADIUS_MM = 16.2;
-
-export const BLOB_FADE_STEPS: [number, number] = [1.5, 2];
-
 const FRONT = { pitch: 0, yaw: 0 };
 const THREE_QUARTER = { pitch: 35, yaw: -25 };
 
@@ -41,7 +36,6 @@ export const STEPS: ExplodeStep[] = [
     icons: ["solar:watch-round-bold-duotone"],
     title: "The assembled charm",
     description: "Pastille as you wear it, a 42 mm disc with Bulle on a round screen.",
-    motionNote: "Move your pointer and Bulle's eyes follow it.",
     offsets: {},
     rotation: FRONT,
   },

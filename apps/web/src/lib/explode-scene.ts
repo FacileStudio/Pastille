@@ -1,17 +1,10 @@
 import type * as THREE from "three";
-import {
-  ASSEMBLY_SOURCES, LCD_WINDOW_RADIUS_MM, STEPS,
-} from "$lib/explode";
-import { clamp01, partOffset, rotationAt } from "$lib/explode-math";
+import { ASSEMBLY_SOURCES, STEPS } from "$lib/explode";
+import { clamp01, rotationAt } from "$lib/explode-math";
 import { applyParts, loadExplodeModel, type ExplodeModel } from "$lib/explode-model";
 import { addLights, disposeObject } from "$lib/pcb-scene";
 
 type Three = typeof import("three");
-
-export interface ScreenFrame {
-  transform: string;
-  opacity: number;
-}
 
 export interface ExplodeControl {
   setProgress: (t: number) => void;
@@ -19,7 +12,6 @@ export interface ExplodeControl {
 }
 
 const DEG = Math.PI / 180;
-export const OVERLAY_PX = 200;
 
 /**
  * Creates a transparent WebGL renderer sized to its host and appends its canvas.
@@ -45,7 +37,6 @@ class ExplodeScene {
   private camera: THREE.PerspectiveCamera;
   private pivot: THREE.Group;
   private tmp: THREE.Vector3;
-  private points: THREE.Vector3[];
   private box: THREE.Box3;
   private sphere: THREE.Sphere;
   private progress = 0;
@@ -56,7 +47,6 @@ class ExplodeScene {
     private host: HTMLElement,
     private renderer: THREE.WebGLRenderer,
     private model: ExplodeModel,
-    private onFrame: (frame: ScreenFrame) => void,
   ) {
     this.scene = new T.Scene();
     addLights(T, this.scene);
@@ -68,7 +58,6 @@ class ExplodeScene {
     this.pivot.add(frame);
     this.scene.add(this.pivot);
     this.tmp = new T.Vector3();
-    this.points = [new T.Vector3(), new T.Vector3(), new T.Vector3()];
     this.box = new T.Box3();
     this.sphere = new T.Sphere();
     this.resize();
@@ -102,7 +91,6 @@ class ExplodeScene {
     this.pivot.updateMatrixWorld(true);
     this.frameCamera();
     this.renderer.render(this.scene, this.camera);
-    this.onFrame(this.project(s));
   }
 
   private frameCamera() {
@@ -114,25 +102,6 @@ class ExplodeScene {
     this.camera.position.set(center.x, center.y, center.z + distance);
     this.camera.lookAt(center);
     this.camera.updateProjectionMatrix();
-  }
-
-  private project(s: number): ScreenFrame {
-    const { anchor, anchorPart, root } = this.model;
-    const base = anchorPart ? partOffset(anchorPart, s, this.tmp).add(anchor) : this.tmp.copy(anchor);
-    const [c, u, v] = this.points;
-    c.copy(base);
-    u.copy(base).x += LCD_WINDOW_RADIUS_MM;
-    v.copy(base).y += LCD_WINDOW_RADIUS_MM;
-    const w = this.host.clientWidth / 2;
-    const h = this.host.clientHeight / 2;
-    for (const p of this.points) {
-      root.localToWorld(p).project(this.camera);
-      p.set((p.x + 1) * w, (1 - p.y) * h, 0);
-    }
-    const k = OVERLAY_PX / 2;
-    const a = (u.x - c.x) / k, b = (u.y - c.y) / k, cc = (c.x - v.x) / k, d = (c.y - v.y) / k;
-    const e = c.x - (a + cc) * k, f = c.y - (b + d) * k;
-    return { transform: `matrix(${a}, ${b}, ${cc}, ${d}, ${e}, ${f})`, opacity: 1 };
   }
 
   dispose() {
@@ -147,18 +116,15 @@ class ExplodeScene {
 /**
  * Loads three.js and the assembly, then mounts an on-demand explode scene inside `host`.
  */
-export async function mountExplodeScene(
-  host: HTMLElement,
-  onFrame: (frame: ScreenFrame) => void = () => {},
-): Promise<ExplodeControl> {
+export async function mountExplodeScene(host: HTMLElement): Promise<ExplodeControl> {
   const [T, { GLTFLoader }] = await Promise.all([
     import("three"),
     import("three/examples/jsm/loaders/GLTFLoader.js"),
   ]);
-  const model = await loadExplodeModel(T, new GLTFLoader(), [ASSEMBLY_SOURCES]);
+  const model = await loadExplodeModel(T, new GLTFLoader(), [ASSEMBLY_SOURCES, ASSEMBLY_SOURCES.slice(0, 1)]);
   let view: ExplodeScene;
   try {
-    view = new ExplodeScene(T, host, createRenderer(T, host), model, onFrame);
+    view = new ExplodeScene(T, host, createRenderer(T, host), model);
   } catch (err) {
     disposeObject(model.root);
     throw err;

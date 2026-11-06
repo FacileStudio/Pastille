@@ -106,7 +106,7 @@
 
 <div bind:this={root} class="flex flex-col gap-6 lg:grid lg:grid-cols-[11fr_9fr] lg:gap-10">
   <div
-    class="sticky top-0 z-20 h-[calc(50dvh+5rem)] bg-fc-page pt-20 lg:top-20 lg:z-10
+    class="sticky top-0 z-20 h-[calc(42dvh+5rem)] bg-fc-page pt-20 lg:top-20 lg:z-10
       lg:h-[calc(100dvh-7rem)] lg:self-start lg:bg-transparent lg:pt-0"
   >
     <div bind:this={stage} class="relative size-full overflow-hidden rounded-fc-lg bg-fc-component">
@@ -136,7 +136,7 @@
 
   <ol
     bind:this={list}
-    class="relative flex flex-col [--step-offset:8px] [--sticky-top:calc(50dvh+5.5rem)] lg:[--step-offset:14px]
+    class="relative flex flex-col [--step-offset:8px] [--sticky-top:calc(42dvh+5.5rem)] lg:[--step-offset:14px]
       lg:[--sticky-top:5.5rem]"
     aria-label="Disassembly steps"
   >
@@ -144,7 +144,7 @@
       {@const current = i === active}
       <li
         aria-current={current ? "step" : undefined}
-        class="sticky transition-all duration-300 ease-out"
+        class="sticky transition-transform duration-300 ease-out motion-reduce:transition-none"
         style:top="calc(var(--sticky-top) + {i} * var(--step-offset))"
         style:z-index={i + 1}
         style:transform={pile(i)}
@@ -152,26 +152,27 @@
       >
         <Card
           class="flex w-full flex-col gap-3 p-6 !bg-fc-component transition-all duration-300
-            {current
-            ? 'shadow-[var(--step-card-shadow-active)] scale-[1.01]'
+            motion-reduce:transition-none {current
+            ? 'shadow-[var(--step-card-shadow-active)] scale-[1.01] motion-reduce:scale-100'
             : 'shadow-[var(--step-card-shadow)]'}"
         >
           <div class="flex items-center gap-3">
             <span
               class="rounded-fc-pill px-3 py-1 font-mono text-fc-xs transition-colors duration-300
-                {current ? 'bg-fc-accent text-fc-accent-fg font-semibold' : 'bg-fc-component text-fc-fg-muted'}"
+                motion-reduce:transition-none
+                {current ? 'bg-fc-accent text-fc-accent-fg font-semibold' : 'bg-fc-surface text-fc-fg-muted'}"
             >
               {pad(i + 1)}
             </span>
             {#each step.icons as icon (icon)}
-              <span class="inline-flex size-10 items-center justify-center rounded-fc-md bg-fc-component text-fc-fg">
+              <span class="inline-flex size-10 items-center justify-center rounded-fc-md bg-fc-surface text-fc-fg">
                 <Icon {icon} size={22} />
               </span>
             {/each}
           </div>
           <h3 class="text-fc-md font-semibold text-fc-fg">{step.title}</h3>
           <p class="text-fc-sm text-fc-fg-muted leading-relaxed">
-            {step.description}{#if step.motionNote && !reduced}{" "}{step.motionNote}{/if}
+            {step.description}
           </p>
         </Card>
       </li>

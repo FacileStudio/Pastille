@@ -16,8 +16,6 @@ export interface PartNode {
 export interface ExplodeModel {
   root: THREE.Group;
   parts: Map<PartName, PartNode>;
-  anchor: THREE.Vector3;
-  anchorPart: PartName | null;
   restSphere: THREE.Sphere;
 }
 
@@ -70,19 +68,22 @@ async function loadAll(T: Three, loader: GLTFLoader, sources: ModelSource[]) {
 /**
  * Finds the named parts, records their rest pose, and measures the rest bounds.
  */
-function buildModel(T: Three, objects: THREE.Object3D[]): ExplodeModel {
+async function buildModel(T: Three, objects: THREE.Object3D[]): Promise<ExplodeModel> {
   const root = new T.Group();
   const explicitMain = objects.find((obj) => obj.name === "main");
   for (const obj of objects) {
     if (explicitMain && obj !== explicitMain) {
       const dummy = obj.getObjectByName("main");
-      if (dummy && dummy.parent) dummy.parent.remove(dummy);
+      if (dummy?.parent) {
+        dummy.parent.remove(dummy);
+        disposeObject(dummy);
+      }
     }
     root.add(obj);
   }
   enrichBoard(T, root);
   styleAssemblyParts(T, root);
-  attachLcdFace(T, root);
+  await attachLcdFace(T, root);
   root.updateMatrixWorld(true);
   const parts = new Map<PartName, PartNode>();
   for (const name of PARTS) {
@@ -91,22 +92,19 @@ function buildModel(T: Three, objects: THREE.Object3D[]): ExplodeModel {
     const toParent = new T.Matrix4().copy(node.parent.matrixWorld).invert();
     parts.set(name, { node, rest: node.position.clone(), basis: new T.Matrix3().setFromMatrix4(toParent) });
   }
-  const lcd = parts.get("lcd")?.node;
-  const box = new T.Box3().setFromObject(lcd ?? root);
-  const anchor = new T.Vector3((box.min.x + box.max.x) / 2, (box.min.y + box.max.y) / 2, box.max.z);
   const restSphere = new T.Box3().setFromObject(root).getBoundingSphere(new T.Sphere());
-  const anchorPart = lcd ? "lcd" : null;
-  return { root, parts, anchor, anchorPart, restSphere };
+  return { root, parts, restSphere };
 }
 
 /**
  * Loads the first candidate source list that resolves completely and builds the explode model.
+ * Pass a shorter fallback list after the full one so one missing file still shows what loaded.
  */
 export async function loadExplodeModel(T: Three, loader: GLTFLoader, candidates: ModelSource[][]) {
   for (const sources of candidates) {
     if (sources.length === 0) continue;
     try {
-      return buildModel(T, await loadAll(T, loader, sources));
+      return await buildModel(T, await loadAll(T, loader, sources));
     } catch {
       continue;
     }
