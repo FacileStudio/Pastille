@@ -8,7 +8,7 @@
     "build": "bun scripts/icons.ts && vite build",
     "preview": "vite preview --port 5185",
     "prepare": "svelte-kit sync || echo ''",
-    "check": "bun scripts/icons.ts --check && bunx --bun svelte-kit sync && bunx --bun svelte-check --tsconfig ./tsconfig.json"
+    "check": "bun scripts/icons.ts --check && bunx --bun svelte-kit sync && bunx --bun svelte-check --tsconfig ./tsconfig.json && bun src/lib/explode-math.check.ts && bun src/lib/components/preorder/order.check.ts"
   },
   "devDependencies": {
     "@iconify-json/solar": "1.2.13",
