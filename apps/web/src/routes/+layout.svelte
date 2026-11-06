@@ -1,84 +1,14 @@
 <script lang="ts">
   import "../app.css";
-  import { onMount, type Snippet } from "svelte";
-  import { browser } from "$app/environment";
-  import { gsap } from "gsap";
-  import {
-    Button, Icon, IconButton, Page, prefersReducedMotion, provideLocale, registerIcons,
-  } from "@facile/muse";
-  import { NAV_SECTIONS } from "$lib/data";
-  import { CLOSE_ICON, GITHUB_ICON, ICONS, MENU_ICON, MOON_ICON, PASTILLE_LOGO } from "$lib/icons";
-  import { RELEASES_ICON, SPEC_ICON, SUN_ICON } from "$lib/icons";
+  import type { Snippet } from "svelte";
+  import { Icon, Page, provideLocale, registerIcons } from "@facile/muse";
+  import { GITHUB_ICON, ICONS, PASTILLE_LOGO, RELEASES_ICON, SPEC_ICON } from "$lib/icons";
   import IntroLoader from "$lib/components/IntroLoader.svelte";
-  import { moveNavPill, scrollToSection, watchActiveSection } from "$lib/motion";
+  import SiteHeader from "$lib/components/SiteHeader.svelte";
 
   let { children }: { children: Snippet } = $props();
   registerIcons(ICONS);
   provideLocale("en");
-
-  let theme = $state<"light" | "dark">("dark");
-  let activeSection = $state<string>(NAV_SECTIONS[0].id);
-  let scrolled = $state(false);
-  let mobileOpen = $state(false);
-  let navPill: HTMLSpanElement | null = $state(null);
-  let navEls: Record<string, HTMLAnchorElement> = $state({});
-  let scrimEl: HTMLDivElement | null = $state(null);
-  let drawerEl: HTMLElement | null = $state(null);
-
-  if (browser && document.documentElement.classList.contains("light")) theme = "light";
-
-  $effect(() => {
-    if (!browser) return;
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    document.documentElement.classList.toggle("light", theme === "light");
-    try {
-      localStorage.setItem("pastille-theme", theme);
-    } catch {}
-  });
-  $effect(() => moveNavPill(navPill, navEls[activeSection], true));
-
-  function toggleTheme() {
-    theme = theme === "dark" ? "light" : "dark";
-  }
-  function selectSection(id: string, event?: MouseEvent) {
-    activeSection = id;
-    scrollToSection(id, event);
-  }
-  function openSidebar() {
-    mobileOpen = true;
-    requestAnimationFrame(() => {
-      if (!scrimEl || !drawerEl || prefersReducedMotion()) return;
-      gsap.fromTo(scrimEl, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" });
-      gsap.fromTo(drawerEl, { xPercent: 100 }, { xPercent: 0, duration: 0.34, ease: "power3.out" });
-    });
-  }
-
-  function closeSidebar(afterClose?: () => void) {
-    if (!scrimEl || !drawerEl || prefersReducedMotion()) {
-      mobileOpen = false;
-      afterClose?.();
-      return;
-    }
-    gsap.to(scrimEl, { opacity: 0, duration: 0.22, ease: "power2.in" });
-    gsap.to(drawerEl, {
-      xPercent: 100,
-      duration: 0.26,
-      ease: "power3.in",
-      onComplete: () => {
-        mobileOpen = false;
-        afterClose?.();
-      },
-    });
-  }
-
-  onMount(() => {
-    moveNavPill(navPill, navEls[activeSection], false);
-    return watchActiveSection(
-      NAV_SECTIONS.map((s) => s.id),
-      (id) => (activeSection = id),
-      (isScrolled) => (scrolled = isScrolled),
-    );
-  });
 
   const FOOTER_LINKS = [
     { label: "BOHS-01 Spec", icon: SPEC_ICON, href: "https://github.com/FacileStudio/Pastille/tree/main/docs/spec" },
@@ -88,135 +18,7 @@
 </script>
 <IntroLoader />
 <div class="flex min-h-dvh w-full flex-col bg-fc-page text-fc-fg">
-  <div class="sticky top-0 z-30 flex w-full justify-center pointer-events-none px-3 sm:px-6">
-    <header
-      class="pointer-events-auto flex h-14 w-full items-center justify-between gap-3 transition-all duration-500 ease-fc
-        {scrolled
-        ? 'mt-3 max-w-4xl rounded-fc-pill bg-fc-surface/65 px-2.5 backdrop-blur-xl'
-        : 'mt-0 max-w-fc-xl rounded-none bg-fc-page/80 px-2 sm:px-4 backdrop-blur-md'}"
-    >
-      <a
-        href="/"
-        class="inline-flex h-9 items-center gap-2 rounded-fc-pill px-3 text-fc-md font-semibold text-fc-fg
-          transition-colors hover:bg-fc-component/70 focus-visible:outline-2
-          focus-visible:outline-offset-2 focus-visible:outline-fc-ring"
-      >
-        <Icon icon={PASTILLE_LOGO} size={22} class="text-fc-fg" />
-        <span>Pastille</span>
-      </a>
-
-      <nav aria-label="Primary" class="relative hidden md:flex items-center gap-0.5 p-1">
-        <span
-          bind:this={navPill}
-          aria-hidden="true"
-          class="pointer-events-none absolute inset-y-1 left-0 rounded-fc-pill bg-fc-accent opacity-0"
-        ></span>
-        {#each NAV_SECTIONS as item (item.id)}
-          {@const active = activeSection === item.id}
-          <a
-            bind:this={navEls[item.id]}
-            href="#{item.id}"
-            aria-current={active ? "location" : undefined}
-            onclick={(e) => selectSection(item.id, e)}
-            class="relative z-10 inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-fc-pill px-3 text-fc-xs
-              font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2
-              focus-visible:outline-fc-ring {active ? 'text-fc-accent-fg' : 'text-fc-fg-muted hover:text-fc-fg'}"
-          >
-            <Icon icon={item.icon} size={14} /><span>{item.label}</span>
-          </a>
-        {/each}
-      </nav>
-
-      <div class="flex items-center gap-1.5">
-        <IconButton
-          variant="ghost"
-          class="size-9 pointer-coarse:size-10 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface rounded-fc-pill"
-          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-          onclick={toggleTheme}
-        >
-          <Icon icon={theme === "dark" ? SUN_ICON : MOON_ICON} size={16} />
-        </IconButton>
-        <Button
-          variant="primary"
-          size="md"
-          class="hidden sm:inline-flex h-9 px-3.5 rounded-fc-pill"
-          href="https://github.com/FacileStudio/Pastille"
-          target="_blank"
-          rel="noreferrer"
-          icon={GITHUB_ICON}>GitHub</Button
-        >
-        <IconButton
-          variant="ghost"
-          class="size-9 pointer-coarse:size-10 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface
-            md:hidden rounded-fc-pill"
-          aria-label="Open navigation menu"
-          aria-expanded={mobileOpen}
-          onclick={openSidebar}
-        >
-          <Icon icon={MENU_ICON} size={18} />
-        </IconButton>
-      </div>
-    </header>
-  </div>
-
-  {#if mobileOpen}
-    <div class="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
-      <div
-        bind:this={scrimEl}
-        role="presentation"
-        class="fixed inset-0 bg-fc-scrim backdrop-blur-xs"
-        onclick={() => closeSidebar()}
-      ></div>
-      <aside
-        bind:this={drawerEl}
-        class="fixed top-3 right-3 bottom-3 flex w-72 max-w-[calc(100vw-1.5rem)] flex-col justify-between
-          rounded-fc-lg bg-fc-component/95 p-5 backdrop-blur-xl"
-      >
-        <div class="flex flex-col gap-6">
-          <div class="flex items-center justify-between">
-            <span class="inline-flex items-center gap-2 text-fc-md font-semibold text-fc-fg">
-              <Icon icon={PASTILLE_LOGO} size={20} />
-              <span>Pastille</span>
-            </span>
-            <IconButton
-              variant="ghost"
-              class="size-9 pointer-coarse:size-11 border-0 bg-fc-surface text-fc-fg"
-              aria-label="Close navigation menu"
-              onclick={() => closeSidebar()}
-            >
-              <Icon icon={CLOSE_ICON} size={16} />
-            </IconButton>
-          </div>
-          <nav aria-label="Mobile" class="flex flex-col gap-1.5">
-            {#each NAV_SECTIONS as item (item.id)}
-              {@const active = activeSection === item.id}
-              <a href="#{item.id}"
-                onclick={(e) => {
-                  e.preventDefault();
-                  closeSidebar(() => selectSection(item.id));
-                }}
-                class="inline-flex h-11 items-center gap-2.5 rounded-fc-pill px-4 text-fc-sm font-medium
-                  transition-colors {active
-                  ? 'bg-fc-accent text-fc-accent-fg'
-                  : 'text-fc-fg-muted hover:bg-fc-surface hover:text-fc-fg'}"
-              >
-                <Icon icon={item.icon} size={18} /><span>{item.label}</span>
-              </a>
-            {/each}
-          </nav>
-        </div>
-        <Button
-          variant="primary"
-          size="md"
-          class="w-full"
-          href="https://github.com/FacileStudio/Pastille"
-          target="_blank"
-          rel="noreferrer"
-          icon={GITHUB_ICON}>GitHub</Button
-        >
-      </aside>
-    </div>
-  {/if}
+  <SiteHeader />
 
   <main class="flex-1"><Page width="xl">{@render children()}</Page></main>
 

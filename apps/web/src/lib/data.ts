@@ -53,6 +53,7 @@ export const NAV_SECTIONS = [
   { id: "protocol", label: "Protocol", icon: "solar:code-square-bold-duotone" },
   { id: "comparison", label: "Comparison", icon: "solar:chart-2-bold-duotone" },
   { id: "quickstart", label: "Build", icon: "solar:box-bold-duotone" },
+  { id: "preorder", label: "Pre-order", icon: "solar:cart-large-2-bold-duotone" },
 ] as const;
 
 export const BATTERY = {
