@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-11-07
+
 ### Changed
 
 - build(web): bump muse to v0.16.1 (from v0.14.4). The order-success mail button uses the `secondary` variant in place of the deprecated `outline`.
