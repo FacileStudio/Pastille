@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- build(web): bump muse to v0.14.4 (from v0.14.2). A single 100% DonutChart slice draws as a full ring.
+
 ## [0.7.2] - 2026-11-07
 
 ### Added
