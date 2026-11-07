@@ -28,7 +28,7 @@ A field device:
 3. Keeps its device token in storage only its own process can read, and survives a reboot without pairing again.
 4. Sets capability bit `0x10` when it switches a load, and lists the `switch.*` tools from [BOHS-01-WIRE.md](BOHS-01-WIRE.md).
 5. Keeps mains voltage off its own board. It drives an isolated, enclosed relay or a low-voltage load, never a bare relay module on mains.
-6. Drives its outputs to a safe state (off, unless configured otherwise) when it boots and when it loses the gateway.
+6. Drives its outputs to a safe state (off, unless configured otherwise) when it boots. It keeps their state when it loses the gateway, so a network drop never switches a light.
 
 ## Device classification (charm profile)
 
