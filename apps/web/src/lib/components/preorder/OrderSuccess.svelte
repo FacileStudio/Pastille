@@ -65,7 +65,7 @@
   <div class="flex flex-col gap-2">
     <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <Button variant="primary" size="lg" icon="solar:copy-bold-duotone" onclick={copy}>Copy order details</Button>
-      <Button variant="outline" size="lg" icon="solar:letter-bold-duotone" href={orderMailto(order)}>
+      <Button variant="secondary" size="lg" icon="solar:letter-bold-duotone" href={orderMailto(order)}>
         Open in mail app
       </Button>
       <Button variant="ghost" size="lg" icon="solar:pen-bold-duotone" onclick={onedit}>Edit order</Button>
