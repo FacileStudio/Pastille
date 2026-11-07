@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-07
+
+### Added
+- `bohs-switch` refuses a gateway socket or `gateway` URL that is not TLS, except on localhost.
+- `bohs-switch` prints the pairing code lifetime the gateway sets.
+
+### Changed
+- `bohs-switch` times out the pairing calls and the socket connect and handshake after 10 to 15 s, so a bad network shows "Offline" instead of hanging.
+- `bohs-switch` waits for the clock sync before it starts.
+- `install.sh` restarts the service on reinstall and rejects a non-numeric `BOHS_LINE` or a non-boolean `BOHS_ACTIVE_LOW`.
+
+### Fixed
+- The `bohs-switch` README documents the boot state of an active-low relay, the Pi 5 chip and the pairing retry.
+
 ## [0.7.1] - 2026-11-07
 
 ### Changed
