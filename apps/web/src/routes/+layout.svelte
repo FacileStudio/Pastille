@@ -1,52 +1,80 @@
 <script lang="ts">
   import "../app.css";
-  import type { Snippet } from "svelte";
-  import { Icon, Page, provideLocale, registerIcons } from "@facile/muse";
-  import { GITHUB_ICON, ICONS, PASTILLE_LOGO, RELEASES_ICON, SPEC_ICON } from "$lib/icons";
+  import { onMount, type Snippet } from "svelte";
+  import { LandingFooter, LandingHeader, Page, provideLocale, registerIcons } from "@facile/muse";
+  import { ICONS, PASTILLE_LOGO } from "$lib/icons";
+  import { NAV_SECTIONS } from "$lib/data";
+  import { scrollToSection, watchActiveSection } from "$lib/motion";
   import IntroLoader from "$lib/components/IntroLoader.svelte";
-  import SiteHeader from "$lib/components/SiteHeader.svelte";
+  import SiteActions from "$lib/components/SiteActions.svelte";
 
   let { children }: { children: Snippet } = $props();
   registerIcons(ICONS);
   provideLocale("en");
 
-  const FOOTER_LINKS = [
-    { label: "BOHS-01 Spec", icon: SPEC_ICON, href: "https://github.com/FacileStudio/Pastille/tree/main/docs/spec" },
-    { label: "Releases", icon: RELEASES_ICON, href: "https://github.com/FacileStudio/Pastille/releases" },
-    { label: "GitHub", icon: GITHUB_ICON, href: "https://github.com/FacileStudio/Pastille" },
+  let activeSection = $state<string>(NAV_SECTIONS[0].id);
+  const BAR_IDS = ["disassembly", "viewer", "architecture", "protocol", "quickstart", "preorder"];
+  const SECTION_IDS = NAV_SECTIONS.map((s) => s.id);
+  const barActive = $derived.by(() => {
+    const at = SECTION_IDS.indexOf(activeSection as (typeof SECTION_IDS)[number]);
+    const owners = BAR_IDS.filter((id) => SECTION_IDS.indexOf(id as (typeof SECTION_IDS)[number]) <= at);
+    return owners[owners.length - 1];
+  });
+  const links = $derived(
+    NAV_SECTIONS.filter((s) => BAR_IDS.includes(s.id)).map((s) => ({
+      href: `#${s.id}`,
+      label: s.label,
+      active: s.id === barActive,
+    })),
+  );
+
+  const FOOTER_COLUMNS = [
+    {
+      title: "Project",
+      links: [
+        { label: "BOHS-01 Spec", href: "https://github.com/FacileStudio/Pastille/tree/main/docs/spec", external: true },
+        { label: "Releases", href: "https://github.com/FacileStudio/Pastille/releases", external: true },
+        { label: "GitHub", href: "https://github.com/FacileStudio/Pastille", external: true },
+      ],
+    },
+    {
+      title: "Studio",
+      links: [{ label: "Made by Facile Studio", href: "https://facile.studio", external: true }],
+    },
   ];
+
+  /**
+   * Smooth-scrolls in-page nav links to their section, offset under the sticky bar.
+   */
+  function onclick(event: MouseEvent) {
+    const anchor = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[href^="#"]');
+    const id = anchor?.getAttribute("href")?.slice(1);
+    if (!id || !NAV_SECTIONS.some((s) => s.id === id)) return;
+    activeSection = id;
+    scrollToSection(id, event);
+  }
+
+  onMount(() =>
+    watchActiveSection(SECTION_IDS, (id) => (activeSection = id)),
+  );
 </script>
+
+<svelte:document {onclick} />
+
 <IntroLoader />
 <div class="flex min-h-dvh w-full flex-col bg-fc-page text-fc-fg">
-  <SiteHeader />
+  <LandingHeader appName="Pastille" icon={PASTILLE_LOGO} {links}>
+    {#snippet actions()}<SiteActions />{/snippet}
+  </LandingHeader>
 
   <main class="flex-1"><Page width="xl">{@render children()}</Page></main>
 
-  <footer class="mx-auto w-full max-w-fc-xl px-4 pb-10 pt-8 sm:px-6 md:px-10">
-    <div
-      class="flex flex-col items-center justify-between gap-4 rounded-fc-pill bg-fc-component px-8 py-4
-        text-fc-xs text-fc-fg-muted sm:flex-row"
-    >
-      <div class="flex flex-wrap items-center gap-2.5">
-        <span class="inline-flex items-center gap-1.5 font-semibold text-fc-fg">
-          <Icon icon={PASTILLE_LOGO} size={16} />
-          <span>Pastille</span>
-        </span>
-        <span>·</span>
-        <span>
-          Made by
-          <a href="https://facile.studio" target="_blank" rel="noreferrer" class="font-medium text-fc-fg"
-            >Facile Studio</a
-          >
-        </span>
-      </div>
-      <div class="flex flex-wrap items-center gap-4">
-        <span class="font-mono">CERN-OHL-S v2 · Apache 2.0</span>
-        {#each FOOTER_LINKS as link (link.label)}
-          <a href={link.href} target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 hover:text-fc-fg"
-            ><Icon icon={link.icon} size={14} />{link.label}</a>
-        {/each}
-      </div>
-    </div>
-  </footer>
+  <LandingFooter
+    appName="Pastille"
+    icon={PASTILLE_LOGO}
+    tagline="Wear your assistant."
+    columns={FOOTER_COLUMNS}
+    copyright="CERN-OHL-S v2 · Apache 2.0"
+    legal={{ hideLocaleSwitch: true }}
+  />
 </div>
