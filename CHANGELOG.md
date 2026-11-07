@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-07
+
 ### Added
 - `examples/bohs-switch`: a BOHS-01 field device for a Raspberry Pi. It pairs with Bulle by a typed code and switches a lamp on a relay when you ask. It ships an install script for Raspberry Pi OS and an rpi-image-gen image.
 - The BOHS-01 spec has a core and two profiles, charm and field. It adds code pairing, the `0x10` switch capability with `switch.set` and `switch.get`, and the `<device>__<tool>` names the gateway shows the model.
