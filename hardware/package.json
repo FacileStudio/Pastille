@@ -1,6 +1,6 @@
 {
   "name": "pastille-hardware",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Pastille hardware design",
   "main": "index.tsx",
   "scripts": {

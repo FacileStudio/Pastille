@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-07
+
 ### Changed
 - The top bar and the footer are muse's `LandingHeader` and `LandingFooter` (muse v0.14.2). The bar shrinks into a floating pill on scroll and opens a right-hand drawer under 1024 px. The footer lists the spec, releases and GitHub, with the licence line as its copyright.
 - The bar shows six links (Inside, Board, Hardware, Protocol, Build, Pre-order) so it fits at 1024 px. Connectivity and Comparison stay on the page, and the active pill follows the section above them.
