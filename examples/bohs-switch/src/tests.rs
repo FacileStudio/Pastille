@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::identity::from_text;
 use crate::output::Memory;
 use crate::rpc::{MAX_PAYLOAD, Switch, handle};
@@ -106,4 +107,20 @@ fn derives_the_hardware_id_from_the_serial() {
     );
     assert_eq!(from_text("0000000000000000"), None);
     assert_eq!(from_text("abc"), None);
+}
+
+#[test]
+fn accepts_plain_http_only_for_localhost() {
+    let load = |gateway: &str| {
+        let path = std::env::temp_dir().join(format!("bohs-switch-test-{}.toml", gateway.len()));
+        std::fs::write(&path, format!("gateway = \"{gateway}\"")).unwrap();
+        let result = Config::load(&path);
+        std::fs::remove_file(&path).unwrap();
+        result.is_ok()
+    };
+    assert!(load("https://bulle.facile.studio"));
+    assert!(load("http://localhost:8080"));
+    assert!(load("http://[::1]:8080"));
+    assert!(!load("http://bulle.facile.studio"));
+    assert!(!load("ftp://bulle"));
 }

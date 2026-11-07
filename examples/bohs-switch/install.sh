@@ -21,8 +21,15 @@ getent group gpio >/dev/null || groupadd --system gpio
 install -m 0644 "$here/systemd/60-bohs-gpio.rules" /etc/udev/rules.d/60-bohs-gpio.rules
 udevadm control --reload && udevadm trigger --subsystem-match=gpio
 
-case "${BOHS_NAME:-}${BOHS_LINE:-}${BOHS_ACTIVE_LOW:-}" in
-  *[!A-Za-z0-9\ _.\'-]*) echo "BOHS_NAME, BOHS_LINE and BOHS_ACTIVE_LOW take letters, digits, spaces and . _ ' - only" >&2; exit 1 ;;
+case "${BOHS_NAME:-}" in
+  *[!A-Za-z0-9\ _.\'-]*) echo "BOHS_NAME takes letters, digits, spaces and . _ ' - only" >&2; exit 1 ;;
+esac
+case "${BOHS_LINE:-17}" in
+  ''|*[!0-9]*) echo "BOHS_LINE must be a BCM GPIO number such as 17" >&2; exit 1 ;;
+esac
+case "${BOHS_ACTIVE_LOW:-false}" in
+  true|false) ;;
+  *) echo "BOHS_ACTIVE_LOW must be true or false" >&2; exit 1 ;;
 esac
 
 if [ ! -f /etc/bohs-switch.toml ]; then
@@ -34,6 +41,7 @@ fi
 
 install -m 0644 "$here/systemd/bohs-switch.service" /etc/systemd/system/bohs-switch.service
 systemctl daemon-reload
-systemctl enable --now bohs-switch
+systemctl enable bohs-switch
+systemctl restart bohs-switch
 sleep 3
 journalctl -u bohs-switch -n 20 --no-pager -o cat

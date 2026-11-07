@@ -3,14 +3,14 @@ use std::fs::OpenOptions;
 use std::io::Write;
 
 /// Shows the pairing code in the journal and, when configured, full screen on a console.
-pub fn code(code: &str, hardware_id: &str, cfg: &Config) {
+pub fn code(code: &str, hardware_id: &str, expires_in: u64, cfg: &Config) {
     let name = &cfg.name;
     let banner = [
         format!("\n  BOHS switch \"{name}\" (hardware id {hardware_id})\n"),
         "  In Bulle, open Settings > Devices > Add a remote device".into(),
         "  and enter this code:\n".into(),
         format!("      {code}\n"),
-        "  It expires in 10 minutes.\n".into(),
+        format!("  It expires in {} minutes.\n", expires_in.div_ceil(60)),
     ]
     .join("\n");
     println!("{banner}");

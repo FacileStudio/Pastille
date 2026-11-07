@@ -1,8 +1,8 @@
 [Unit]
 Description=BOHS switch for Bulle
 Documentation=https://github.com/FacileStudio/Pastille/tree/main/examples/bohs-switch
-Wants=network-online.target time-sync.target
-After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target systemd-time-wait-sync.service
+After=network-online.target time-sync.target systemd-time-wait-sync.service
 
 [Service]
 ExecStart=/usr/local/bin/bohs-switch --config /etc/bohs-switch.toml

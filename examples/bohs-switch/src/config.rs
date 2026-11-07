@@ -1,5 +1,11 @@
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
+use tungstenite::http::Uri;
+
+/// Answers whether `host` is this machine, the only place a plain-text socket is acceptable.
+pub fn is_loopback(host: &str) -> bool {
+    matches!(host, "localhost" | "127.0.0.1" | "[::1]")
+}
 
 /// Where the daemon reads its settings when no `--config` is given.
 pub const DEFAULT_PATH: &str = "/etc/bohs-switch.toml";
@@ -50,10 +56,21 @@ impl Config {
             Err(e) => return Err(format!("cannot read {}: {e}", path.display())),
         };
         let config: Self = toml::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))?;
-        if !config.gateway.starts_with("https://") && !config.gateway.starts_with("http://") {
-            return Err(format!("{}: gateway must be an http(s) URL", path.display()));
-        }
+        config.check_gateway().map_err(|e| format!("{}: {e}", path.display()))?;
         Ok(config)
+    }
+
+    fn check_gateway(&self) -> Result<(), String> {
+        let uri: Uri = self.gateway.parse().map_err(|e| format!("gateway is not a URL: {e}"))?;
+        let secure = match uri.scheme_str() {
+            Some("https") => true,
+            Some("http") => uri.host().is_some_and(is_loopback),
+            _ => false,
+        };
+        if secure {
+            return Ok(());
+        }
+        Err("gateway must be an https URL (http is allowed only for localhost)".into())
     }
 
     /// Answers the gateway URL with no trailing slash.

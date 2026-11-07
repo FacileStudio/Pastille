@@ -8,7 +8,7 @@ It implements the field profile of [BOHS-01-ARCH.md](../../docs/spec/BOHS-01-ARC
 
 ## Hardware
 
-- Raspberry Pi 3 Model B+ (any Pi with 40-pin GPIO and Raspberry Pi OS works).
+- Raspberry Pi 3 Model B+ (any Pi with a 40-pin header and Raspberry Pi OS works; on a Pi 5 set `chip = "/dev/gpiochip4"`).
 - A relay the Pi can drive at 3.3 V, and a lamp.
 
 Keep mains voltage away from the Pi and from your hands. Use one of these, in this order:
@@ -26,6 +26,14 @@ Wiring, with the default config:
 | 9 | Ground | `-` / `GND` |
 
 Many relay boards switch on when their input is LOW. If the lamp is on when it should be off, set `active_low = true`.
+
+The daemon owns the GPIO line only while it runs. Before it starts (during boot) and for the 5 seconds after a crash, the pin takes the Pi's default, a pull-down input, and an active-low relay board then switches the lamp **on**. To fix the boot state, add this line to `/boot/firmware/config.txt` (`dh` drives the pin high, which is off for an active-low board; use `dl` for an active-high board that must stay off):
+
+```
+gpio=17=op,dh
+```
+
+The state is not saved: after a reboot the lamp takes `initial_on`.
 
 ## Build the binary
 
@@ -91,7 +99,7 @@ The image has no login password and no SSH. Everything it does is in the systemd
 2. In Bulle: Settings, Devices, "Add a remote device". Type the code, and a name if you want another one. Bulle finds the device by this name.
 3. Within 3 seconds the Pi says `Online as Living Room Light`.
 
-The code lives 10 minutes, then the Pi shows a new one. Removing the device in Bulle makes the Pi forget its token and show a new code.
+The code lives 10 minutes, then the Pi shows a new one. If the Pi shows a new code right after you entered the old one, the reply was lost on the way (the gateway hands the token out once): remove the device in Bulle and enter the new code. Removing the device in Bulle makes the Pi forget its token and show a new code.
 
 ## Demo runbook
 
@@ -127,4 +135,4 @@ cargo test
 cargo clippy --all-targets -- -D warnings
 ```
 
-The tests cover the JSON-RPC rules of [BOHS-01-WIRE.md](../../docs/spec/BOHS-01-WIRE.md), the switch tools and the hardware ID. The daemon was checked end to end against Bulle's real hardware module, with pairing, claim, reconnect with the saved token and keepalive pings. It has not run on a Pi yet.
+The tests cover the JSON-RPC rules of [BOHS-01-WIRE.md](../../docs/spec/BOHS-01-WIRE.md), the switch tools and the hardware ID. The device name in the switch's answers is the one set when it paired; a rename in Bulle shows after the next pairing. The daemon was checked end to end against Bulle's real hardware module, with pairing, claim, reconnect with the saved token and keepalive pings. It has not run on a Pi yet.
