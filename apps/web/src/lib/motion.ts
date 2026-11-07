@@ -85,23 +85,6 @@ export function scrollReveal(
 }
 
 /**
- * Slides the active navigation pill to match the target link's offset and width.
- */
-export function moveNavPill(
-  pill: HTMLElement | null,
-  target: HTMLElement | undefined,
-  animate = true,
-) {
-  if (!pill || !target) return;
-  const to = { x: target.offsetLeft, width: target.offsetWidth, autoAlpha: 1 };
-  if (!animate || prefersReducedMotion()) {
-    gsap.set(pill, to);
-    return;
-  }
-  gsap.to(pill, { ...to, duration: 0.32, ease: "power3.inOut", overwrite: "auto" });
-}
-
-/**
  * Smoothly scrolls the viewport to a section ID while locking scroll-spy updates.
  */
 export function scrollToSection(id: string, event?: MouseEvent) {
