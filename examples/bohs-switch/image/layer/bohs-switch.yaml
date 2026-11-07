@@ -1,0 +1,54 @@
+# METABEGIN
+# X-Env-Layer-Name: bohs-switch
+# X-Env-Layer-Version: 0.1.0
+# X-Env-Layer-Category: app
+# X-Env-Layer-Desc: BOHS-01 field device. A GPIO light switch that pairs with
+#  Bulle by a code drawn on the HDMI console, then runs as a systemd service.
+# X-Env-Layer-Requires: systemd-net-min,systemd-timesyncd,iwd,wireless-regulatory
+#
+# X-Env-VarPrefix: bohs
+#
+# X-Env-Var-root:
+# X-Env-Var-root-Desc: The examples/bohs-switch directory, holding
+#  dist/bohs-switch-arm64 from build.sh and the systemd files.
+# X-Env-Var-root-Required: y
+# X-Env-Var-root-Valid: string
+# X-Env-Var-root-Set: y
+#
+# X-Env-Var-name: Living Room Light
+# X-Env-Var-name-Desc: The name the switch suggests when it pairs.
+# X-Env-Var-name-Required: n
+# X-Env-Var-name-Valid: regex:^[A-Za-z0-9 _.'-]{1,64}$
+# X-Env-Var-name-Set: y
+#
+# X-Env-Var-line: 17
+# X-Env-Var-line-Desc: The BCM GPIO number that drives the relay.
+# X-Env-Var-line-Required: n
+# X-Env-Var-line-Valid: int:0-27
+# X-Env-Var-line-Set: y
+#
+# X-Env-Var-active_low: n
+# X-Env-Var-active_low-Desc: Set for relay boards that switch on when the pin is low.
+# X-Env-Var-active_low-Required: n
+# X-Env-Var-active_low-Valid: bool
+# X-Env-Var-active_low-Set: y
+# METAEND
+---
+mmdebstrap:
+  customize-hooks:
+    - |-
+      set -eu
+      root="$IGconf_bohs_root"
+      install -m 0755 "$root/dist/bohs-switch-arm64" "$1/usr/local/bin/bohs-switch"
+      install -m 0644 "$root/systemd/bohs-switch.service" "$1/etc/systemd/system/bohs-switch.service"
+      install -D -m 0644 "$root/systemd/60-bohs-gpio.rules" "$1/etc/udev/rules.d/60-bohs-gpio.rules"
+      chroot "$1" groupadd -f --system gpio
+      low=false
+      case "${IGconf_bohs_active_low:-n}" in y|yes|1|true) low=true ;; esac
+      printf 'name = "%s"\nline = %s\nactive_low = %s\ntty = "/dev/tty1"\n' \
+        "$IGconf_bohs_name" "$IGconf_bohs_line" "$low" > "$1/etc/bohs-switch.toml"
+      install -d "$1/etc/systemd/network"
+      printf '[Match]\nName=eth0\n\n[Network]\nDHCP=yes\n' > "$1/etc/systemd/network/20-wired.network"
+      printf '[Match]\nName=wlan0\n\n[Network]\nDHCP=yes\n' > "$1/etc/systemd/network/25-wireless.network"
+      ln -sf /dev/null "$1/etc/systemd/system/getty@tty1.service"
+    - $BDEBSTRAP_HOOKS/enable-units "$1" bohs-switch

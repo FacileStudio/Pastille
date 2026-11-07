@@ -143,6 +143,10 @@ The output files land in `dist/fab/`, `dist/cad/`, `dist/docs/`, and `bodies/`. 
 
 The v0.4.0 case is an engineering prototype: it fits the 3D models, but no test print has checked it against the real panel and cell yet.
 
+## Other BOHS devices
+
+BOHS-01 is not only for wearables. [`examples/bohs-switch`](examples/bohs-switch) turns a Raspberry Pi into a lamp switch that Bulle drives from any chat. It pairs with a typed code, so the Pi and the person talking to Bulle can be in different cities.
+
 ## Firmware guide
 
 Pastille firmware runs bare-metal on the ESP32-S3 in Rust, on `esp-hal` 1.2 with the `esp-rtos` Embassy executor and `esp-radio` for Wi-Fi and BLE. Fusible generates the pin bindings in `apps/firmware/src/pins.rs`, and the device code takes every GPIO from there.

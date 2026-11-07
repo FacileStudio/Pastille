@@ -1,0 +1,25 @@
+[Unit]
+Description=BOHS switch for Bulle
+Documentation=https://github.com/FacileStudio/Pastille/tree/main/examples/bohs-switch
+Wants=network-online.target time-sync.target
+After=network-online.target time-sync.target
+
+[Service]
+ExecStart=/usr/local/bin/bohs-switch --config /etc/bohs-switch.toml
+Restart=always
+RestartSec=5
+DynamicUser=yes
+StateDirectory=bohs-switch
+StateDirectoryMode=0700
+SupplementaryGroups=gpio tty
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

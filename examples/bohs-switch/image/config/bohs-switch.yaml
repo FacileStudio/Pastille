@@ -1,0 +1,18 @@
+include:
+  file: trixie-minbase.yaml
+
+device:
+  layer: rpi3
+  hostname: bohs-switch
+
+image:
+  name: bohs-switch-pi3
+
+layer:
+  app: bohs-switch
+
+bohs:
+  root: ${@SRCROOT}/..
+  name: Living Room Light
+  line: 17
+  active_low: n

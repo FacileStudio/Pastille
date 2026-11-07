@@ -3,6 +3,7 @@ ignore:
   - .tscircuit
   - target
   - apps/firmware/target
+  - examples/bohs-switch/target
   - apps/firmware/src/pins.rs
   - node_modules
   - hardware/node_modules

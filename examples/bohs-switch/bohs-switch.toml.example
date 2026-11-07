@@ -1,0 +1,23 @@
+# /etc/bohs-switch.toml. Every key is optional; these are the defaults.
+
+# The Bulle server the switch pairs with.
+gateway = "https://bulle.facile.studio"
+
+# The name it suggests when it pairs. Bulle finds the device by it.
+name = "Living Room Light"
+
+# GPIO line, as the BCM number. 17 is header pin 11; pin 9 is ground next to it.
+chip = "/dev/gpiochip0"
+line = 17
+
+# Most cheap relay boards switch on when the pin is LOW: set this to true for them.
+active_low = false
+
+# State at boot.
+initial_on = false
+
+# Where the device token is kept.
+# state_dir = "/var/lib/bohs-switch"
+
+# Draw the pairing code full screen on the HDMI console.
+# tty = "/dev/tty1"
