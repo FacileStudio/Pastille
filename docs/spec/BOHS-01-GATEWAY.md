@@ -4,13 +4,16 @@ This guide describes how the Bulle gateway integrates BOHS-01 hardware periphera
 
 ## Endpoints
 
-The Bulle API exposes four hardware endpoints:
+The Bulle API exposes these hardware endpoints:
 
 | Method and path | Caller | Purpose |
 | :--- | :--- | :--- |
 | `POST /api/hardware/devices/claim` | Bulle app, user session | Claim a device and mint its device token |
 | `GET /api/hardware/devices` | Bulle app, user session | List the user's devices |
 | `DELETE /api/hardware/devices/{id}` | Bulle app, user session | Revoke a device |
+| `POST /api/hardware/pair` | Device, no auth | Get a pairing code to show (code pairing) |
+| `POST /api/hardware/pair/poll` | Device, `device_code` | Collect the device token once the code is entered |
+| `POST /api/hardware/devices/claim-code` | Bulle app, user session | Claim the device that shows a code |
 | `GET /api/hardware/ws` | Device or Bulle app | Open a `bohs.v1` WebSocket session |
 
 The WebSocket endpoint terminates TLS, authenticates the caller, negotiates the `bohs.v1` subprotocol, and carries audio and tool frames:
@@ -65,6 +68,38 @@ The gateway mints a device token of the form `bohs_tok_` followed by 32 lowercas
 ```
 
 The app passes `device_token` and `gateway_ws_url` to the device in `prov.configure` over the encrypted BLE link, then drops the token from memory.
+
+### Code pairing
+
+A device with no BLE link to the app, such as a field device in another city, pairs with a typed code instead of a tap. The flow follows the OAuth device authorization grant (RFC 8628).
+
+```mermaid
+sequenceDiagram
+    participant D as Device
+    participant G as Gateway
+    participant U as Owner in the Bulle app
+    D->>G: POST /api/hardware/pair {hardware_id, device_class, name}
+    G-->>D: {user_code "KX7Q-42MN", device_code, expires_in 600, interval 3}
+    Note over D: Shows the user code on its screen, console or status page
+    loop every interval seconds
+        D->>G: POST /api/hardware/pair/poll {device_code}
+        G-->>D: {"status":"pending"}
+    end
+    U->>G: POST /api/hardware/devices/claim-code {code, name}
+    G-->>U: 201 device
+    D->>G: POST /api/hardware/pair/poll {device_code}
+    G-->>D: {"status":"claimed", device_token, gateway_ws_url, device}
+    D->>G: WSS /api/hardware/ws, Bearer bohs_tok_...
+```
+
+Rules:
+
+- The user code is 8 characters from `ABCDEFGHJKMNPQRSTUVWXYZ23456789`, shown as two groups of 4. The claim ignores case, spaces and dashes.
+- A code lives 10 minutes and works once. The first user to enter it owns the device.
+- The gateway hands the token to the device on one poll only. A second poll answers `404`.
+- `pair` is rate limited per address, `poll` per address, and `claim-code` per user. With at most 256 codes waiting, a guess hits one with a probability under 1 in 3 billion.
+- Seeing the code stands in for the physical tap: only someone near the device can read it. A device must show the code only locally (its own screen, console or LAN page), never on a public page.
+- A user who types a code that a stranger sent claims the stranger's device, and its tools reach that user's agent. The app lists the new device with its name and hardware ID right away, so a wrong one can be revoked at once. Tell users to enter only codes they read off their own device.
 
 ### Listing and revoking
 
@@ -147,9 +182,22 @@ flowchart LR
 
 When a BOHS-01 session opens, on either path, Bulle queries the device's tools via `tools/list` over opcode `0x02`. Bulle injects these edge tools into the LLM context.
 
+### Tool naming
+
+Model APIs accept tool names matching `^[a-zA-Z0-9_-]{1,64}$`, so a device tool name such as `charm.display_avatar` cannot reach the model as is. The gateway names each tool `<device>__<tool>`: both parts lowercased, with every run of other characters turned into `_`, cut at 64 characters. A clash gets the first 6 characters of the device id as a suffix.
+
+| Device name | Device tool | Model tool |
+| :--- | :--- | :--- |
+| Living Room Light | `switch.set` | `living_room_light__switch_set` |
+| Pastille #91C0 | `charm.haptic_pulse` | `pastille_91c0__charm_haptic_pulse` |
+
+The description the model reads starts with `On the device "<name>":`, and the system prompt lists the connected devices by name. That is how "turn on the light" finds "Living Room Light" with no matching code in the gateway.
+
+Every agent run, in chat, jobs and voice, gets the tools of the devices that are connected when it starts. A device that connects mid-run is available from the next run.
+
 ### Tool manifest injection
 
-Bulle exposes peripheral tools to the model with a dedicated hardware prefix:
+For a charm, the tools reach the model like this:
 
 - `charm.display_avatar`: Changes the graphic expression on the wearable screen.
 - `charm.haptic_pulse`: Vibrates the charm to notify the user tactilely.
@@ -182,7 +230,7 @@ During conversation turns, the LLM can call edge tools concurrently with voice o
 
 Physical tool execution must not block conversational flow:
 
-- Maximum RPC round-trip timeout: 350 ms.
-- If the peripheral fails to acknowledge a tool execution within 350 ms, the gateway aborts the call and continues the dialogue.
+- The gateway waits at most 5 seconds for a tool answer, then fails the call with "did not answer" and the run carries on. A device should answer well inside 350 ms.
+- In a voice turn the gateway starts speech without waiting for display or haptic calls.
 - The device answers every request with a result or a JSON-RPC error, so a timeout means the link is slow or gone, not that the call was rejected.
 - If the session closes, direct or relayed, the gateway immediately removes peripheral tools from the active model session. Future alerts fall back to desktop and mobile push channels.

@@ -1,14 +1,42 @@
 # BOHS-01 Architecture Specification
 
-The Bulle Open Hardware Standard (BOHS-01) defines physical, electrical, and operational requirements for wearable artificial intelligence peripherals.
+The Bulle Open Hardware Standard (BOHS-01) defines how physical devices give an AI agent hands and senses. A device advertises tools, the agent calls them, and the device acts.
 
-## Device classification
+## Core and profiles
 
-A BOHS-01 device operates strictly as a sensor and actuator peripheral. It does not run a general-purpose operating system, an application store, or a local large language model.
+BOHS-01 has one core and two device profiles.
 
-Traditional smart devices embed full operating systems like Android or Linux. That choice increases bill of materials costs, causes thermal throttling, drains batteries in hours, and requires fragile local application runtimes.
+The **core** is the wire protocol and the gateway contract: the `bohs.v1` frames in [BOHS-01-WIRE.md](BOHS-01-WIRE.md) and the claim, session and tool rules in [BOHS-01-GATEWAY.md](BOHS-01-GATEWAY.md). Every BOHS-01 device implements the core, whatever it runs on.
 
-BOHS-01 splits the system cleanly:
+A **profile** adds the physical and power rules for one kind of device. It sets the `device_class` the device claims with.
+
+| Profile | `device_class` | What it is | Reference |
+| :--- | :--- | :--- | :--- |
+| Charm | `charm` | Wearable on a battery: a 38 mm board, no operating system, deep sleep | Pastille |
+| Field | `field` | Fixed device on mains power, such as a light switch, a sensor or a lock. Any hardware and any operating system. | `examples/bohs-switch` on a Raspberry Pi |
+
+`totem` is reserved for a future table-top profile.
+
+The rest of this document is the **charm profile**. A field device needs only the core and the field rules below.
+
+### Field profile
+
+A field device:
+
+1. Implements the core over Wi-Fi WSS or Ethernet. BLE and USB are optional.
+2. Pairs with a typed code, since it may sit in another city from the app that claims it. See code pairing in [BOHS-01-GATEWAY.md](BOHS-01-GATEWAY.md).
+3. Keeps its device token in storage only its own process can read, and survives a reboot without pairing again.
+4. Sets capability bit `0x10` when it switches a load, and lists the `switch.*` tools from [BOHS-01-WIRE.md](BOHS-01-WIRE.md).
+5. Keeps mains voltage off its own board. It drives an isolated, enclosed relay or a low-voltage load, never a bare relay module on mains.
+6. Drives its outputs to a safe state (off, unless configured otherwise) when it boots and when it loses the gateway.
+
+## Device classification (charm profile)
+
+A charm operates strictly as a sensor and actuator peripheral. It does not run a general-purpose operating system, an application store, or a local large language model.
+
+Traditional smart devices embed full operating systems like Android or Linux. On a wearable that choice increases bill of materials costs, causes thermal throttling, drains batteries in hours, and requires fragile local application runtimes.
+
+The charm profile splits the system cleanly:
 
 1. The peripheral captures human intent through digital microphones and touch sensors.
 2. The peripheral presents agent output through speakers, displays, and haptic actuators.
@@ -20,7 +48,7 @@ This division keeps the physical peripheral cheap, cool, reliable, and instantly
 
 ### Form factor and geometry
 
-A BOHS-01 device uses a circular disc geometry. The board is at most 38.0 mm across. The enclosure is at most 42.5 mm across and 14.0 mm thick, walls included.
+A charm uses a circular disc geometry. The board is at most 38.0 mm across. The enclosure is at most 42.5 mm across and 14.0 mm thick, walls included.
 
 This form factor enables versatile wearable attachments:
 

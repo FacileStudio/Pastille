@@ -160,7 +160,7 @@ A read of `B001` returns 8 bytes:
 
 Provisioning state codes: `0x00` unclaimed, `0x01` awaiting_tap, `0x02` authorized, `0x03` provisioned.
 
-Capability bits: `0x01` microphone, `0x02` speaker, `0x04` display, `0x08` haptic. Bits 4-7 are reserved and set to zero.
+Capability bits: `0x01` microphone, `0x02` speaker, `0x04` display, `0x08` haptic, `0x10` switch (the device switches a load, see the switch tools). Bits 5-7 are reserved and set to zero.
 
 Transport codes: `0x00` BLE, `0x01` Wi-Fi, `0x02` USB.
 
@@ -499,6 +499,38 @@ If the gateway calls `charm.snapshot` on a device without a camera sensor, the d
   }
 }
 ```
+
+#### Switch tools (field profile)
+
+A device that switches a load, such as a lamp on a relay, lists `switch.set` and `switch.get`. The gateway shows them to the model under the device's name (see tool naming in [BOHS-01-GATEWAY.md](BOHS-01-GATEWAY.md)), so the tools name no device themselves. A device with several outputs adds an optional `output` string argument with an `enum` of its output names.
+
+```json
+{
+  "name": "switch.set",
+  "description": "Turns the load on or off",
+  "inputSchema": {
+    "type": "object",
+    "properties": {"state": {"type": "string", "enum": ["on", "off", "toggle"]}},
+    "required": ["state"]
+  }
+}
+```
+
+```json
+{
+  "name": "switch.get",
+  "description": "Reads whether the load is on or off",
+  "inputSchema": {"type": "object", "properties": {}}
+}
+```
+
+Both answer the state after the call as text, so the model can say what happened:
+
+```json
+{"jsonrpc":"2.0","id":7,"result":{"content":[{"type":"text","text":"Living Room Light is on"}],"isError":false}}
+```
+
+An unknown `state` gets `-32602` `invalid params`. A device that cannot drive its output (a GPIO error) answers `isError: true` with the reason as text, never a false success.
 
 ## Event push notifications
 
