@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-11-11
+
+### Fixed
+
+- build(hardware): override sharp to 0.35.5, past three high advisories in the 0.32 line looks-same pins.
+- build(web): override cookie to 0.7.2 (CVE-2024-47764).
+- chore(filet): drop the inert `limits.returns` key that filet 0.19 flags.
+
 ## [0.7.4] - 2026-11-07
 
 ### Changed
