@@ -22,7 +22,6 @@ limits:
   funcLines: 30
   lineLength: 120
   params: 5
-  returns: 3
   nesting: 4
   complexity: 10
 

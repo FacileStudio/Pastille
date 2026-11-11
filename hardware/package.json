@@ -17,5 +17,8 @@
   "dependencies": {
     "@tscircuit/core": "^0.0.2267",
     "@types/react": "^19.3.0"
+  },
+  "overrides": {
+    "sharp": "0.35.5"
   }
 }

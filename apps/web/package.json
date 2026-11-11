@@ -29,5 +29,8 @@
     "gsap": "^3.13.0",
     "iconify-icon": "^3.0.2",
     "three": "^0.186.1"
+  },
+  "overrides": {
+    "cookie": "0.7.2"
   }
 }
