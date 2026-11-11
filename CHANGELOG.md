@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.7] - 2026-11-11
+
+### Fixed
+
+- fix(brand): the title and link preview say "An open voice companion, 42 mm wide", the disc's size, from muse v0.19.2's catalog. The old title gave the 38 mm board width.
+
 ## [0.7.6] - 2026-11-11
 
 ### Fixed
