@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-11-11
+
+### Fixed
+
+- fix(brand): favicons, touch icons, manifest and link preview come from muse v0.19.0's brand generator, with the catalog's English title and description. The generated `og-image.png` replaces the old `og.png`.
+
 ## [0.7.5] - 2026-11-11
 
 ### Fixed
