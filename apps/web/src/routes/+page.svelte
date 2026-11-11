@@ -27,13 +27,6 @@
   };
 </script>
 
-<svelte:head>
-  <title>Pastille | Wear your assistant</title>
-  <meta
-    name="description"
-    content="Pastille is an open hardware charm you wear. Tap it, talk, and your own Bulle assistant answers."
-  />
-</svelte:head>
 
 <section use:scrollReveal={{ delay: 0.12, stagger: 0.07 }} class="flex flex-col gap-6 pt-4 md:pt-8">
   <div data-reveal-item class="flex flex-col gap-3 max-w-2xl">

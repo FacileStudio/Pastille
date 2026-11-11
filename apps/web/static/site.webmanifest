@@ -1,0 +1,21 @@
+{
+  "name": "Pastille",
+  "short_name": "Pastille",
+  "description": "Open BOHS-01 hardware with duplex 16 kHz audio, a round IPS screen and Rust Embassy firmware.",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#fafafa",
+  "background_color": "#fafafa",
+  "display": "standalone",
+  "start_url": "/"
+}
