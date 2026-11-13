@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.8] - 2026-11-13
+
+### Changed
+
+- build(web): muse v0.21.0. The landing's icon buttons (theme, quantity stepper) show their label as a muse tooltip on hover and keyboard focus.
+
 ## [0.7.7] - 2026-11-11
 
 ### Fixed
