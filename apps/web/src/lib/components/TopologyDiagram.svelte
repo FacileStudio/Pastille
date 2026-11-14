@@ -5,10 +5,10 @@
     TOPOLOGY_DEVICES,
     TOPOLOGY_HUB,
     TOPOLOGY_SERVER,
-    EXAMPLE_NOTE,
     type TopologyMode,
     type TopologyNode,
   } from "$lib/topology";
+  import { t } from "$lib/i18n/index.svelte";
 
   let { mode, id, vertical = false }: { mode: TopologyMode; id: string; vertical?: boolean } = $props();
 
@@ -27,7 +27,7 @@
   class="topology mx-auto h-auto w-full"
   class:max-w-sm={vertical}
 >
-  <title {id}>{`${mode.button}: ${mode.summary} ${EXAMPLE_NOTE}`}</title>
+  <title {id}>{`${t(mode.button)}: ${t(mode.summary)} ${t("topo.note")}`}</title>
 
   {#each TOPOLOGY_DEVICES as node, i (node.id)}
     <path
@@ -78,20 +78,22 @@
       {/if}
       <circle cx={at.x} cy={at.y} r="34" class="disc" class:primary={node.id === "pastille"} />
       <SvgIcon name={node.icon} x={at.x} y={at.y} size={34} color="var(--color-fc-accent)" />
-      <text x={at.x} y={at.y + L.labelDy} text-anchor="middle" class="label">{node.label}</text>
+      <text x={at.x} y={at.y + L.labelDy} text-anchor="middle" class="label">
+        {node.label === "Pastille" ? node.label : t(node.label)}
+      </text>
     </g>
   {/each}
 
   <g class="node" class:dim={mode.direct}>
     <circle cx={L.hub.x} cy={L.hub.y} r="44" class="disc" />
     <SvgIcon name={TOPOLOGY_HUB.icon} x={L.hub.x} y={L.hub.y} size={40} color="var(--color-fc-accent)" />
-    <text x={L.hub.x} y={L.hub.y + 64} text-anchor="middle" class="label">{TOPOLOGY_HUB.label}</text>
+    <text x={L.hub.x} y={L.hub.y + 64} text-anchor="middle" class="label">{t(TOPOLOGY_HUB.label)}</text>
   </g>
 
   <g class="node">
     <circle cx={L.server.x} cy={L.server.y} r="48" class="disc" />
     <SvgIcon name={TOPOLOGY_SERVER.icon} x={L.server.x} y={L.server.y} size={44} color="var(--color-fc-accent)" />
-    <text x={L.server.x} y={L.server.y + 70} text-anchor="middle" class="label">{TOPOLOGY_SERVER.label}</text>
+    <text x={L.server.x} y={L.server.y + 70} text-anchor="middle" class="label">{t(TOPOLOGY_SERVER.label)}</text>
   </g>
 </svg>
 

@@ -1,65 +1,62 @@
 <script lang="ts">
-  import { fade } from "svelte/transition";
-  import { Icon } from "@facile/muse";
-  import { Bar, Stage, Stream, Window, grow, type Act } from "@facile/mise-en-scene";
-  import { Blob } from "@facile/blob";
+  import { Stage, Window, type Act } from "@facile/mise-en-scene";
+  import { t } from "$lib/i18n/index.svelte";
   import CharmFace, { type Mood } from "./CharmFace.svelte";
-
-  type Step = "hidden" | "running" | "ok";
-
-  const QUESTION = "What's left on my list for today?";
-  const ANSWER = "Two things: call the plumber, and send Léa the slides before six.";
-  const STEPS = [
-    { icon: "solar:checklist-minimalistic-bold-duotone", text: "Checked your to-do list" },
-    { icon: "solar:soundwave-bold-duotone", text: "Read the answer out loud on Pastille" },
-  ];
-  const WORDS = ANSWER.split(" ").length;
+  import DemoThread, { type Step } from "./DemoThread.svelte";
 
   let mood = $state<Mood>("idle");
-  let tapped = $state(false);
   let heard = $state("");
   let tools = $state<Step[]>(["hidden", "hidden"]);
   let words = $state(0);
 
+  const answerWords = () => t("demo.answer").split(" ").length;
+
+  /**
+   * Puts the scene back on its resting frame: the earlier exchange only, the charm idle.
+   */
   function reset() {
     mood = "idle";
-    tapped = false;
     heard = "";
     tools = ["hidden", "hidden"];
     words = 0;
   }
 
+  /**
+   * Shows the finished exchange, for reduced motion and the first paint before the loop starts.
+   */
   function poster() {
-    mood = "speaking";
-    heard = QUESTION;
+    mood = "showing";
+    heard = t("demo.question");
     tools = ["ok", "ok"];
-    words = WORDS;
+    words = answerWords();
   }
 
+  /**
+   * Runs one tool row from pending to done.
+   */
   async function runTool(act: Act, i: number) {
     tools[i] = "running";
     await act.wait(700);
     tools[i] = "ok";
   }
 
+  /**
+   * One loop: the question is typed in Bulle, Bulle checks Opus, buzzes the charm and answers.
+   */
   async function script(act: Act) {
     await act.wait(900);
-    tapped = true;
-    await act.wait(180);
-    tapped = false;
-    mood = "listening";
-    await act.wait(300);
-    await act.type(QUESTION, (v) => (heard = v), 42);
+    await act.type(t("demo.question"), (v) => (heard = v), 42);
     await act.wait(400);
     mood = "thinking";
     await runTool(act, 0);
-    await act.wait(500);
-    mood = "speaking";
-    await act.count(WORDS, (v) => (words = v), 120);
+    await act.wait(300);
+    mood = "buzz";
     await runTool(act, 1);
-    await act.wait(2200);
+    mood = "showing";
+    await act.count(answerWords(), (v) => (words = v), 120);
+    await act.wait(2600);
     reset();
-    await act.wait(700);
+    await act.wait(900);
   }
 </script>
 
@@ -70,45 +67,14 @@
   {script}
   {reset}
   {poster}
-  label="Pastille hears a question, Bulle answers out loud and the charm shows its face."
+  label={t("demo.label")}
 >
   {#snippet children({ compact })}
     <div class="hd-charm" class:hd-compact={compact}>
-      <CharmFace {mood} {tapped} size={compact ? 150 : 300} />
+      <CharmFace {mood} size={compact ? 150 : 300} />
     </div>
     <Window title="Bulle" class={compact ? "hd-win hd-win-compact" : "hd-win"}>
-      <div class="hd-thread">
-        <div class="hd-past">
-          <span class="hd-bubble-bar hd-short"></span>
-          <Bar w="64%" />
-          <span class="hd-bubble-bar"></span>
-          <Bar w="78%" />
-          <Bar w="54%" />
-        </div>
-        {#if heard}
-          <div class="hd-q" in:grow out:fade={{ duration: 200, delay: 160 }}>
-            <span class="hd-via"><Icon icon="solar:microphone-3-bold-duotone" size={13} />Pastille</span>
-            <p>{heard}</p>
-          </div>
-        {/if}
-        {#if tools[0] !== "hidden"}
-          <div class="hd-reply" in:grow out:fade={{ duration: 200, delay: 100 }}>
-            <div class="hd-who"><Blob name="Bulle" size={22} /><b>Bulle</b></div>
-            <ul class="hd-tools">
-              {#each STEPS as step, i (step.text)}
-                {#if tools[i] !== "hidden"}
-                  <li in:grow={{ duration: 300 }} data-state={tools[i]}>
-                    <span class="hd-mark"></span><Icon icon={step.icon} size={14} /><span>{step.text}</span>
-                  </li>
-                {/if}
-              {/each}
-            </ul>
-            {#if words > 0}
-              <Stream class="hd-answer" text={ANSWER} count={words} />
-            {/if}
-          </div>
-        {/if}
-      </div>
+      <DemoThread {heard} {tools} {words} />
     </Window>
   {/snippet}
 </Stage>
@@ -134,95 +100,5 @@
     left: 16px;
     width: 326px;
     height: 352px;
-  }
-  .hd-thread {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    justify-content: flex-end;
-    min-height: 0;
-    overflow: hidden;
-    padding: 0 18px 18px;
-    font-family: var(--font-fc-body);
-    font-size: 14px;
-    color: var(--color-fc-fg);
-    mask-image: linear-gradient(to bottom, transparent, black 48px);
-  }
-  .hd-past {
-    display: grid;
-    gap: 8px;
-    padding-bottom: 8px;
-  }
-  .hd-bubble-bar {
-    justify-self: end;
-    width: 40%;
-    height: 32px;
-    border-radius: 12px;
-    background: var(--color-fc-surface);
-  }
-  .hd-short {
-    width: 28%;
-  }
-  .hd-q {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    padding-top: 16px;
-  }
-  .hd-via {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    color: var(--color-fc-fg-muted);
-  }
-  .hd-q p {
-    max-width: 85%;
-    margin: 0;
-    padding: 8px 16px;
-    border-radius: 12px;
-    background: var(--color-fc-surface);
-  }
-  .hd-reply {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-top: 16px;
-  }
-  .hd-who {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-  }
-  .hd-tools {
-    margin: 0;
-    padding: 4px 0;
-    list-style: none;
-    border-radius: 12px;
-    background: var(--color-fc-component);
-  }
-  .hd-tools li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 12px;
-    font-size: 12px;
-    color: var(--color-fc-fg-muted);
-  }
-  .hd-mark {
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: var(--color-fc-fg-muted);
-    transition: background 0.2s ease;
-  }
-  [data-state="ok"] .hd-mark {
-    background: var(--color-fc-success);
-  }
-  :global(.hd-answer) {
-    margin: 0;
-    line-height: 1.6;
   }
 </style>

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Button, Icon, IconButton } from "@facile/muse";
-  import { GITHUB_ICON, MOON_ICON, SUN_ICON } from "$lib/icons";
+  import { MOON_ICON, SUN_ICON } from "$lib/icons";
+  import { t } from "$lib/i18n/index.svelte";
+  import { scrollToSection } from "$lib/motion";
   import { theme, toggleTheme } from "$lib/theme.svelte";
 
   const ROUND = "size-(--fc-ctl) rounded-fc-inner bg-fc-surface/70 text-fc-fg hover:bg-fc-surface";
@@ -9,7 +11,7 @@
 <IconButton
   variant="ghost"
   class={ROUND}
-  aria-label={theme.value === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+  aria-label={theme.value === "dark" ? t("theme.light") : t("theme.dark")}
   onclick={toggleTheme}
 >
   <Icon icon={theme.value === "dark" ? SUN_ICON : MOON_ICON} size={16} />
@@ -18,8 +20,7 @@
   variant="primary"
   size="md"
   class="h-(--fc-ctl) rounded-fc-inner px-4"
-  href="https://github.com/FacileStudio/Pastille"
-  target="_blank"
-  rel="noreferrer"
-  icon={GITHUB_ICON}>GitHub</Button
+  href="#preorder"
+  icon="solar:cart-large-2-bold-duotone"
+  onclick={(e) => scrollToSection("preorder", e)}>{t("hero.preorder")}</Button
 >

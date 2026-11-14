@@ -1,39 +1,34 @@
 <script module lang="ts">
-  export type Mood = "idle" | "listening" | "thinking" | "speaking";
+  export type Mood = "idle" | "thinking" | "buzz" | "showing";
 </script>
 
 <script lang="ts">
   import { Blob, idle, surprised, type Expression } from "@facile/blob";
   import { Roll } from "@facile/mise-en-scene";
+  import { t } from "$lib/i18n/index.svelte";
 
-  let { mood, tapped, size }: { mood: Mood; tapped: boolean; size: number } = $props();
+  let { mood, size }: { mood: Mood; size: number } = $props();
 
   const pose = (p: Partial<Expression["p"]>): Expression => ({ ...idle, p: { ...idle.p, ...p } });
   const EXPRESSIONS: Record<Mood, Expression> = {
     idle,
-    listening: surprised,
     thinking: pose({ esx: 1.06, esy: 1.06, bdy: -0.6 }),
-    speaking: pose({ esx: 1.16, esy: 1.16, bdy: -1 }),
-  };
-  const LABELS: Record<Mood, string> = {
-    idle: "Tap to talk",
-    listening: "Listening",
-    thinking: "Thinking",
-    speaking: "Speaking",
+    buzz: surprised,
+    showing: pose({ esx: 1.16, esy: 1.16, bdy: -1 }),
   };
 </script>
 
 <div class="cf" style="--cf-size:{size}px">
-  <div class="cf-shell" class:cf-tapped={tapped}>
+  <div class="cf-shell" class:cf-buzz={mood === "buzz"}>
     <div class="cf-screen" class:cf-still={mood === "thinking"}>
       <Blob name="Bulle" size={Math.round(size * 0.42)} animate="always" expression={EXPRESSIONS[mood]} />
     </div>
   </div>
   <div class="cf-status">
-    <span class="cf-wave" class:cf-live={mood === "listening" || mood === "speaking"}>
+    <span class="cf-wave" class:cf-live={mood === "buzz" || mood === "thinking"}>
       <i></i><i></i><i></i><i></i>
     </span>
-    <Roll value={LABELS[mood]} class="cf-label" />
+    <Roll value={t(`demo.mood.${mood}`)} class="cf-label" />
   </div>
 </div>
 
@@ -52,10 +47,17 @@
     border-radius: 999px;
     background: var(--color-fc-component);
     box-shadow: var(--mes-shadow-hero, 0 30px 70px -20px rgb(0 0 0 / 0.22), 0 8px 24px -8px rgb(0 0 0 / 0.1));
-    transition: scale 0.18s ease;
   }
-  .cf-tapped {
-    scale: 0.96;
+  .cf-buzz {
+    animation: cf-shake 0.12s linear 5;
+  }
+  @keyframes cf-shake {
+    25% {
+      transform: translateX(-3px) rotate(-1.5deg);
+    }
+    75% {
+      transform: translateX(3px) rotate(1.5deg);
+    }
   }
   .cf-screen {
     display: grid;
@@ -80,7 +82,7 @@
     color: var(--color-fc-fg);
   }
   :global(.cf-label) {
-    width: 76px;
+    width: 84px;
     justify-items: center;
   }
   .cf-wave {
@@ -91,7 +93,8 @@
   }
   .cf-wave i {
     width: 3px;
-    height: 4px;
+    height: 14px;
+    transform: scaleY(0.3);
     border-radius: 2px;
     background: var(--color-fc-fg-muted);
   }
@@ -110,13 +113,16 @@
   }
   @keyframes cf-bar {
     50% {
-      height: 14px;
+      transform: scaleY(1);
     }
   }
   @media (prefers-reduced-motion: reduce) {
+    .cf-buzz {
+      animation: none;
+    }
     .cf-live i {
       animation: none;
-      height: 10px;
+      transform: scaleY(0.7);
     }
   }
 </style>

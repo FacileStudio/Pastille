@@ -1,72 +1,82 @@
 <script lang="ts">
-  import { Button, Card, Icon, Section } from "@facile/muse";
+  import { FeatureSplit, PricingPlans, WorksWith, type FeatureItem, type WorksWithApp } from "@facile/muse";
+  import Block from "$lib/components/Block.svelte";
   import Disassembly from "$lib/components/Disassembly.svelte";
-  import HeroDemo from "$lib/components/demo/HeroDemo.svelte";
+  import HeroSection from "$lib/components/HeroSection.svelte";
+  import MakersBlock from "$lib/components/MakersBlock.svelte";
   import PcbViewer from "$lib/components/PcbViewer.svelte";
   import PreOrderForm from "$lib/components/PreOrderForm.svelte";
   import SyncTopology from "$lib/components/SyncTopology.svelte";
-  import { FEATURES } from "$lib/data";
-  import { GITHUB_ICON } from "$lib/icons";
-  import { scrollReveal, scrollToSection } from "$lib/motion";
+  import { t } from "$lib/i18n/index.svelte";
+  import { scrollReveal } from "$lib/motion";
+
+  const features: FeatureItem[] = $derived([
+    { icon: "solar:eye-bold-duotone", title: t("features.face.title"), text: t("features.face.text") },
+    {
+      icon: "solar:battery-charge-bold-duotone",
+      title: t("features.battery.title"),
+      text: t("features.battery.text"),
+    },
+    {
+      icon: "solar:smile-circle-bold-duotone",
+      title: t("features.account.title"),
+      text: t("features.account.text"),
+    },
+    { icon: "solar:microphone-3-bold-duotone", title: t("features.voice.title"), text: t("features.voice.text") },
+  ]);
+
+  const apps: WorksWithApp[] = $derived([
+    {
+      name: "Bulle",
+      icon: "solar:smile-circle-bold-duotone",
+      line: t("with.bulle"),
+      href: "https://bulle.facile.studio",
+    },
+    {
+      name: "Fusible",
+      icon: "solar:cpu-bolt-bold-duotone",
+      line: t("with.fusible"),
+      href: "https://fusible.facile.studio",
+    },
+  ]);
 </script>
 
+<div class="flex flex-col gap-24 pb-12 sm:gap-32">
+  <HeroSection />
 
-<section use:scrollReveal={{ delay: 0.12, stagger: 0.07 }} class="flex flex-col gap-6 pt-4 md:pt-8">
-  <div data-reveal-item class="flex max-w-2xl flex-col gap-3">
-    <h1 class="text-fc-2xl font-bold tracking-tight text-fc-fg sm:text-fc-3xl">Open hardware. Sovereign AI.</h1>
-    <p class="text-fc-md text-fc-fg-muted sm:text-fc-lg">
-      A 42 mm charm you tap to talk to. Bulle answers from a server you run.
-    </p>
+  <FeatureSplit id="features" class="scroll-mt-20" title={t("features.title")} description={t("features.line")}
+    {features} />
+
+  <WorksWith {apps} />
+
+  <Block id="pricing" title={t("pricing.title")} description={t("pricing.note")}>
+    <PricingPlans
+      headingLevel={3}
+      highlight={["ai.access"]}
+      highlightOnly
+      notes={{ solo: t("pricing.solo"), "*": t("pricing.paid") }}
+      recommended="pro"
+      suiteHref="https://suite.facile.studio/#tarifs"
+    />
+  </Block>
+
+  <Block id="disassembly" title={t("inside.title")} description={t("inside.line")}>
+    <Disassembly />
+  </Block>
+
+  <div use:scrollReveal={{ y: 20 }}>
+    <Block id="connectivity" title={t("topo.title")} description={t("topo.line")}>
+      <SyncTopology />
+    </Block>
   </div>
 
-  <div data-reveal-item class="flex flex-wrap items-center gap-3">
-    <Button variant="primary" size="lg" href="#preorder" icon="solar:cart-large-2-bold-duotone"
-      onclick={(e) => scrollToSection("preorder", e)}>Pre-order</Button>
-    <Button variant="secondary" size="lg" href="https://github.com/FacileStudio/Pastille" target="_blank"
-      rel="noreferrer" icon={GITHUB_ICON}>View on GitHub</Button>
+  <div use:scrollReveal={{ y: 20 }}>
+    <Block id="viewer" title={t("board.title")} description={t("board.line")}>
+      <PcbViewer />
+    </Block>
   </div>
 
-  <div data-reveal-item class="pt-2">
-    <HeroDemo />
-  </div>
-</section>
+  <MakersBlock />
 
-<Section id="disassembly" title="What's inside" description="Scroll to take Pastille apart, one layer at a time.">
-  <Disassembly />
-</Section>
-
-<div use:scrollReveal={{ y: 20 }}>
-  <Section
-    id="connectivity"
-    title="One app, many devices"
-    description="Bluetooth on the go, Wi-Fi at home, one tap to pair."
-  >
-    <SyncTopology />
-  </Section>
+  <PreOrderForm />
 </div>
-
-<div use:scrollReveal={{ stagger: 0.05 }}>
-  <Section id="features" title="Made to wear" description="A 42 mm disc, 14 mm thick, built around a 38 mm board.">
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {#each FEATURES as item (item.title)}
-        <div data-reveal-item>
-          <Card class="flex h-full flex-col gap-2.5 p-6">
-            <div class="inline-flex size-10 items-center justify-center rounded-fc-md bg-fc-surface text-fc-fg">
-              <Icon icon={item.icon} size={22} />
-            </div>
-            <h3 class="text-fc-md font-bold text-fc-fg">{item.title}</h3>
-            <p class="text-fc-sm text-fc-fg-muted">{item.description}</p>
-          </Card>
-        </div>
-      {/each}
-    </div>
-  </Section>
-</div>
-
-<div use:scrollReveal={{ y: 20 }} class="pb-12">
-  <Section id="viewer" title="The board in 3D" description="Tap Explore in 3D, then drag to turn it.">
-    <PcbViewer />
-  </Section>
-</div>
-
-<PreOrderForm />

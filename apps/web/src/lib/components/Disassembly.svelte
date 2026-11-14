@@ -2,9 +2,11 @@
   import { onMount } from "svelte";
   import { gsap } from "gsap";
   import { Card, Icon, Spinner, prefersReducedMotion } from "@facile/muse";
-  import { STEPS } from "$lib/explode";
+  import { STEPS, type ExplodeStep } from "$lib/explode";
   import { whenNear, watchSteps } from "$lib/explode-motion";
   import { mountExplodeScene, type ExplodeControl } from "$lib/explode-scene";
+  import { BATTERY } from "$lib/data";
+  import { t } from "$lib/i18n/index.svelte";
 
   const LAST = STEPS.length - 1;
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -18,7 +20,10 @@
   let reduced = $state(false);
   let viewer: ExplodeControl | null = null;
   let progress = 0;
-  const label = $derived(`Pastille disassembly, step ${active + 1} of ${STEPS.length}: ${STEPS[active].title}`);
+  const BATTERY_PARAMS = { capacity: BATTERY.capacity, cell: BATTERY.cell, current: BATTERY.chargeCurrent };
+  const title = (step: ExplodeStep) => t(`step.${step.id}.title`);
+  const text = (step: ExplodeStep) => t(`step.${step.id}.text`, BATTERY_PARAMS);
+  const label = $derived(t("inside.stage", { n: active + 1, total: STEPS.length, title: title(STEPS[active]) }));
 
   /**
    * Stores the scroll progress and forwards it to the scene, which renders on the next frame.
@@ -115,12 +120,12 @@
       {#if status === "idle" || status === "loading"}
         <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none">
           <Spinner />
-          <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">Loading 3D assembly</span>
+          <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">{t("inside.loading")}</span>
         </div>
       {:else if status === "error"}
         <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
-          <span class="text-fc-sm font-bold text-fc-fg">3D preview unavailable</span>
-          <span class="text-fc-xs text-fc-fg-muted">The steps below still describe every part.</span>
+          <span class="text-fc-sm font-bold text-fc-fg">{t("inside.error")}</span>
+          <span class="text-fc-xs text-fc-fg-muted">{t("inside.errorLine")}</span>
         </div>
       {/if}
 
@@ -129,7 +134,7 @@
           text-fc-fg-muted backdrop-blur"
         aria-hidden="true"
       >
-        {pad(active + 1)} / {pad(STEPS.length)} · {STEPS[active].title}
+        {pad(active + 1)} / {pad(STEPS.length)} · {title(STEPS[active])}
       </span>
     </div>
   </div>
@@ -138,7 +143,7 @@
     bind:this={list}
     class="relative flex flex-col [--step-offset:8px] [--sticky-top:calc(42dvh+5.5rem)] lg:[--step-offset:14px]
       lg:[--sticky-top:5.5rem]"
-    aria-label="Disassembly steps"
+    aria-label={t("inside.steps")}
   >
     {#each STEPS as step, i (step.id)}
       {@const current = i === active}
@@ -170,9 +175,9 @@
               </span>
             {/each}
           </div>
-          <h3 class="text-fc-md font-bold text-fc-fg">{step.title}</h3>
+          <h3 class="text-fc-md font-bold text-fc-fg">{title(step)}</h3>
           <p class="text-fc-sm text-fc-fg-muted leading-relaxed">
-            {step.description}
+            {text(step)}
           </p>
         </Card>
       </li>

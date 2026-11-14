@@ -1,17 +1,19 @@
+import type { AppKey } from "$lib/i18n/messages";
+
 export type TopologyModeId = "ble" | "wifi" | "pair";
 
 export type DeviceId = "pastille" | "speaker" | "headset";
 
 export interface TopologyPill {
   icon: string;
-  value: string;
+  value: AppKey;
 }
 
 export interface TopologyMode {
   id: TopologyModeId;
-  button: string;
+  button: AppKey;
   icon: string;
-  summary: string;
+  summary: AppKey;
   devices: DeviceId[];
   direct: boolean;
   pills: TopologyPill[];
@@ -19,7 +21,7 @@ export interface TopologyMode {
 
 export interface TopologyNode {
   id: DeviceId;
-  label: string;
+  label: AppKey | "Pastille";
   icon: string;
 }
 
@@ -64,54 +66,58 @@ export const LAYOUTS: Record<"horizontal" | "vertical", TopologyLayout> = {
 
 export const TOPOLOGY_DEVICES: TopologyNode[] = [
   { id: "pastille", label: "Pastille", icon: "solar:circle-dot-bold-duotone" },
-  { id: "speaker", label: "Speaker", icon: "solar:smart-speaker-bold-duotone" },
-  { id: "headset", label: "Headset", icon: "solar:headphones-round-sound-bold-duotone" },
+  { id: "speaker", label: "topo.speaker", icon: "solar:smart-speaker-bold-duotone" },
+  { id: "headset", label: "topo.headset", icon: "solar:headphones-round-sound-bold-duotone" },
 ];
 
-export const EXAMPLE_NOTE = "The speaker and headset are examples of other BOHS-01 devices, not Pastille products.";
+export const TOPOLOGY_HUB: { label: AppKey; icon: string } = {
+  label: "topo.hub",
+  icon: "solar:monitor-smartphone-bold-duotone",
+};
 
-export const TOPOLOGY_HUB = { label: "Bulle app", icon: "solar:monitor-smartphone-bold-duotone" };
-
-export const TOPOLOGY_SERVER = { label: "Your server", icon: "solar:server-square-bold-duotone" };
+export const TOPOLOGY_SERVER: { label: AppKey; icon: string } = {
+  label: "topo.server",
+  icon: "solar:server-square-bold-duotone",
+};
 
 export const TOPOLOGY_MODES: TopologyMode[] = [
   {
     id: "ble",
-    button: "Bluetooth",
+    button: "topo.ble.button",
     icon: "solar:bluetooth-wave-bold-duotone",
-    summary: "Pastille and any other BOHS-01 device talk to the Bulle app, which relays to your server.",
+    summary: "topo.ble.summary",
     devices: ["pastille", "speaker", "headset"],
     direct: false,
     pills: [
-      { icon: "solar:bluetooth-wave-bold-duotone", value: "Bluetooth LE" },
-      { icon: "solar:battery-full-bold-duotone", value: "10 h target" },
-      { icon: "solar:monitor-smartphone-bold-duotone", value: "Via the app" },
+      { icon: "solar:bluetooth-wave-bold-duotone", value: "topo.ble.link" },
+      { icon: "solar:battery-full-bold-duotone", value: "topo.ble.battery" },
+      { icon: "solar:monitor-smartphone-bold-duotone", value: "topo.ble.via" },
     ],
   },
   {
     id: "wifi",
-    button: "Wi-Fi",
+    button: "topo.wifi.button",
     icon: "solar:wi-fi-router-bold-duotone",
-    summary: "At home, Pastille and any other BOHS-01 device connect straight to your server.",
+    summary: "topo.wifi.summary",
     devices: ["pastille", "speaker", "headset"],
     direct: true,
     pills: [
-      { icon: "solar:wi-fi-router-bold-duotone", value: "Wi-Fi" },
-      { icon: "solar:battery-full-bold-duotone", value: "3.5 h target" },
-      { icon: "solar:server-square-bold-duotone", value: "No phone needed" },
+      { icon: "solar:wi-fi-router-bold-duotone", value: "topo.wifi.link" },
+      { icon: "solar:battery-full-bold-duotone", value: "topo.wifi.battery" },
+      { icon: "solar:server-square-bold-duotone", value: "topo.wifi.phone" },
     ],
   },
   {
     id: "pair",
-    button: "Pairing",
+    button: "topo.pair.button",
     icon: "solar:hand-shake-bold-duotone",
-    summary: "Tap Pastille once. The app hands it a key over an encrypted link.",
+    summary: "topo.pair.summary",
     devices: ["pastille"],
     direct: false,
     pills: [
-      { icon: "solar:hand-shake-bold-duotone", value: "One tap" },
-      { icon: "solar:shield-check-bold-duotone", value: "Encrypted" },
-      { icon: "solar:key-bold-duotone", value: "Key saved" },
+      { icon: "solar:hand-shake-bold-duotone", value: "topo.pair.tap" },
+      { icon: "solar:shield-check-bold-duotone", value: "topo.pair.encrypted" },
+      { icon: "solar:key-bold-duotone", value: "topo.pair.key" },
     ],
   },
 ];

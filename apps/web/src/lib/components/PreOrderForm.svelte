@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Button, Card, Divider, Field, Icon, Input, Section, Textarea } from "@facile/muse";
+  import { Button, Card, Divider, Field, Icon, Input, Textarea } from "@facile/muse";
+  import Block from "./Block.svelte";
   import { tick } from "svelte";
   import OrderSuccess from "./preorder/OrderSuccess.svelte";
   import OrderSummary from "./preorder/OrderSummary.svelte";
@@ -8,28 +9,16 @@
     ORDER_FIELDS, PREORDER, clampQuantity, formatPrice, orderMailto, validateOrder,
     type Order, type OrderField,
   } from "./preorder/order";
+  import { t } from "$lib/i18n/index.svelte";
 
-  const DESCRIPTION = "Reserve a pre-built Pastille by email.";
   const FIELD = "bg-fc-surface";
   const GROUP_LABEL = "text-fc-xs font-mono uppercase text-fc-fg-muted";
 
   const STEPS = [
-    {
-      icon: "solar:letter-bold-duotone",
-      title: "You send the reservation",
-      body: "The button opens your mail app with your details filled in.",
-    },
-    {
-      icon: "solar:chat-round-check-bold-duotone",
-      title: "We confirm by email",
-      body: "We reply to confirm your reservation.",
-    },
-    {
-      icon: "solar:wallet-money-bold-duotone",
-      title: "Payment details come later",
-      body: "We send them by email.",
-    },
-  ];
+    { icon: "solar:letter-bold-duotone", title: "po.step1.title", body: "po.step1.body" },
+    { icon: "solar:chat-round-check-bold-duotone", title: "po.step2.title", body: "po.step2.body" },
+    { icon: "solar:wallet-money-bold-duotone", title: "po.step3.title", body: "po.step3.body" },
+  ] as const;
 
   let order: Order = $state({ name: "", email: "", quantity: 1, message: "" });
   let touched: Partial<Record<OrderField, boolean>> = $state({});
@@ -39,10 +28,20 @@
 
   const errors = $derived(validateOrder(order));
   const shown = $derived(
-    Object.fromEntries(ORDER_FIELDS.map((f) => [f, submitted || touched[f] ? errors[f] : undefined])),
+    Object.fromEntries(ORDER_FIELDS.map((f) => [f, submitted || touched[f] ? message(f) : undefined])),
   );
   const units = $derived(clampQuantity(order.quantity));
   const total = $derived(formatPrice(units * PREORDER.unitPrice));
+
+  /**
+   * The visitor's language version of a field's validation error, or nothing when the field is valid.
+   */
+  function message(field: OrderField): string | undefined {
+    if (!errors[field]) return undefined;
+    if (field === "name") return t("po.err.name");
+    if (field === "quantity") return t("po.err.quantity", { max: PREORDER.maxQuantity });
+    return order.email.trim() ? t("po.err.emailShape") : t("po.err.email");
+  }
 
   /**
    * Validates the order, focuses the first invalid field, or opens the mail app and shows the success panel.
@@ -69,7 +68,7 @@
   }
 </script>
 
-<Section id="preorder" title="Pre-order Pastille" description={DESCRIPTION}>
+<Block id="preorder" title={t("po.title")} description={t("po.line")}>
   <div class="grid gap-6 lg:grid-cols-[5fr_7fr] lg:items-stretch">
     <OrderSummary />
 
@@ -79,9 +78,9 @@
       <Card class="flex flex-col gap-6 p-6 sm:p-8">
         <form bind:this={form} onsubmit={submit} novalidate class="flex flex-col gap-6">
           <div class="flex flex-col gap-5">
-            <span class={GROUP_LABEL}>Your details</span>
+            <span class={GROUP_LABEL}>{t("po.details")}</span>
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="Name" error={shown.name}>
+              <Field label={t("po.name")} error={shown.name}>
                 <Input
                   class={FIELD}
                   bind:value={order.name}
@@ -90,7 +89,7 @@
                   onblur={() => (touched.name = true)}
                 />
               </Field>
-              <Field label="Email" error={shown.email}>
+              <Field label={t("po.email")} error={shown.email}>
                 <Input
                   class={FIELD}
                   type="email"
@@ -106,13 +105,13 @@
           <Divider />
 
           <div class="flex flex-col gap-5">
-            <span class={GROUP_LABEL}>Your order</span>
+            <span class={GROUP_LABEL}>{t("po.order")}</span>
             <QuantityStepper
               bind:value={order.quantity}
               error={shown.quantity}
               onblur={() => (touched.quantity = true)}
             />
-            <Field label="Message" helper="Optional. Tell us how you plan to use it.">
+            <Field label={t("po.message")} helper={t("po.messageHelp")}>
               <Textarea class={FIELD} bind:value={order.message} rows={4} />
             </Field>
           </div>
@@ -120,11 +119,11 @@
           <Divider />
 
           <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5 rounded-fc-md bg-fc-surface p-4 text-fc-sm">
-            <dt class="text-fc-fg-muted">Quantity</dt>
+            <dt class="text-fc-fg-muted">{t("po.quantity")}</dt>
             <dd class="text-right font-mono text-fc-fg">{units} × {formatPrice(PREORDER.unitPrice)}</dd>
-            <dt class="text-fc-fg-muted">Total before shipping</dt>
+            <dt class="text-fc-fg-muted">{t("po.subtotal")}</dt>
             <dd class="text-right font-mono font-bold text-fc-fg">{total}</dd>
-            <dd class="col-span-2 text-fc-xs text-fc-fg-muted">{PREORDER.paymentNote}</dd>
+            <dd class="col-span-2 text-fc-xs text-fc-fg-muted">{t("po.payment")}</dd>
           </dl>
 
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -135,9 +134,9 @@
               icon="solar:cart-large-2-bold-duotone"
               class="w-full sm:w-auto"
             >
-              Send pre-order
+              {t("po.submit")}
             </Button>
-            <p class="text-fc-xs text-fc-fg-muted">Opens your mail app. {PREORDER.privacyNote}</p>
+            <p class="text-fc-xs text-fc-fg-muted">{t("po.opensMail")} {t("po.privacy")}</p>
           </div>
         </form>
       </Card>
@@ -153,11 +152,11 @@
           <Icon icon={step.icon} size={18} />
         </span>
         <div class="flex min-w-0 flex-col gap-1">
-          <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">Step {i + 1}</span>
-          <span class="text-fc-sm font-bold text-fc-fg">{step.title}</span>
-          <span class="text-fc-xs leading-relaxed text-fc-fg-muted">{step.body}</span>
+          <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">{t("po.step", { n: i + 1 })}</span>
+          <span class="text-fc-sm font-bold text-fc-fg">{t(step.title)}</span>
+          <span class="text-fc-xs leading-relaxed text-fc-fg-muted">{t(step.body)}</span>
         </div>
       </Card>
     {/each}
   </div>
-</Section>
+</Block>

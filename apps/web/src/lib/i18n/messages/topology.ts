@@ -1,0 +1,52 @@
+import type { Row } from "../row";
+
+export const topology = {
+  "topo.title": ["How it connects", "Comment elle se connecte", "Cómo se conecta", "Wie sie sich verbindet"],
+  "topo.line": [
+    "The BOHS-01 design: Bluetooth on the go, Wi-Fi at home, one tap to pair.",
+    "Le design BOHS-01 : Bluetooth en déplacement, Wi-Fi à la maison, un geste pour jumeler.",
+    "El diseño BOHS-01: Bluetooth fuera de casa, Wi-Fi en casa, un toque para vincular.",
+    "Das BOHS-01-Design: unterwegs Bluetooth, zu Hause WLAN, ein Tippen zum Koppeln.",
+  ],
+  "topo.group": ["Connection mode", "Mode de connexion", "Modo de conexión", "Verbindungsart"],
+  "topo.note": [
+    "The speaker and headset are examples of other BOHS-01 devices, not Pastille products.",
+    "L'enceinte et le casque sont des exemples d'autres appareils BOHS-01, pas des produits Pastille.",
+    "El altavoz y los auriculares son ejemplos de otros dispositivos BOHS-01, no productos de Pastille.",
+    "Lautsprecher und Headset sind Beispiele für andere BOHS-01-Geräte, keine Pastille-Produkte.",
+  ],
+  "topo.speaker": ["Speaker", "Enceinte", "Altavoz", "Lautsprecher"],
+  "topo.headset": ["Headset", "Casque", "Auriculares", "Headset"],
+  "topo.hub": ["Bulle app", "App Bulle", "App Bulle", "Bulle-App"],
+  "topo.server": ["Bulle", "Bulle", "Bulle", "Bulle"],
+  "topo.ble.button": ["Bluetooth", "Bluetooth", "Bluetooth", "Bluetooth"],
+  "topo.ble.summary": [
+    "Pastille and any other BOHS-01 device talk to the Bulle app, which relays to Bulle.",
+    "Pastille et tout autre appareil BOHS-01 passent par l'app Bulle, qui relaie vers Bulle.",
+    "Pastille y cualquier otro dispositivo BOHS-01 pasan por la app Bulle, que lo reenvía a Bulle.",
+    "Pastille und jedes andere BOHS-01-Gerät laufen über die Bulle-App, die an Bulle weiterleitet.",
+  ],
+  "topo.ble.link": ["Bluetooth LE", "Bluetooth LE", "Bluetooth LE", "Bluetooth LE"],
+  "topo.ble.battery": ["10 h target", "Objectif 10 h", "Objetivo 10 h", "Ziel 10 h"],
+  "topo.ble.via": ["Via the app", "Via l'app", "A través de la app", "Über die App"],
+  "topo.wifi.button": ["Wi-Fi", "Wi-Fi", "Wi-Fi", "WLAN"],
+  "topo.wifi.summary": [
+    "At home, Pastille and any other BOHS-01 device connect straight to Bulle.",
+    "À la maison, Pastille et tout autre appareil BOHS-01 se connectent directement à Bulle.",
+    "En casa, Pastille y cualquier otro dispositivo BOHS-01 se conectan directamente a Bulle.",
+    "Zu Hause verbinden sich Pastille und jedes andere BOHS-01-Gerät direkt mit Bulle.",
+  ],
+  "topo.wifi.link": ["Wi-Fi", "Wi-Fi", "Wi-Fi", "WLAN"],
+  "topo.wifi.battery": ["3.5 h target", "Objectif 3,5 h", "Objetivo 3,5 h", "Ziel 3,5 h"],
+  "topo.wifi.phone": ["No phone needed", "Sans téléphone", "Sin teléfono", "Ohne Telefon"],
+  "topo.pair.button": ["Pairing", "Jumelage", "Vinculación", "Kopplung"],
+  "topo.pair.summary": [
+    "Tap Pastille once. The app hands it a key over an encrypted link.",
+    "Touchez Pastille une fois. L'app lui remet une clé par un lien chiffré.",
+    "Toca Pastille una vez. La app le entrega una clave por un enlace cifrado.",
+    "Einmal auf Pastille tippen. Die App übergibt ihr einen Schlüssel über eine verschlüsselte Verbindung.",
+  ],
+  "topo.pair.tap": ["One tap", "Un geste", "Un toque", "Ein Tippen"],
+  "topo.pair.encrypted": ["Encrypted", "Chiffré", "Cifrado", "Verschlüsselt"],
+  "topo.pair.key": ["Key saved", "Clé enregistrée", "Clave guardada", "Schlüssel gespeichert"],
+} satisfies Record<string, Row>;

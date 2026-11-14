@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Field, Icon, IconButton, Input } from "@facile/muse";
+  import { t } from "$lib/i18n/index.svelte";
   import { PREORDER, clampQuantity } from "./order";
 
   interface Props {
@@ -21,11 +22,11 @@
   }
 </script>
 
-<Field label="Quantity" helper="Up to {PREORDER.maxQuantity} per order." {error}>
+<Field label={t("po.quantity")} helper={t("po.quantityHelp", { max: PREORDER.maxQuantity })} {error}>
   {#snippet children({ id })}
     <div class="flex items-center gap-2">
       <IconButton
-        aria-label="Remove one"
+        aria-label={t("po.remove")}
         aria-controls={id}
         aria-disabled={value <= 1}
         variant="ghost"
@@ -46,7 +47,7 @@
         {onblur}
       />
       <IconButton
-        aria-label="Add one"
+        aria-label={t("po.add")}
         aria-controls={id}
         aria-disabled={value >= PREORDER.maxQuantity}
         variant="ghost"

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { Button, Card, Icon, prefersReducedMotion } from "@facile/muse";
   import TopologyDiagram from "$lib/components/TopologyDiagram.svelte";
-  import { EXAMPLE_NOTE, TOPOLOGY_MODES, type TopologyModeId } from "$lib/topology";
+  import { TOPOLOGY_MODES, type TopologyModeId } from "$lib/topology";
+  import { t } from "$lib/i18n/index.svelte";
 
   const CYCLE_MS = 5000;
   const TOUCH = "pointer-coarse:h-11";
@@ -59,7 +60,7 @@
 
 <div bind:this={root}>
   <Card class="flex flex-col items-center gap-5 p-4 sm:p-6">
-    <div role="group" aria-label="Connection mode" class="flex flex-wrap gap-1 rounded-fc-pill bg-fc-surface p-1">
+    <div role="group" aria-label={t("topo.group")} class="flex flex-wrap gap-1 rounded-fc-pill bg-fc-surface p-1">
       {#each TOPOLOGY_MODES as option (option.id)}
         <Button
           size="sm"
@@ -69,12 +70,12 @@
           aria-pressed={activeId === option.id}
           onclick={() => choose(option.id)}
         >
-          {option.button}
+          {t(option.button)}
         </Button>
       {/each}
     </div>
 
-    <p class="text-center text-fc-sm text-fc-fg-muted" aria-live={pinned ? "polite" : "off"}>{active.summary}</p>
+    <p class="text-center text-fc-sm text-fc-fg-muted" aria-live={pinned ? "polite" : "off"}>{t(active.summary)}</p>
 
     <div class="w-full rounded-fc-md bg-fc-component">
       <div class="sm:hidden"><TopologyDiagram mode={active} id="topology-vertical" vertical /></div>
@@ -85,11 +86,11 @@
       {#each active.pills as pill (pill.value)}
         <li class="flex items-center gap-2 rounded-fc-pill bg-fc-surface px-3 py-1.5 text-fc-sm text-fc-fg">
           <Icon icon={pill.icon} size={18} class="text-fc-accent" />
-          {pill.value}
+          {t(pill.value)}
         </li>
       {/each}
     </ul>
 
-    <p class="text-center text-fc-xs text-fc-fg-muted">{EXAMPLE_NOTE}</p>
+    <p class="text-center text-fc-xs text-fc-fg-muted">{t("topo.note")}</p>
   </Card>
 </div>

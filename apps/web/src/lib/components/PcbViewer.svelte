@@ -4,6 +4,7 @@
   import { VERSION } from "$lib/data";
   import { whenNear } from "$lib/explode-motion";
   import { mountPcbScene, type Preset, type SceneControl } from "$lib/pcb-scene";
+  import { t } from "$lib/i18n/index.svelte";
 
   type ModelMode = "pcb" | "case";
 
@@ -121,7 +122,7 @@
         disabled={status === "idle" || status === "loading"}
         onclick={() => chooseMode("pcb")}
       >
-        3D PCB
+        {t("board.pcb")}
       </Button>
       <Button
         size="sm"
@@ -131,7 +132,7 @@
         disabled={status === "idle" || status === "loading"}
         onclick={() => chooseMode("case")}
       >
-        Enclosure
+        {t("board.case")}
       </Button>
     </div>
 
@@ -170,12 +171,12 @@
         bg-fc-component/80 pointer-events-none"
     >
       <Spinner />
-      <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">Loading 3D geometry</span>
+      <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">{t("board.loading")}</span>
     </div>
   {:else if status === "error"}
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
-      <span class="text-fc-sm font-bold text-fc-fg">3D preview unavailable</span>
-      <span class="text-fc-xs text-fc-fg-muted">Could not load the 3D model. Reload the page to try again.</span>
+      <span class="text-fc-sm font-bold text-fc-fg">{t("inside.error")}</span>
+      <span class="text-fc-xs text-fc-fg-muted">{t("board.errorLine")}</span>
     </div>
   {:else}
     <div
@@ -189,14 +190,14 @@
           class={interactive ? TOUCH : `${TOUCH} bg-fc-surface/85 text-fc-fg backdrop-blur hover:bg-fc-surface`}
           onclick={() => setInteractive(!interactive)}
         >
-          {interactive ? "Done" : "Explore in 3D"}
+          {interactive ? t("board.done") : t("board.explore")}
         </Button>
         {#if interactive}
           <span
             class="rounded-fc-pill bg-fc-surface/85 backdrop-blur px-3 py-1
               text-fc-xs font-mono text-fc-fg-muted"
           >
-            Drag to orbit · Pinch or scroll to zoom
+            {t("board.hint")}
           </span>
         {/if}
       </div>
@@ -204,7 +205,7 @@
         class="hidden sm:inline-flex rounded-fc-pill bg-fc-surface/85
           backdrop-blur px-3 py-1 text-fc-xs font-mono text-fc-success"
       >
-        Fuse intact · 0 DRC violations
+        {t("board.fuse")}
       </span>
     </div>
   {/if}
