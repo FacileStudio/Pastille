@@ -9,9 +9,9 @@
 
   const QUESTION = "What's left on my list for today?";
   const ANSWER = "Two things: call the plumber, and send Léa the slides before six.";
-  const TOOLS = [
-    { name: "charm.display_avatar", args: "thinking" },
-    { name: "charm.haptic_pulse", args: "short" },
+  const STEPS = [
+    { icon: "solar:checklist-minimalistic-bold-duotone", text: "Checked your to-do list" },
+    { icon: "solar:soundwave-bold-duotone", text: "Read the answer out loud on Pastille" },
   ];
   const WORDS = ANSWER.split(" ").length;
 
@@ -95,10 +95,10 @@
           <div class="hd-reply" in:grow out:fade={{ duration: 200, delay: 100 }}>
             <div class="hd-who"><Blob name="Bulle" size={22} /><b>Bulle</b></div>
             <ul class="hd-tools">
-              {#each TOOLS as tool, i (tool.name)}
+              {#each STEPS as step, i (step.text)}
                 {#if tools[i] !== "hidden"}
                   <li in:grow={{ duration: 300 }} data-state={tools[i]}>
-                    <span class="hd-mark"></span><code>{tool.name}</code><span>{tool.args}</span>
+                    <span class="hd-mark"></span><Icon icon={step.icon} size={14} /><span>{step.text}</span>
                   </li>
                 {/if}
               {/each}
@@ -210,10 +210,6 @@
     padding: 7px 12px;
     font-size: 12px;
     color: var(--color-fc-fg-muted);
-  }
-  .hd-tools code {
-    font-family: var(--font-fc-mono);
-    color: var(--color-fc-fg);
   }
   .hd-mark {
     width: 8px;

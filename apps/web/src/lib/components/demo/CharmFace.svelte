@@ -3,12 +3,18 @@
 </script>
 
 <script lang="ts">
-  import { Blob, happy, idle, surprised, thinking } from "@facile/blob";
+  import { Blob, idle, surprised, type Expression } from "@facile/blob";
   import { Roll } from "@facile/mise-en-scene";
 
   let { mood, tapped, size }: { mood: Mood; tapped: boolean; size: number } = $props();
 
-  const EXPRESSIONS = { idle, listening: surprised, thinking, speaking: happy };
+  const pose = (p: Partial<Expression["p"]>): Expression => ({ ...idle, p: { ...idle.p, ...p } });
+  const EXPRESSIONS: Record<Mood, Expression> = {
+    idle,
+    listening: surprised,
+    thinking: pose({ esx: 1.06, esy: 1.06, bdy: -0.6 }),
+    speaking: pose({ esx: 1.16, esy: 1.16, bdy: -1 }),
+  };
   const LABELS: Record<Mood, string> = {
     idle: "Tap to talk",
     listening: "Listening",
@@ -19,7 +25,7 @@
 
 <div class="cf" style="--cf-size:{size}px">
   <div class="cf-shell" class:cf-tapped={tapped}>
-    <div class="cf-screen">
+    <div class="cf-screen" class:cf-still={mood === "thinking"}>
       <Blob name="Bulle" size={Math.round(size * 0.42)} animate="always" expression={EXPRESSIONS[mood]} />
     </div>
   </div>
@@ -59,6 +65,9 @@
     border-radius: 999px;
     background: var(--color-fc-inverse);
   }
+  .cf-still :global(.mo-eyes) {
+    animation: none;
+  }
   .cf-status {
     display: flex;
     align-items: center;
@@ -71,7 +80,8 @@
     color: var(--color-fc-fg);
   }
   :global(.cf-label) {
-    width: 84px;
+    width: 76px;
+    justify-items: center;
   }
   .cf-wave {
     display: flex;
