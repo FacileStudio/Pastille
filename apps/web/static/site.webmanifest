@@ -1,7 +1,7 @@
 {
   "name": "Pastille",
   "short_name": "Pastille",
-  "description": "Open BOHS-01 hardware with duplex 16 kHz audio, a round IPS screen and Rust Embassy firmware.",
+  "description": "A small round 42 mm charm with a screen, linked to Bulle, your assistant. Pre-orders are open, shipping planned for March 2027.",
   "icons": [
     {
       "src": "/icon-192.png",
