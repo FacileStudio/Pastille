@@ -36,7 +36,11 @@
 </Section>
 
 <div use:scrollReveal={{ y: 20 }}>
-  <Section id="connectivity" title="One app, many devices" description="Bluetooth on the go, Wi-Fi at home, one tap to pair.">
+  <Section
+    id="connectivity"
+    title="One app, many devices"
+    description="Bluetooth on the go, Wi-Fi at home, one tap to pair."
+  >
     <SyncTopology />
   </Section>
 </div>
