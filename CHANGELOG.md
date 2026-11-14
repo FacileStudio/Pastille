@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-14
+
+### Changed
+
+- feat(web): the landing now speaks to everyday users. New slogan "Wear your assistant.", a 42 mm size everywhere, the price and "nothing to pay today" in the hero, and pre-order as the main button.
+- feat(web): the hero demo shows what works today: you ask Bulle in a chat, Bulle checks your list in Opus and buzzes your Pastille. A "voice comes later" note replaces every voice claim.
+- feat(web): new "Works with" (Bulle, Fusible), plan note with the Facile plans, and a "For makers" block (source, firmware, BOHS-01, Fusible, self-hosting) below the board viewer.
+- feat(web): the page is available in French, English, Spanish and German, with a language switch in the footer.
+- build(web): muse v0.24.0 and mise-en-scene v0.2.2.
+
 ## [0.8.2] - 2026-11-14
 
 ### Added
