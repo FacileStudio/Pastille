@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-14
+
+### Added
+
+- feat(web): a mise-en-scene hero demo. Pastille hears a question, its round screen shows Bulle's face listening, thinking and speaking, and the Bulle thread shows the `charm.display_avatar` and `charm.haptic_pulse` calls.
+
+### Changed
+
+- feat(web): a shorter landing: hero, what's inside, four feature cards, the 3D board and the pre-order form.
+- build(web): muse v0.23.0 (Magnetik typeface, start-aligned footer on phones) and mise-en-scene v0.2.1. Headings use `font-bold`.
+
+### Removed
+
+- feat(web): the protocol, comparison, build and connectivity sections, and the hero metric cards.
+
 ## [0.7.9] - 2026-11-13
 
 ### Added
