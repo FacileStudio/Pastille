@@ -36,7 +36,7 @@
       </IconButton>
       <Input
         {id}
-        class="w-20 border-0 bg-fc-surface text-center font-mono"
+        class="w-20 bg-fc-surface text-center font-mono"
         type="number"
         inputmode="numeric"
         min="1"

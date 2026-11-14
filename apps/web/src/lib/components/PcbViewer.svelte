@@ -174,7 +174,7 @@
     </div>
   {:else if status === "error"}
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
-      <span class="text-fc-sm font-semibold text-fc-fg">3D preview unavailable</span>
+      <span class="text-fc-sm font-bold text-fc-fg">3D preview unavailable</span>
       <span class="text-fc-xs text-fc-fg-muted">Could not load the 3D model. Reload the page to try again.</span>
     </div>
   {:else}

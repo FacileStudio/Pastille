@@ -1,81 +1,32 @@
 <script lang="ts">
-  import { Button, Card, Icon, Section, icons } from "@facile/muse";
+  import { Button, Card, Icon, Section } from "@facile/muse";
   import Disassembly from "$lib/components/Disassembly.svelte";
+  import HeroDemo from "$lib/components/demo/HeroDemo.svelte";
   import PcbViewer from "$lib/components/PcbViewer.svelte";
   import PreOrderForm from "$lib/components/PreOrderForm.svelte";
-  import SyncTopology from "$lib/components/SyncTopology.svelte";
-  import {
-    COMPARISON,
-    COMPARISON_SOURCES,
-    FEATURES,
-    HERO_METRICS,
-    PROTOCOL_PLANES,
-    QUICKSTART_STEPS,
-    RELEASE_TAG,
-    type TokenTone,
-  } from "$lib/data";
+  import { FEATURES } from "$lib/data";
   import { GITHUB_ICON } from "$lib/icons";
   import { scrollReveal, scrollToSection } from "$lib/motion";
-
-  const TONE_CLASS: Record<TokenTone, string> = {
-    fg: "text-fc-fg",
-    muted: "text-fc-fg-muted",
-    key: "text-fc-info",
-    str: "text-fc-success",
-    num: "text-fc-warning",
-    kw: "text-fc-admin",
-  };
 </script>
 
 
 <section use:scrollReveal={{ delay: 0.12, stagger: 0.07 }} class="flex flex-col gap-6 pt-4 md:pt-8">
-  <div data-reveal-item class="flex flex-col gap-3 max-w-2xl">
-    <h1 class="text-fc-2xl sm:text-fc-3xl font-semibold tracking-tight text-fc-fg">
-      Open hardware. Sovereign AI.
-    </h1>
-    <p class="text-fc-md sm:text-fc-lg text-fc-fg-muted">
-      Pastille brings Bulle into the physical world. It's a 42 mm charm with a round screen that you tap to
-      talk. Bulle answers out loud from a server you run. The hardware and firmware are open source.
+  <div data-reveal-item class="flex max-w-2xl flex-col gap-3">
+    <h1 class="text-fc-2xl font-bold tracking-tight text-fc-fg sm:text-fc-3xl">Open hardware. Sovereign AI.</h1>
+    <p class="text-fc-md text-fc-fg-muted sm:text-fc-lg">
+      A 42 mm charm you tap to talk to. Bulle answers from a server you run.
     </p>
   </div>
 
-  <div data-reveal-item class="flex flex-wrap items-center gap-3 pt-1">
+  <div data-reveal-item class="flex flex-wrap items-center gap-3">
     <Button variant="primary" size="lg" href="#preorder" icon="solar:cart-large-2-bold-duotone"
       onclick={(e) => scrollToSection("preorder", e)}>Pre-order</Button>
-    <Button
-      variant="ghost"
-      size="lg"
-      class="bg-fc-surface text-fc-fg hover:bg-fc-component"
-      href="https://github.com/FacileStudio/Pastille"
-      target="_blank"
-      rel="noreferrer"
-      icon={GITHUB_ICON}
-    >
-      View on GitHub
-    </Button>
-    <Button
-      variant="ghost"
-      size="lg"
-      class="bg-fc-surface text-fc-fg hover:bg-fc-component"
-      href="https://github.com/FacileStudio/Pastille/releases/tag/{RELEASE_TAG}"
-      target="_blank"
-      rel="noreferrer"
-      icon={icons.download}
-    >
-      Build files ({RELEASE_TAG})
-    </Button>
+    <Button variant="secondary" size="lg" href="https://github.com/FacileStudio/Pastille" target="_blank"
+      rel="noreferrer" icon={GITHUB_ICON}>View on GitHub</Button>
   </div>
 
-  <div class="grid grid-cols-1 gap-4 pt-3 sm:grid-cols-2 lg:grid-cols-4">
-    {#each HERO_METRICS as metric (metric.label)}
-      <div data-reveal-item>
-        <Card class="flex h-full flex-col gap-1 p-5">
-          <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">{metric.label}</span>
-          <span class="text-fc-2xl font-semibold text-fc-fg">{metric.value}</span>
-          <span class="text-fc-xs text-fc-fg-muted">{metric.detail}</span>
-        </Card>
-      </div>
-    {/each}
+  <div data-reveal-item class="pt-2">
+    <HeroDemo />
   </div>
 </section>
 
@@ -83,161 +34,28 @@
   <Disassembly />
 </Section>
 
-<div use:scrollReveal={{ y: 20 }}>
-  <Section
-    id="viewer"
-    title="The board in 3D"
-    description={"Tap Explore in 3D, then drag to turn it. " +
-      "Fusible builds this model from the circuit source, so it matches the real board."}
-  >
+<div use:scrollReveal={{ stagger: 0.05 }}>
+  <Section id="features" title="Made to wear" description="A 42 mm disc, 14 mm thick, built around a 38 mm board.">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {#each FEATURES as item (item.title)}
+        <div data-reveal-item>
+          <Card class="flex h-full flex-col gap-2.5 p-6">
+            <div class="inline-flex size-10 items-center justify-center rounded-fc-md bg-fc-surface text-fc-fg">
+              <Icon icon={item.icon} size={22} />
+            </div>
+            <h3 class="text-fc-md font-bold text-fc-fg">{item.title}</h3>
+            <p class="text-fc-sm text-fc-fg-muted">{item.description}</p>
+          </Card>
+        </div>
+      {/each}
+    </div>
+  </Section>
+</div>
+
+<div use:scrollReveal={{ y: 20 }} class="pb-12">
+  <Section id="viewer" title="The board in 3D" description="Tap Explore in 3D, then drag to turn it.">
     <PcbViewer />
   </Section>
 </div>
 
-<div use:scrollReveal={{ y: 20 }}>
-  <Section
-    id="connectivity"
-    title="One app, many devices"
-    description="Bluetooth on the go, Wi-Fi at home, one tap to pair."
-  >
-    <SyncTopology />
-  </Section>
-</div>
-
-<div use:scrollReveal={{ stagger: 0.05 }}>
-  <Section
-    id="architecture"
-    title="What it's made of"
-    description="Six blocks on one 38 mm, 4-layer board."
-  >
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {#each FEATURES as item (item.title)}
-        <div data-reveal-item>
-          <Card class="flex h-full flex-col justify-between gap-4 p-6">
-            <div class="flex flex-col gap-2.5">
-              <div class="inline-flex h-10 w-10 items-center justify-center rounded-fc-md bg-fc-surface text-fc-fg">
-                <Icon icon={item.icon} size={22} />
-              </div>
-              <h3 class="text-fc-md font-semibold text-fc-fg">{item.title}</h3>
-              <p class="text-fc-sm text-fc-fg-muted">{item.description}</p>
-            </div>
-            <span class="w-fit rounded-fc-pill bg-fc-surface px-3 py-1 text-fc-xs font-mono text-fc-fg-muted">
-              {item.tag}
-            </span>
-          </Card>
-        </div>
-      {/each}
-    </div>
-  </Section>
-</div>
-
-<div use:scrollReveal={{ stagger: 0.07 }}>
-  <Section
-    id="protocol"
-    title="How it talks"
-    description="Voice, tool calls and pairing share one bohs.v1 stream, over Bluetooth or Wi-Fi."
-  >
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {#each PROTOCOL_PLANES as plane (plane.opcode)}
-        <div data-reveal-item>
-          <Card class="flex h-full flex-col justify-between gap-4 p-6">
-            <div class="flex flex-col gap-2">
-              <span class="w-fit rounded-fc-pill bg-fc-surface px-3 py-1 text-fc-xs font-mono text-fc-fg-muted">
-                {plane.opcode}
-              </span>
-              <h3 class="text-fc-md font-semibold text-fc-fg">{plane.name}</h3>
-              <p class="text-fc-sm text-fc-fg-muted">{plane.summary}</p>
-            </div>
-            <div
-              class="flex flex-col gap-0.5 rounded-fc-md bg-fc-surface p-4 font-mono text-fc-xs
-                leading-relaxed overflow-x-auto"
-            >
-              {#each plane.lines as line, idx (idx)}
-                <div class="flex">
-                  {#each line as token, tIdx (tIdx)}
-                    <span class="whitespace-pre {TONE_CLASS[token.tone ?? 'fg']}">{token.text}</span>
-                  {/each}
-                </div>
-              {/each}
-            </div>
-          </Card>
-        </div>
-      {/each}
-    </div>
-  </Section>
-</div>
-
-<div use:scrollReveal={{ stagger: 0.05 }}>
-  <Section
-    id="comparison"
-    title="How it compares"
-    description="Pastille next to two AI gadgets you can buy today."
-  >
-    <div class="grid grid-cols-1 gap-2.5">
-      <div class="hidden md:grid md:grid-cols-4 gap-4 px-5 py-2 text-fc-xs font-mono uppercase text-fc-fg-muted">
-        <span>Metric</span>
-        <span>Pastille {RELEASE_TAG}</span>
-        <span>Omi</span>
-        <span>Rabbit R1</span>
-      </div>
-      {#each COMPARISON as row (row.metric)}
-        <div data-reveal-item>
-          <Card class="grid grid-cols-1 gap-2 p-4 sm:p-5 md:grid-cols-4 md:items-center md:gap-4">
-            <span class="text-fc-sm font-semibold text-fc-fg">{row.metric}</span>
-            <span class="rounded-fc-sm bg-fc-surface px-3 py-1 text-fc-sm font-medium text-fc-fg w-fit">
-              {row.pastille}
-            </span>
-            <span class="text-fc-sm text-fc-fg-muted">{row.omi}</span>
-            <span class="text-fc-sm text-fc-fg-muted">{row.rabbit}</span>
-          </Card>
-        </div>
-      {/each}
-      <p data-reveal-item class="px-1 pt-2 text-fc-xs text-fc-fg-muted">
-        Pastille battery figures are design targets from the BOHS-01 spec, not measurements. Omi and Rabbit
-        figures come from
-        {#each COMPARISON_SOURCES as source, i (source.href)}
-          <a href={source.href} target="_blank" rel="noreferrer" class="underline hover:text-fc-fg"
-            >{source.label}</a
-          >{i < COMPARISON_SOURCES.length - 1 ? ", " : "."}
-        {/each}
-      </p>
-    </div>
-  </Section>
-</div>
-
-<div use:scrollReveal={{ stagger: 0.07 }} class="pb-12">
-  <Section
-    id="quickstart"
-    title="Build your own"
-    description="Check the circuit, export the case and board files, then test and flash the firmware."
-  >
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {#each QUICKSTART_STEPS as step (step.badge)}
-        <div data-reveal-item>
-          <Card class="flex h-full flex-col justify-between gap-4 p-6">
-            <div class="flex flex-col gap-2">
-              <span class="w-fit rounded-fc-pill bg-fc-surface px-3 py-1 text-fc-xs font-mono text-fc-fg-muted">
-                {step.badge}
-              </span>
-              <h3 class="text-fc-md font-semibold text-fc-fg">{step.title}</h3>
-              <p class="text-fc-sm text-fc-fg-muted">{step.summary}</p>
-            </div>
-            <div
-              class="flex flex-col gap-1 rounded-fc-md bg-fc-surface p-4 font-mono text-fc-xs
-                leading-relaxed overflow-x-auto"
-            >
-              {#each step.lines as line, idx (idx)}
-                <div class="flex">
-                  {#each line as token, tIdx (tIdx)}
-                    <span class="whitespace-pre {TONE_CLASS[token.tone ?? 'fg']}">{token.text}</span>
-                  {/each}
-                </div>
-              {/each}
-            </div>
-          </Card>
-        </div>
-      {/each}
-    </div>
-  </Section>
-</div>
 <PreOrderForm />

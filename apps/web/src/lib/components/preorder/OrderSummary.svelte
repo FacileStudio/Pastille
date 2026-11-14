@@ -13,14 +13,14 @@
     <div class="flex flex-col gap-1">
       <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">{PREORDER.priceLabel}</span>
       <p class="flex items-baseline gap-2">
-        <span class="font-mono text-fc-3xl font-semibold text-fc-fg">{formatPrice(PREORDER.unitPrice)}</span>
+        <span class="font-mono text-fc-3xl font-bold text-fc-fg">{formatPrice(PREORDER.unitPrice)}</span>
         <span class="text-fc-sm text-fc-fg-muted">per unit</span>
       </p>
     </div>
   </div>
 
   <div class="flex flex-col gap-3">
-    <h3 class="text-fc-sm font-semibold text-fc-fg">What you get</h3>
+    <h3 class="text-fc-sm font-bold text-fc-fg">What you get</h3>
     <ul class="flex flex-col gap-3">
       {#each PREORDER.includes as item (item.label)}
         <li class="flex items-center gap-3 text-fc-sm text-fc-fg">

@@ -3,7 +3,7 @@
   import { GITHUB_ICON, MOON_ICON, SUN_ICON } from "$lib/icons";
   import { theme, toggleTheme } from "$lib/theme.svelte";
 
-  const ROUND = "size-(--fc-ctl) rounded-fc-inner border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface";
+  const ROUND = "size-(--fc-ctl) rounded-fc-inner bg-fc-surface/70 text-fc-fg hover:bg-fc-surface";
 </script>
 
 <IconButton

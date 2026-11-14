@@ -10,7 +10,7 @@
   } from "./preorder/order";
 
   const DESCRIPTION = "Reserve a pre-built Pastille by email.";
-  const FIELD = "border-0 bg-fc-surface";
+  const FIELD = "bg-fc-surface";
   const GROUP_LABEL = "text-fc-xs font-mono uppercase text-fc-fg-muted";
 
   const STEPS = [
@@ -123,7 +123,7 @@
             <dt class="text-fc-fg-muted">Quantity</dt>
             <dd class="text-right font-mono text-fc-fg">{units} × {formatPrice(PREORDER.unitPrice)}</dd>
             <dt class="text-fc-fg-muted">Total before shipping</dt>
-            <dd class="text-right font-mono font-semibold text-fc-fg">{total}</dd>
+            <dd class="text-right font-mono font-bold text-fc-fg">{total}</dd>
             <dd class="col-span-2 text-fc-xs text-fc-fg-muted">{PREORDER.paymentNote}</dd>
           </dl>
 
@@ -154,7 +154,7 @@
         </span>
         <div class="flex min-w-0 flex-col gap-1">
           <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">Step {i + 1}</span>
-          <span class="text-fc-sm font-semibold text-fc-fg">{step.title}</span>
+          <span class="text-fc-sm font-bold text-fc-fg">{step.title}</span>
           <span class="text-fc-xs leading-relaxed text-fc-fg-muted">{step.body}</span>
         </div>
       </Card>

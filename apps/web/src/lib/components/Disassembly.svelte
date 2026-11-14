@@ -119,7 +119,7 @@
         </div>
       {:else if status === "error"}
         <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
-          <span class="text-fc-sm font-semibold text-fc-fg">3D preview unavailable</span>
+          <span class="text-fc-sm font-bold text-fc-fg">3D preview unavailable</span>
           <span class="text-fc-xs text-fc-fg-muted">The steps below still describe every part.</span>
         </div>
       {/if}
@@ -160,7 +160,7 @@
             <span
               class="rounded-fc-pill px-3 py-1 font-mono text-fc-xs transition-colors duration-300
                 motion-reduce:transition-none
-                {current ? 'bg-fc-accent text-fc-accent-fg font-semibold' : 'bg-fc-surface text-fc-fg-muted'}"
+                {current ? 'bg-fc-accent text-fc-accent-fg font-bold' : 'bg-fc-surface text-fc-fg-muted'}"
             >
               {pad(i + 1)}
             </span>
@@ -170,7 +170,7 @@
               </span>
             {/each}
           </div>
-          <h3 class="text-fc-md font-semibold text-fc-fg">{step.title}</h3>
+          <h3 class="text-fc-md font-bold text-fc-fg">{step.title}</h3>
           <p class="text-fc-sm text-fc-fg-muted leading-relaxed">
             {step.description}
           </p>

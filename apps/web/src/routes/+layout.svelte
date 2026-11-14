@@ -13,19 +13,9 @@
   provideLocale("en");
 
   let activeSection = $state<string>(NAV_SECTIONS[0].id);
-  const BAR_IDS = ["disassembly", "viewer", "architecture", "protocol", "quickstart", "preorder"];
   const SECTION_IDS = NAV_SECTIONS.map((s) => s.id);
-  const barActive = $derived.by(() => {
-    const at = SECTION_IDS.indexOf(activeSection as (typeof SECTION_IDS)[number]);
-    const owners = BAR_IDS.filter((id) => SECTION_IDS.indexOf(id as (typeof SECTION_IDS)[number]) <= at);
-    return owners[owners.length - 1];
-  });
   const links = $derived(
-    NAV_SECTIONS.filter((s) => BAR_IDS.includes(s.id)).map((s) => ({
-      href: `#${s.id}`,
-      label: s.label,
-      active: s.id === barActive,
-    })),
+    NAV_SECTIONS.map((s) => ({ href: `#${s.id}`, label: s.label, active: s.id === activeSection })),
   );
 
   const FOOTER_COLUMNS = [

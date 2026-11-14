@@ -40,7 +40,7 @@
       <Icon icon="solar:check-circle-bold-duotone" size={22} />
     </span>
     <div class="flex flex-col gap-1">
-      <h3 bind:this={heading} tabindex="-1" class="text-fc-md font-semibold text-fc-fg focus:outline-none">
+      <h3 bind:this={heading} tabindex="-1" class="text-fc-md font-bold text-fc-fg focus:outline-none">
         Your reservation email is ready
       </h3>
       <p class="text-fc-sm leading-relaxed text-fc-fg-muted">

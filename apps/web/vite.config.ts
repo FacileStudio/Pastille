@@ -8,6 +8,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 800
   },
   optimizeDeps: {
-    exclude: ['@facile/muse']
+    exclude: ['@facile/muse', '@facile/mise-en-scene']
   }
 });
