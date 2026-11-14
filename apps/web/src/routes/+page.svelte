@@ -4,6 +4,7 @@
   import HeroDemo from "$lib/components/demo/HeroDemo.svelte";
   import PcbViewer from "$lib/components/PcbViewer.svelte";
   import PreOrderForm from "$lib/components/PreOrderForm.svelte";
+  import SyncTopology from "$lib/components/SyncTopology.svelte";
   import { FEATURES } from "$lib/data";
   import { GITHUB_ICON } from "$lib/icons";
   import { scrollReveal, scrollToSection } from "$lib/motion";
@@ -33,6 +34,12 @@
 <Section id="disassembly" title="What's inside" description="Scroll to take Pastille apart, one layer at a time.">
   <Disassembly />
 </Section>
+
+<div use:scrollReveal={{ y: 20 }}>
+  <Section id="connectivity" title="One app, many devices" description="Bluetooth on the go, Wi-Fi at home, one tap to pair.">
+    <SyncTopology />
+  </Section>
+</div>
 
 <div use:scrollReveal={{ stagger: 0.05 }}>
   <Section id="features" title="Made to wear" description="A 42 mm disc, 14 mm thick, built around a 38 mm board.">
