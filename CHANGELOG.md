@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-14
+
+### Fixed
+
+- fix(web): the hero demo face keeps round, friendly eyes. Thinking no longer squints or rolls the eyes, and speaking no longer narrows them to slits.
+- fix(web): the voice status pill under the face centers its label.
+- fix(web): the Bulle thread in the hero demo lists plain steps ("Checked your to-do list") instead of tool call names.
+
 ## [0.8.0] - 2026-11-14
 
 ### Added
