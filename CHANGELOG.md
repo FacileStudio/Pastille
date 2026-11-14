@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-14
+
+### Changed
+
+- The pre-order form stores the reservation instead of opening a mail app: an email, a consent checkbox and the line "Nous gardons votre email uniquement pour vous prévenir de la sortie. Désinscription en un clic.", posted to Registre (`sso.facile.studio/api/waitlist`, product `pastille`) behind an ALTCHA proof of work, in four languages with success and error states. Name, quantity and message are no longer asked; quantity and payment are confirmed by email when pre-orders open. Price and ship date are unchanged.
+- Without JavaScript the form keeps the `mailto:` reservation link.
+
+### Removed
+
+- The order success panel, the quantity stepper and the copy-to-clipboard helper.
+
 ## [0.9.2] - 2026-11-14
 
 ### Changed
