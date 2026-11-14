@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-11-14
+
+### Added
+
+- feat(web): the "One app, many devices" connectivity diagram is back on the landing, between "What's inside" and the feature cards. It cycles through Bluetooth, Wi-Fi and pairing.
+
 ## [0.8.1] - 2026-11-14
 
 ### Fixed
