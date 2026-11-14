@@ -1,18 +1,15 @@
 <script lang="ts">
-  import { Button, Card, Divider, Field, Icon, Input, Textarea } from "@facile/muse";
+  import { Alert, Button, Card, Checkbox, Field, Icon, Input } from "@facile/muse";
+  import { onMount } from "svelte";
   import Block from "./Block.svelte";
-  import { tick } from "svelte";
-  import OrderSuccess from "./preorder/OrderSuccess.svelte";
   import OrderSummary from "./preorder/OrderSummary.svelte";
-  import QuantityStepper from "./preorder/QuantityStepper.svelte";
-  import {
-    ORDER_FIELDS, PREORDER, clampQuantity, formatPrice, orderMailto, validateOrder,
-    type Order, type OrderField,
-  } from "./preorder/order";
-  import { t } from "$lib/i18n/index.svelte";
+  import { orderMailto } from "./preorder/order";
+  import { joinWaitlist, type JoinResult } from "./preorder/waitlist";
+  import { locale, t } from "$lib/i18n/index.svelte";
 
   const FIELD = "bg-fc-surface";
-  const GROUP_LABEL = "text-fc-xs font-mono uppercase text-fc-fg-muted";
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const MAILTO = orderMailto({ name: "", email: "", quantity: 1, message: "" });
 
   const STEPS = [
     { icon: "solar:letter-bold-duotone", title: "po.step1.title", body: "po.step1.body" },
@@ -20,51 +17,42 @@
     { icon: "solar:wallet-money-bold-duotone", title: "po.step3.title", body: "po.step3.body" },
   ] as const;
 
-  let order: Order = $state({ name: "", email: "", quantity: 1, message: "" });
-  let touched: Partial<Record<OrderField, boolean>> = $state({});
-  let submitted = $state(false);
-  let sent = $state(false);
-  let form: HTMLFormElement | undefined = $state();
+  let ready = $state(false);
+  let email = $state("");
+  let consent = $state(false);
+  let checked = $state(false);
+  let busy = $state(false);
+  let result: JoinResult | null = $state(null);
 
-  const errors = $derived(validateOrder(order));
-  const shown = $derived(
-    Object.fromEntries(ORDER_FIELDS.map((f) => [f, submitted || touched[f] ? message(f) : undefined])),
+  const emailError = $derived(emailMessage(checked, email, result));
+  const consentError = $derived(
+    (checked && !consent) || result === "consent_required" ? t("po.err.consent") : undefined,
   );
-  const units = $derived(clampQuantity(order.quantity));
-  const total = $derived(formatPrice(units * PREORDER.unitPrice));
+  const failure = $derived(
+    result === "rate_limited" ? t("po.err.rate") : result === "failed" ? t("po.err.failed") : undefined,
+  );
+
+  onMount(() => (ready = true));
 
   /**
-   * The visitor's language version of a field's validation error, or nothing when the field is valid.
+   * The email field's error once the form was submitted, or the server's refusal of the address.
    */
-  function message(field: OrderField): string | undefined {
-    if (!errors[field]) return undefined;
-    if (field === "name") return t("po.err.name");
-    if (field === "quantity") return t("po.err.quantity", { max: PREORDER.maxQuantity });
-    return order.email.trim() ? t("po.err.emailShape") : t("po.err.email");
+  function emailMessage(shown: boolean, value: string, outcome: JoinResult | null): string | undefined {
+    if (shown && !value.trim()) return t("po.err.email");
+    if ((shown && !EMAIL.test(value.trim())) || outcome === "invalid_email") return t("po.err.emailShape");
+    return undefined;
   }
 
   /**
-   * Validates the order, focuses the first invalid field, or opens the mail app and shows the success panel.
+   * Checks the address and the consent box, then puts the address on the pre-order list.
    */
   async function submit(event: SubmitEvent) {
     event.preventDefault();
-    submitted = true;
-    if (Object.keys(errors).length > 0) {
-      await tick();
-      form?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
-      return;
-    }
-    window.location.href = orderMailto(order);
-    sent = true;
-  }
-
-  /**
-   * Returns to the filled-in form so the visitor can change the order.
-   */
-  async function edit() {
-    sent = false;
-    await tick();
-    form?.querySelector<HTMLElement>("input")?.focus();
+    checked = true;
+    if (busy || !EMAIL.test(email.trim()) || !consent) return;
+    busy = true;
+    result = await joinWaitlist(email, locale());
+    busy = false;
   }
 </script>
 
@@ -72,60 +60,24 @@
   <div class="grid gap-6 lg:grid-cols-[5fr_7fr] lg:items-stretch">
     <OrderSummary />
 
-    {#if sent}
-      <OrderSuccess {order} onedit={edit} />
-    {:else}
-      <Card class="flex flex-col gap-6 p-6 sm:p-8">
-        <form bind:this={form} onsubmit={submit} novalidate class="flex flex-col gap-6">
-          <div class="flex flex-col gap-5">
-            <span class={GROUP_LABEL}>{t("po.details")}</span>
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label={t("po.name")} error={shown.name}>
-                <Input
-                  class={FIELD}
-                  bind:value={order.name}
-                  required
-                  autocomplete="name"
-                  onblur={() => (touched.name = true)}
-                />
-              </Field>
-              <Field label={t("po.email")} error={shown.email}>
-                <Input
-                  class={FIELD}
-                  type="email"
-                  bind:value={order.email}
-                  required
-                  autocomplete="email"
-                  onblur={() => (touched.email = true)}
-                />
-              </Field>
-            </div>
-          </div>
-
-          <Divider />
-
-          <div class="flex flex-col gap-5">
-            <span class={GROUP_LABEL}>{t("po.order")}</span>
-            <QuantityStepper
-              bind:value={order.quantity}
-              error={shown.quantity}
-              onblur={() => (touched.quantity = true)}
-            />
-            <Field label={t("po.message")} helper={t("po.messageHelp")}>
-              <Textarea class={FIELD} bind:value={order.message} rows={4} />
-            </Field>
-          </div>
-
-          <Divider />
-
-          <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5 rounded-fc-md bg-fc-surface p-4 text-fc-sm">
-            <dt class="text-fc-fg-muted">{t("po.quantity")}</dt>
-            <dd class="text-right font-mono text-fc-fg">{units} × {formatPrice(PREORDER.unitPrice)}</dd>
-            <dt class="text-fc-fg-muted">{t("po.subtotal")}</dt>
-            <dd class="text-right font-mono font-bold text-fc-fg">{total}</dd>
-            <dd class="col-span-2 text-fc-xs text-fc-fg-muted">{t("po.payment")}</dd>
-          </dl>
-
+    <Card class="flex flex-col justify-center gap-6 p-6 sm:p-8">
+      {#if !ready}
+        <Button variant="primary" size="lg" href={MAILTO} icon="solar:letter-bold-duotone" class="w-full sm:w-auto">
+          {t("po.mailLink")}
+        </Button>
+      {:else if result === "ok"}
+        <Alert tone="success" title={t("po.done.title")}>{t("po.done.body")}</Alert>
+      {:else}
+        <form onsubmit={submit} novalidate class="flex flex-col gap-5">
+          <Field label={t("po.email")} error={emailError}>
+            <Input class={FIELD} type="email" bind:value={email} required autocomplete="email" />
+          </Field>
+          <Field error={consentError}>
+            <Checkbox label={t("po.consent")} bind:checked={consent} />
+          </Field>
+          {#if failure}
+            <Alert tone="danger" title={failure} />
+          {/if}
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button
               type="submit"
@@ -133,14 +85,17 @@
               size="lg"
               icon="solar:cart-large-2-bold-duotone"
               class="w-full sm:w-auto"
+              disabled={busy}
             >
-              {t("po.submit")}
+              {busy ? t("po.sending") : t("po.submit")}
             </Button>
-            <p class="text-fc-xs text-fc-fg-muted">{t("po.opensMail")} {t("po.privacy")}</p>
+            <a class="text-fc-xs text-fc-fg-muted underline underline-offset-4" href={MAILTO}>{t("po.mailLink")}</a>
           </div>
+          <p class="text-fc-xs text-fc-fg-muted">{t("po.payment")}</p>
         </form>
-      </Card>
-    {/if}
+      {/if}
+      <p class="text-fc-xs text-fc-fg-muted">{t("po.privacy")}</p>
+    </Card>
   </div>
 
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
