@@ -6,7 +6,8 @@
       "name": "pastille-web",
       "dependencies": {
         "@facile/blob": "github:FacileStudio/blob#v0.2.1",
-        "@facile/muse": "github:FacileStudio/muse#v0.21.0",
+        "@facile/mise-en-scene": "github:FacileStudio/mise-en-scene#v0.2.1",
+        "@facile/muse": "github:FacileStudio/muse#v0.22.1",
         "gsap": "^3.13.0",
         "iconify-icon": "^3.0.2",
         "three": "^0.186.1",
@@ -86,7 +87,9 @@
 
     "@facile/blob": ["@facile/blob@github:FacileStudio/blob#0e54ffe", { "peerDependencies": { "svelte": "^5.29.0" } }, "FacileStudio-blob-0e54ffe", "sha512-7olabx9Sk/ZV+BMJ/YVYpqMFemEXJ7qspN2ardOZN9/aSx3lHtLP3v5X+PS2y/SJ9lgJE3rHgvDamxNtL7C5SA=="],
 
-    "@facile/muse": ["@facile/muse@github:FacileStudio/muse#5a6c669", { "dependencies": { "gsap": "^3.13.0", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "svelte": "^5.0.0", "tailwindcss": "^4.0.0" } }, "FacileStudio-muse-5a6c669", "sha512-Sv5uB1AdKGt8ndCqa8Xss0v51Zn208unEDN89+1l1a+LbmhZynj0wyDSS7mQlMzJoXS677sonfGDF79Thw6NnA=="],
+    "@facile/mise-en-scene": ["@facile/mise-en-scene@github:FacileStudio/mise-en-scene#29d936d", { "peerDependencies": { "svelte": "^5.29.0" } }, "FacileStudio-mise-en-scene-29d936d", "sha512-ZWvqtesVLNlH4i+oEBHh/obcLTDhdK+JFtnQYnwxrfEERCG2F111AxzEJ9syJkp2NFztic+oz/o4Y6pSh/KCtA=="],
+
+    "@facile/muse": ["@facile/muse@github:FacileStudio/muse#2c4a17e", { "dependencies": { "gsap": "^3.13.0", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "svelte": "^5.0.0", "tailwindcss": "^4.0.0" } }, "FacileStudio-muse-2c4a17e", "sha512-bphgSE6YX8nt7VDzRj0g+4bTlb90lYzlOojjrm9ZvZnAMS3VbLoyMatiIFE4Veuvrendc+ehjg3IHTXMy4/1xw=="],
 
     "@iconify-json/solar": ["@iconify-json/solar@1.2.13", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-/ZWb6xRib6pzxD/qTkKWYhuzSU2yu0bY+EN0spgtz1NM3d5f4eYueQZpL3PfCdsg5uVfm4Ldtt3cAyQL+YI8/Q=="],
 
