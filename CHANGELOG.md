@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-11-14
+
+### Changed
+
+- fix(web): the "How it connects" section is labelled "Planned design", with one line in all four languages: "This diagram shows the planned architecture. It will be finalized before the March 2027 deliveries." The BOHS-01 design it shows is not built yet.
+
 ## [0.9.1] - 2026-11-14
 
 ### Changed
