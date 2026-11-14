@@ -6,8 +6,8 @@
       "name": "pastille-web",
       "dependencies": {
         "@facile/blob": "github:FacileStudio/blob#v0.2.1",
-        "@facile/mise-en-scene": "github:FacileStudio/mise-en-scene#v0.2.1",
-        "@facile/muse": "github:FacileStudio/muse#v0.23.0",
+        "@facile/mise-en-scene": "github:FacileStudio/mise-en-scene#v0.2.2",
+        "@facile/muse": "github:FacileStudio/muse#v0.24.0",
         "gsap": "^3.13.0",
         "iconify-icon": "^3.0.2",
         "three": "^0.186.1",
@@ -87,9 +87,9 @@
 
     "@facile/blob": ["@facile/blob@github:FacileStudio/blob#0e54ffe", { "peerDependencies": { "svelte": "^5.29.0" } }, "FacileStudio-blob-0e54ffe", "sha512-7olabx9Sk/ZV+BMJ/YVYpqMFemEXJ7qspN2ardOZN9/aSx3lHtLP3v5X+PS2y/SJ9lgJE3rHgvDamxNtL7C5SA=="],
 
-    "@facile/mise-en-scene": ["@facile/mise-en-scene@github:FacileStudio/mise-en-scene#29d936d", { "peerDependencies": { "svelte": "^5.29.0" } }, "FacileStudio-mise-en-scene-29d936d", "sha512-ZWvqtesVLNlH4i+oEBHh/obcLTDhdK+JFtnQYnwxrfEERCG2F111AxzEJ9syJkp2NFztic+oz/o4Y6pSh/KCtA=="],
+    "@facile/mise-en-scene": ["@facile/mise-en-scene@github:FacileStudio/mise-en-scene#7050c6c", { "peerDependencies": { "svelte": "^5.29.0" } }, "FacileStudio-mise-en-scene-7050c6c", "sha512-qXj5cCxgAwYeck9aLtPqx38D3H2csCHA1xUySzpabHH18QGZyDLSLMj8HuXwMieASr3axBLF7V59lS6GvVtEpQ=="],
 
-    "@facile/muse": ["@facile/muse@github:FacileStudio/muse#709a22d", { "dependencies": { "gsap": "^3.13.0", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "svelte": "^5.0.0", "tailwindcss": "^4.0.0" } }, "FacileStudio-muse-709a22d", "sha512-YXi7YAF8R1qfUBmx3nWKfeKXo+utYj4dXmqA3IHdrX9Fvp49avnKZ5vTdfl51i1IbnBiy/SydMxzgUH2vo0drQ=="],
+    "@facile/muse": ["@facile/muse@github:FacileStudio/muse#63b7403", { "dependencies": { "gsap": "^3.13.0", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "svelte": "^5.0.0", "tailwindcss": "^4.0.0" } }, "FacileStudio-muse-63b7403", "sha512-txHtXcKj1s7UeHANu8NIwzE07r8Xl4Ivf4vEi8yJu+9zCJeZNIXCGdLTdYi1gwz2PL5uw1ttduY/QU/ZbamOsw=="],
 
     "@iconify-json/solar": ["@iconify-json/solar@1.2.13", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-/ZWb6xRib6pzxD/qTkKWYhuzSU2yu0bY+EN0spgtz1NM3d5f4eYueQZpL3PfCdsg5uVfm4Ldtt3cAyQL+YI8/Q=="],
 

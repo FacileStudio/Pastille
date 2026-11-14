@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "@facile/blob": "github:FacileStudio/blob#v0.2.1",
-    "@facile/mise-en-scene": "github:FacileStudio/mise-en-scene#v0.2.1",
-    "@facile/muse": "github:FacileStudio/muse#v0.23.0",
+    "@facile/mise-en-scene": "github:FacileStudio/mise-en-scene#v0.2.2",
+    "@facile/muse": "github:FacileStudio/muse#v0.24.0",
     "gsap": "^3.13.0",
     "iconify-icon": "^3.0.2",
     "three": "^0.186.1"
