@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-11-14
+
+### Changed
+
+- fix(web): new share image and web manifest description: "A small round 42 mm charm with a screen, linked to Bulle, your assistant. Pre-orders are open, shipping planned for March 2027." The old manifest still promised duplex audio.
+- build(web): muse v0.25.1.
+
 ## [0.9.0] - 2026-11-14
 
 ### Changed
