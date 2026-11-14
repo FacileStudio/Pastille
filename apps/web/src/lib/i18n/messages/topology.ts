@@ -1,6 +1,13 @@
 import type { Row } from "../row";
 
 export const topology = {
+  "topo.kicker": ["Planned design", "Conception prévue", "Diseño previsto", "Geplantes Design"],
+  "topo.planned": [
+    "This diagram shows the planned architecture. It will be finalized before the March 2027 deliveries.",
+    "Ce schéma montre l'architecture prévue. Elle sera finalisée avant les livraisons de mars 2027.",
+    "Este esquema muestra la arquitectura prevista. Se finalizará antes de las entregas de marzo de 2027.",
+    "Dieses Schema zeigt die geplante Architektur. Sie wird vor den Auslieferungen im März 2027 fertiggestellt.",
+  ],
   "topo.title": ["How it connects", "Comment elle se connecte", "Cómo se conecta", "Wie sie sich verbindet"],
   "topo.line": [
     "The BOHS-01 design: Bluetooth on the go, Wi-Fi at home, one tap to pair.",

@@ -60,6 +60,8 @@
 
 <div bind:this={root}>
   <Card class="flex flex-col items-center gap-5 p-4 sm:p-6">
+    <p class="text-center text-fc-sm text-fc-fg">{t("topo.planned")}</p>
+
     <div role="group" aria-label={t("topo.group")} class="flex flex-wrap gap-1 rounded-fc-pill bg-fc-surface p-1">
       {#each TOPOLOGY_MODES as option (option.id)}
         <Button

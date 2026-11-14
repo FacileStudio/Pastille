@@ -65,7 +65,7 @@
   </Block>
 
   <div use:scrollReveal={{ y: 20 }}>
-    <Block id="connectivity" title={t("topo.title")} description={t("topo.line")}>
+    <Block id="connectivity" kicker={t("topo.kicker")} title={t("topo.title")} description={t("topo.line")}>
       <SyncTopology />
     </Block>
   </div>
