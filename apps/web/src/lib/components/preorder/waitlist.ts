@@ -45,6 +45,15 @@ export function quantityOk(value: number | null | undefined): boolean {
 }
 
 /**
+ * Turns what the number field holds into a quantity; an empty field is unset.
+ */
+export function readQuantity(typed: string | number | null | undefined): number | undefined {
+  if (typed == null || typed === "") return undefined;
+  const value = Number(typed);
+  return Number.isNaN(value) ? undefined : value;
+}
+
+/**
  * Moves a quantity by one step inside 1 to MAX_QUANTITY; stepping up from unset gives 1.
  */
 export function stepQuantity(value: number | null | undefined, delta: number): number | null | undefined {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Field, Icon, IconButton, Input } from "@facile/muse";
   import { t } from "$lib/i18n/index.svelte";
-  import { MAX_QUANTITY, stepQuantity } from "./waitlist";
+  import { MAX_QUANTITY, readQuantity, stepQuantity } from "./waitlist";
 
   interface Props {
     value: number | undefined;
@@ -34,7 +34,7 @@
         min="1"
         max={MAX_QUANTITY}
         step="1"
-        bind:value
+        bind:value={() => value ?? "", (typed) => (value = readQuantity(typed))}
       />
       <IconButton
         aria-label={t("po.add")}
