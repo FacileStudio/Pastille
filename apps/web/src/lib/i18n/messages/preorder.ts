@@ -16,6 +16,13 @@ export const preorder = {
     "Wir senden sie per E-Mail.",
   ],
   "po.email": ["Email", "E-mail", "Correo", "E-Mail"],
+  "po.formTitle": ["Reserve yours", "Réservez la vôtre", "Reserva la tuya", "Sichern Sie sich Ihre"],
+  "po.formLine": [
+    "An email address is all we need.",
+    "Une adresse e-mail suffit.",
+    "Solo necesitamos tu correo.",
+    "Eine E-Mail-Adresse genügt.",
+  ],
   "po.payment": [
     "You pay nothing now. We send payment details by email later.",
     "Vous ne payez rien maintenant. Nous envoyons les détails du paiement par e-mail plus tard.",

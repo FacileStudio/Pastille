@@ -65,7 +65,11 @@
   <div class="grid gap-6 lg:grid-cols-[5fr_7fr] lg:items-stretch">
     <OrderSummary />
 
-    <Card class="flex flex-col justify-center gap-6 p-6 sm:p-8">
+    <Card class="flex flex-col gap-6 p-6 sm:p-8">
+      <div class="flex flex-col gap-1.5">
+        <h3 class="font-fc-title text-fc-xl font-bold text-fc-fg">{t("po.formTitle")}</h3>
+        <p class="text-fc-sm text-fc-fg-muted">{t("po.formLine")}</p>
+      </div>
       {#if !ready}
         <Button variant="primary" size="lg" href={MAILTO} icon="solar:letter-bold-duotone" class="w-full sm:w-auto">
           {t("po.mailLink")}
@@ -97,27 +101,24 @@
             </Button>
             <a class="text-fc-xs text-fc-fg-muted underline underline-offset-4" href={MAILTO}>{t("po.mailLink")}</a>
           </div>
-          <p class="text-fc-xs text-fc-fg-muted">{t("po.payment")}</p>
         </form>
       {/if}
-      <p class="text-fc-xs text-fc-fg-muted">{t("po.privacy")}</p>
+      <ol class="flex flex-col gap-3">
+        {#each STEPS as step, i (step.title)}
+          <li class="flex items-start gap-3">
+            <span
+              class="inline-flex size-8 shrink-0 items-center justify-center rounded-fc-md bg-fc-surface text-fc-fg"
+            >
+              <Icon icon={step.icon} size={16} />
+            </span>
+            <div class="flex min-w-0 flex-col">
+              <span class="text-fc-sm font-bold text-fc-fg">{t("po.step", { n: i + 1 })} · {t(step.title)}</span>
+              <span class="text-fc-xs leading-relaxed text-fc-fg-muted">{t(step.body)}</span>
+            </div>
+          </li>
+        {/each}
+      </ol>
+      <p class="mt-auto text-fc-xs text-fc-fg-muted">{t("po.privacy")}</p>
     </Card>
-  </div>
-
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-    {#each STEPS as step, i (step.title)}
-      <Card class="flex items-start gap-3 p-5">
-        <span
-          class="inline-flex size-9 shrink-0 items-center justify-center rounded-fc-md bg-fc-surface text-fc-fg"
-        >
-          <Icon icon={step.icon} size={18} />
-        </span>
-        <div class="flex min-w-0 flex-col gap-1">
-          <span class="text-fc-xs font-mono uppercase text-fc-fg-muted">{t("po.step", { n: i + 1 })}</span>
-          <span class="text-fc-sm font-bold text-fc-fg">{t(step.title)}</span>
-          <span class="text-fc-xs leading-relaxed text-fc-fg-muted">{t(step.body)}</span>
-        </div>
-      </Card>
-    {/each}
   </div>
 </Block>
