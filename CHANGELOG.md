@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-15
+
+### Added
+
+- The pre-order form has an optional "How many charms?" stepper (1 to 10, empty by default) in four languages. The quantity goes to Registre only when set, and the privacy line now says it is kept with the email. Without JavaScript the form keeps the `mailto:` reservation link. Price and ship date are unchanged.
+
 ## [0.10.0] - 2026-11-14
 
 ### Changed
