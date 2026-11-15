@@ -11,8 +11,17 @@ export const WAITLIST_API = "https://sso.facile.studio/api/waitlist";
 /** The version of the consent line shown next to the checkbox. Bump it when that text changes. */
 export const CONSENT_VERSION = "2026-11-14";
 
+/** The most charms one pre-order may ask for; Registre refuses more. */
+export const MAX_QUANTITY = 10;
+
 /** What a join can end in, one value per message the form shows. */
-export type JoinResult = "ok" | "invalid_email" | "consent_required" | "rate_limited" | "failed";
+export type JoinResult =
+  | "ok"
+  | "invalid_email"
+  | "invalid_quantity"
+  | "consent_required"
+  | "rate_limited"
+  | "failed";
 
 interface Challenge {
   algorithm: string;
@@ -22,7 +31,26 @@ interface Challenge {
   signature: string;
 }
 
-const REFUSALS: Record<string, JoinResult> = { invalid_email: "invalid_email", consent_required: "consent_required" };
+const REFUSALS: Record<string, JoinResult> = {
+  invalid_email: "invalid_email",
+  invalid_quantity: "invalid_quantity",
+  consent_required: "consent_required",
+};
+
+/**
+ * Whether a quantity is unset, or a whole number from 1 to MAX_QUANTITY.
+ */
+export function quantityOk(value: number | null | undefined): boolean {
+  return value == null || (Number.isInteger(value) && value >= 1 && value <= MAX_QUANTITY);
+}
+
+/**
+ * Moves a quantity by one step inside 1 to MAX_QUANTITY; stepping up from unset gives 1.
+ */
+export function stepQuantity(value: number | null | undefined, delta: number): number | null | undefined {
+  if (value == null || !Number.isFinite(value)) return delta > 0 ? 1 : value;
+  return Math.min(MAX_QUANTITY, Math.max(1, Math.round(value) + delta));
+}
 
 /**
  * The SHA-256 of a string, as lowercase hex.
@@ -55,9 +83,14 @@ async function refusal(response: Response): Promise<JoinResult> {
 }
 
 /**
- * Puts an address on the Pastille list and answers which message the form should show.
+ * Puts an address on the Pastille list, with the quantity only when one is set, and answers which
+ * message the form should show.
  */
-export async function joinWaitlist(email: string, locale: string): Promise<JoinResult> {
+export async function joinWaitlist(
+  email: string,
+  locale: string,
+  quantity: number | null | undefined,
+): Promise<JoinResult> {
   try {
     const challenge = await fetch(`${WAITLIST_API}/challenge`, { cache: "no-store" });
     if (!challenge.ok) return refusal(challenge);
@@ -65,7 +98,14 @@ export async function joinWaitlist(email: string, locale: string): Promise<JoinR
     const response = await fetch(WAITLIST_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), product: "pastille", locale, consent: CONSENT_VERSION, altcha }),
+      body: JSON.stringify({
+        email: email.trim(),
+        product: "pastille",
+        locale,
+        consent: CONSENT_VERSION,
+        altcha,
+        ...(quantity == null ? {} : { quantity }),
+      }),
     });
     return response.ok ? "ok" : refusal(response);
   } catch {

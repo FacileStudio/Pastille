@@ -3,8 +3,9 @@
   import { onMount } from "svelte";
   import Block from "./Block.svelte";
   import OrderSummary from "./preorder/OrderSummary.svelte";
+  import QuantityStepper from "./preorder/QuantityStepper.svelte";
   import { orderMailto } from "./preorder/order";
-  import { joinWaitlist, type JoinResult } from "./preorder/waitlist";
+  import { joinWaitlist, quantityOk, type JoinResult } from "./preorder/waitlist";
   import { locale, t } from "$lib/i18n/index.svelte";
 
   const FIELD = "bg-fc-surface";
@@ -19,12 +20,16 @@
 
   let ready = $state(false);
   let email = $state("");
+  let quantity: number | undefined = $state(undefined);
   let consent = $state(false);
   let checked = $state(false);
   let busy = $state(false);
   let result: JoinResult | null = $state(null);
 
   const emailError = $derived(emailMessage(checked, email, result));
+  const quantityError = $derived(
+    !quantityOk(quantity) || result === "invalid_quantity" ? t("po.err.quantity") : undefined,
+  );
   const consentError = $derived(
     (checked && !consent) || result === "consent_required" ? t("po.err.consent") : undefined,
   );
@@ -49,9 +54,9 @@
   async function submit(event: SubmitEvent) {
     event.preventDefault();
     checked = true;
-    if (busy || !EMAIL.test(email.trim()) || !consent) return;
+    if (busy || !EMAIL.test(email.trim()) || !consent || !quantityOk(quantity)) return;
     busy = true;
-    result = await joinWaitlist(email, locale());
+    result = await joinWaitlist(email, locale(), quantity);
     busy = false;
   }
 </script>
@@ -72,6 +77,7 @@
           <Field label={t("po.email")} error={emailError}>
             <Input class={FIELD} type="email" bind:value={email} required autocomplete="email" />
           </Field>
+          <QuantityStepper bind:value={quantity} error={quantityError} />
           <Field error={consentError}>
             <Checkbox label={t("po.consent")} bind:checked={consent} />
           </Field>

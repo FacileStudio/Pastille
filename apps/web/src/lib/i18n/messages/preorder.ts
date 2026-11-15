@@ -104,6 +104,21 @@ export const preorder = {
     "Cuando abran las reservas, te escribimos para confirmar la reserva y la cantidad.",
     "Sobald Vorbestellungen öffnen, bestätigen wir Reservierung und Menge per E-Mail.",
   ],
+  "po.quantity": ["How many charms?", "Combien de badges ?", "¿Cuántas insignias?", "Wie viele Anstecker?"],
+  "po.quantityHelp": [
+    "Optional, up to {max}.",
+    "Facultatif, jusqu'à {max}.",
+    "Opcional, hasta {max}.",
+    "Optional, bis zu {max}.",
+  ],
+  "po.remove": ["Remove one", "En retirer un", "Quitar una", "Einen entfernen"],
+  "po.add": ["Add one", "En ajouter un", "Añadir una", "Einen hinzufügen"],
+  "po.err.quantity": [
+    "Choose a whole number from 1 to 10, or leave it empty.",
+    "Choisissez un nombre entier de 1 à 10, ou laissez vide.",
+    "Elige un número entero del 1 al 10, o déjalo vacío.",
+    "Wählen Sie eine ganze Zahl von 1 bis 10 oder lassen Sie das Feld leer.",
+  ],
   "po.consent": [
     "I agree to receive an email when Pastille pre-orders open.",
     "J'accepte de recevoir un e-mail à l'ouverture des précommandes de Pastille.",
@@ -123,10 +138,12 @@ export const preorder = {
     "Wird gesendet…",
   ],
   "po.privacy": [
-    "We keep your email only to tell you when it ships. Unsubscribe in one click.",
-    "Nous gardons votre email uniquement pour vous prévenir de la sortie. Désinscription en un clic.",
-    "Guardamos tu correo solo para avisarte del lanzamiento. Baja en un clic.",
-    "Wir speichern Ihre E-Mail nur, um Sie zum Start zu benachrichtigen. Abmeldung mit einem Klick.",
+    "We keep your email, and the quantity if you give one, only to tell you when it ships. Unsubscribe in one click.",
+    "Nous gardons votre email, et la quantité si vous l'indiquez, uniquement pour vous prévenir de la sortie. " +
+      "Désinscription en un clic.",
+    "Guardamos tu correo, y la cantidad si la indicas, solo para avisarte del lanzamiento. Baja en un clic.",
+    "Wir speichern Ihre E-Mail und, falls angegeben, die Menge nur, um Sie zum Start zu benachrichtigen. " +
+      "Abmeldung mit einem Klick.",
   ],
   "po.mailLink": [
     "Reserve by email instead",

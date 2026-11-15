@@ -1,4 +1,5 @@
 import { PREORDER, clampQuantity, orderMailto, orderText, validateOrder } from "./order";
+import { MAX_QUANTITY, quantityOk, stepQuantity } from "./waitlist";
 
 /**
  * Throws when `ok` is false, naming the failed expectation.
@@ -19,5 +20,9 @@ expect(clampQuantity(99) === PREORDER.maxQuantity && clampQuantity(-3) === 1, "t
 expect(clampQuantity(Number.NaN) === 1, "an empty quantity falls back to one");
 expect(orderText(valid).includes(`Total before shipping: $${2 * PREORDER.unitPrice}`), "the total is in the summary");
 expect(orderMailto(valid).startsWith(`mailto:${PREORDER.contact}?subject=`), "the link targets the contact");
+expect(quantityOk(undefined) && quantityOk(null) && quantityOk(1) && quantityOk(MAX_QUANTITY), "list quantities pass");
+expect(!quantityOk(0) && !quantityOk(MAX_QUANTITY + 1) && !quantityOk(2.5), "list quantities stay in 1 to 10");
+expect(stepQuantity(undefined, 1) === 1 && stepQuantity(undefined, -1) === undefined, "stepping from empty");
+expect(stepQuantity(MAX_QUANTITY, 1) === MAX_QUANTITY && stepQuantity(1, -1) === 1, "the list stepper clamps");
 
 console.log("preorder: ok");
