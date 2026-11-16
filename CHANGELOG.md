@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.4] - 2026-11-16
+
+### Changed
+
+- Bump muse to v0.32.0 (Tabs and segmented option cards match the 36px button height, 44px on touch).
+
 ## [0.10.3] - 2026-11-15
 
 ### Fixed
