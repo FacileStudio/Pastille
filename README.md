@@ -302,4 +302,4 @@ Pastille/
 
 ## Contributing and license
 
-Pastille hardware designs and specifications are released under the CERN Open Hardware Licence Version 2 - Strongly Reciprocal (CERN-OHL-S). Firmware is licensed under the Apache 2.0 License.
+The hardware designs (`hardware/`, `bodies/`, `bom.yml`, `fusible.yml` and the board images in `assets/`) are released under the CERN Open Hardware Licence Version 2 - Strongly Reciprocal (CERN-OHL-S-2.0), in [`LICENSE-HARDWARE`](LICENSE-HARDWARE). Everything else, firmware and landing page included, is licensed under the GNU Affero General Public License v3.0 only (AGPL-3.0-only), in [`LICENSE`](LICENSE).
